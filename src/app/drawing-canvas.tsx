@@ -20,7 +20,7 @@ export const DrawingCanvas = () => {
     return getAllowedPointerTypes().includes(type);
   };
 
-  const onPointerDown = (e: PointerEvent) => {
+  const onPointerStart = (e: PointerEvent) => {
     if (!canvasRef.current || !isAllowedPointerType(e.pointerType)) return;
     e.preventDefault();
     isDrawingRef.current = true;
@@ -39,27 +39,12 @@ export const DrawingCanvas = () => {
     lastPosRef.current = { x: e.offsetX, y: e.offsetY };
   };
 
-  const onPointerUp = (e: PointerEvent) => {
+  const onPointerEnd = (e: PointerEvent) => {
     if (!canvasRef.current || !isAllowedPointerType(e.pointerType)) return;
     e.preventDefault();
     isDrawingRef.current = false;
     canvasRef.current.releasePointerCapture(e.pointerId);
-    const ctx = canvasRef.current.getContext("2d");
-    if (!ctx) return;
-    const imageData = ctx.getImageData(
-      0,
-      0,
-      canvasRef.current.width,
-      canvasRef.current.height,
-    );
-    historyRef.current = [
-      ...historyRef.current.slice(
-        0,
-        historyRef.current.length - undoRef.current,
-      ),
-      imageData,
-    ];
-    undoRef.current = 0;
+    pushHistory();
   };
 
   const onSaveImage = () => {
@@ -71,12 +56,27 @@ export const DrawingCanvas = () => {
     link.click();
   };
 
+  const pushHistory = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    historyRef.current = [
+      ...historyRef.current.slice(
+        0,
+        historyRef.current.length - undoRef.current,
+      ),
+      imageData,
+    ];
+    undoRef.current = 0;
+  };
+
   const onUndo = () => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
     undoRef.current++;
-    const historyIndex = historyRef.current.length - 1 - undoRef.current;
+    const historyIndex = historyRef.current.length - undoRef.current - 1;
     const prevState = historyRef.current[historyIndex];
     if (prevState) {
       ctx.putImageData(prevState, 0, 0);
@@ -97,16 +97,16 @@ export const DrawingCanvas = () => {
   useEffect(() => {
     if (!canvasRef.current) return;
     const canvas = canvasRef.current;
-    canvas.addEventListener("pointerdown", onPointerDown);
+    canvas.addEventListener("pointerdown", onPointerStart);
     canvas.addEventListener("pointermove", onPointerMove);
-    canvas.addEventListener("pointerup", onPointerUp);
+    canvas.addEventListener("pointerup", onPointerEnd);
     return () => {
-      canvas.removeEventListener("pointerdown", onPointerDown);
+      canvas.removeEventListener("pointerdown", onPointerStart);
       canvas.removeEventListener("pointermove", onPointerMove);
-      canvas.removeEventListener("pointerup", onPointerUp);
+      canvas.removeEventListener("pointerup", onPointerEnd);
     };
     // biome-ignore lint/correctness/useExhaustiveDependencies: React Compiler
-  }, [onPointerDown, onPointerMove, onPointerUp]);
+  }, [onPointerStart, onPointerMove, onPointerEnd]);
 
   useEffect(() => {
     const ctx = canvasRef.current?.getContext("2d");
