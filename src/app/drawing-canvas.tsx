@@ -8,6 +8,8 @@ export const DrawingCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isDrawingRef = useRef(false);
   const lastPosRef = useRef({ x: 0, y: 0 });
+  const historyRef = useRef<ImageData[]>([]);
+  const undoRef = useRef(0);
   const [lineStyle, _setLineStyle] = useState({ width: 2, color: "#000" });
   const [penOnly, setPenOnly] = useState(false);
 
@@ -42,6 +44,22 @@ export const DrawingCanvas = () => {
     e.preventDefault();
     isDrawingRef.current = false;
     canvasRef.current.releasePointerCapture(e.pointerId);
+    const ctx = canvasRef.current.getContext("2d");
+    if (!ctx) return;
+    const imageData = ctx.getImageData(
+      0,
+      0,
+      canvasRef.current.width,
+      canvasRef.current.height,
+    );
+    historyRef.current = [
+      ...historyRef.current.slice(
+        0,
+        historyRef.current.length - undoRef.current,
+      ),
+      imageData,
+    ];
+    undoRef.current = 0;
   };
 
   const onSaveImage = () => {
@@ -51,6 +69,20 @@ export const DrawingCanvas = () => {
     link.href = dataUrl;
     link.download = "drawing.png";
     link.click();
+  };
+
+  const onUndo = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+    undoRef.current++;
+    const historyIndex = historyRef.current.length - 1 - undoRef.current;
+    const prevState = historyRef.current[historyIndex];
+    if (prevState) {
+      ctx.putImageData(prevState, 0, 0);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
   };
 
   // Initialize drawing canvas
@@ -103,7 +135,7 @@ export const DrawingCanvas = () => {
             <DownloadIcon />
             ほぞん
           </Button>
-          <Button type="button" variant="outline">
+          <Button type="button" variant="outline" onClick={onUndo}>
             <Undo2Icon />
             もどる
           </Button>
