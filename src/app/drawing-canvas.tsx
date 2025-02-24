@@ -10,7 +10,8 @@ export const DrawingCanvas = () => {
   const lastPosRef = useRef({ x: 0, y: 0 });
   const historyRef = useRef<ImageData[]>([]);
   const undoRef = useRef(0);
-  const [lineStyle, _setLineStyle] = useState({ width: 2, color: "#000" });
+  // const [lineStyle, _setLineStyle] = useState({ width: 2, color: "#000" });
+  const lineStyle = { width: 2, color: "#000" };
   const [penOnly, setPenOnly] = useState(false);
 
   const getAllowedPointerTypes = () =>
