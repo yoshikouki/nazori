@@ -1,15 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 export const DrawingCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [lastPos, setLastPos] = useState({ x: 0, y: 0 });
+  const isDrawingRef = useRef(false);
+  const lastPosRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     if (!canvasRef.current) return;
     const canvas = canvasRef.current;
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     ctx.lineWidth = 2;
@@ -17,22 +19,25 @@ export const DrawingCanvas = () => {
     ctx.strokeStyle = "#000";
 
     const handlePointerDown = (e: PointerEvent) => {
-      setIsDrawing(true);
-      setLastPos({ x: e.offsetX, y: e.offsetY });
+      e.preventDefault();
+      isDrawingRef.current = true;
+      lastPosRef.current = { x: e.offsetX, y: e.offsetY };
       canvas.setPointerCapture(e.pointerId);
     };
 
     const handlePointerMove = (e: PointerEvent) => {
-      if (!isDrawing) return;
+      e.preventDefault();
+      if (!isDrawingRef.current) return;
       ctx.beginPath();
-      ctx.moveTo(lastPos.x, lastPos.y);
+      ctx.moveTo(lastPosRef.current.x, lastPosRef.current.y);
       ctx.lineTo(e.offsetX, e.offsetY);
       ctx.stroke();
-      setLastPos({ x: e.offsetX, y: e.offsetY });
+      lastPosRef.current = { x: e.offsetX, y: e.offsetY };
     };
 
     const handlePointerUp = (e: PointerEvent) => {
-      setIsDrawing(false);
+      e.preventDefault();
+      isDrawingRef.current = false;
       canvas.releasePointerCapture(e.pointerId);
     };
 
@@ -45,7 +50,7 @@ export const DrawingCanvas = () => {
       canvas.removeEventListener("pointermove", handlePointerMove);
       canvas.removeEventListener("pointerup", handlePointerUp);
     };
-  }, [isDrawing, lastPos]);
+  }, []);
 
   const saveImage = () => {
     if (!canvasRef.current) return;
@@ -58,7 +63,7 @@ export const DrawingCanvas = () => {
 
   return (
     <div className="relative h-full w-full">
-      <canvas ref={canvasRef} className="h-full w-full" />
+      <canvas ref={canvasRef} className="h-full w-full touch-none" />
       <button
         type="button"
         onClick={saveImage}
