@@ -74,13 +74,24 @@ export const DrawingCanvas = () => {
   return (
     <div className="relative h-full w-full">
       <canvas ref={canvasRef} className="h-full w-full touch-none" />
-      <Button
-        type="button"
-        onClick={saveImage}
-        className="absolute top-4 right-4"
-      >
-        Save Image
-      </Button>
+      <div className="absolute inset-x-4 top-4 flex items-center justify-between">
+        <div className="inline-flex items-center gap-2">
+          <Button type="button" variant="outline">
+            <PencilLineIcon />
+            ペン
+          </Button>
+        </div>
+        <div className="inline-flex items-center gap-2">
+          <Button type="button" onClick={onSaveImage}>
+            <DownloadIcon />
+            ほぞん
+          </Button>
+          <Button type="button" variant="outline">
+            <Undo2Icon />
+            もどる
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };
