@@ -59,11 +59,15 @@ export const DrawingCanvas = () => {
     const canvas = canvasRef.current;
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
+  }, []);
 
+  // Register event listeners
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
     canvas.addEventListener("pointerdown", onPointerDown);
     canvas.addEventListener("pointermove", onPointerMove);
     canvas.addEventListener("pointerup", onPointerUp);
-
     return () => {
       canvas.removeEventListener("pointerdown", onPointerDown);
       canvas.removeEventListener("pointermove", onPointerMove);
