@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack -p 8888",
+    "dev": "next dev --turbopack -p 80",
     "build": "next build",
     "start": "next start",
     "eslint": "next lint",
