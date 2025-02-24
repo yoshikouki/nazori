@@ -9,9 +9,17 @@ export const DrawingCanvas = () => {
   const isDrawingRef = useRef(false);
   const lastPosRef = useRef({ x: 0, y: 0 });
   const [lineStyle, _setLineStyle] = useState({ width: 2, color: "#000" });
+  const [penOnly, setPenOnly] = useState(false);
+
+  const getAllowedPointerTypes = () =>
+    penOnly ? ["pen"] : ["pen", "mouse", "touch"];
+
+  const isAllowedPointerType = (type: string) => {
+    return getAllowedPointerTypes().includes(type);
+  };
 
   const onPointerDown = (e: PointerEvent) => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current || !isAllowedPointerType(e.pointerType)) return;
     e.preventDefault();
     isDrawingRef.current = true;
     lastPosRef.current = { x: e.offsetX, y: e.offsetY };
@@ -20,7 +28,8 @@ export const DrawingCanvas = () => {
 
   const onPointerMove = (e: PointerEvent) => {
     const ctx = canvasRef.current?.getContext("2d");
-    if (!ctx || !isDrawingRef.current) return;
+    if (!ctx || !isDrawingRef.current || !isAllowedPointerType(e.pointerType))
+      return;
     ctx.beginPath();
     ctx.moveTo(lastPosRef.current.x, lastPosRef.current.y);
     ctx.lineTo(e.offsetX, e.offsetY);
@@ -29,7 +38,7 @@ export const DrawingCanvas = () => {
   };
 
   const onPointerUp = (e: PointerEvent) => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current || !isAllowedPointerType(e.pointerType)) return;
     e.preventDefault();
     isDrawingRef.current = false;
     canvasRef.current.releasePointerCapture(e.pointerId);
@@ -76,9 +85,13 @@ export const DrawingCanvas = () => {
       <canvas ref={canvasRef} className="h-full w-full touch-none" />
       <div className="absolute inset-x-4 top-4 flex items-center justify-between">
         <div className="inline-flex items-center gap-2">
-          <Button type="button" variant="outline">
+          <Button
+            type="button"
+            variant={penOnly ? "default" : "outline"}
+            onClick={() => setPenOnly(!penOnly)}
+          >
             <PencilLineIcon />
-            ペン
+            ペン{penOnly ? "のみ" : ""}
           </Button>
         </div>
         <div className="inline-flex items-center gap-2">
