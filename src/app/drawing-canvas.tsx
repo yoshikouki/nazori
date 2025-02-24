@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { useEffect, useRef } from "react";
 
 export const DrawingCanvas = () => {
@@ -64,13 +65,13 @@ export const DrawingCanvas = () => {
   return (
     <div className="relative h-full w-full">
       <canvas ref={canvasRef} className="h-full w-full touch-none" />
-      <button
+      <Button
         type="button"
         onClick={saveImage}
-        className="absolute top-4 right-4 rounded bg-blue-500 px-4 py-2 text-white"
+        className="absolute top-4 right-4"
       >
         Save Image
-      </button>
+      </Button>
     </div>
   );
 };
