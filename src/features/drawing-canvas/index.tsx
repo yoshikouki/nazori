@@ -144,13 +144,13 @@ export const DrawingCanvas = () => {
             />
             <LineColorPicker color={lineStyle.color} onColorChange={onLineStyleChange} />
           </div>
+        </div>
+        <div className="flex flex-col items-end gap-2 sm:flex-row-reverse sm:items-center">
+          <SaveImageButton canvasRef={canvasRef} />
           <Button type="button" variant={"outline"} onClick={() => setPenOnly(!penOnly)}>
             {penOnly ? <HandIcon /> : <PencilLineIcon />}
             {penOnly ? "てもつかう" : "ペンでかく"}
           </Button>
-        </div>
-        <div className="inline-flex items-center gap-2">
-          <SaveImageButton canvasRef={canvasRef} />
         </div>
       </div>
     </div>
