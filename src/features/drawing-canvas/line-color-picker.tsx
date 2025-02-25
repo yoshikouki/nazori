@@ -33,6 +33,7 @@ export const LineColorPicker = ({ color, onColorChange }: LineColorPickerProps) 
           <DropdownMenuItem
             key={colorOption.key}
             onClick={() => onColorChange({ color: colorOption.value })}
+            onPointerUp={() => onColorChange({ color: colorOption.value })}
             className="flex gap-2"
           >
             <div

@@ -137,7 +137,11 @@ export const DrawingCanvas = () => {
               <Undo2Icon />
               <span className="hidden sm:inline">もどす</span>
             </Button>
-            <LineWidthPicker width={lineStyle.width} onWidthChange={onLineStyleChange} />
+            <LineWidthPicker
+              width={lineStyle.width}
+              color={lineStyle.color}
+              onWidthChange={onLineStyleChange}
+            />
             <LineColorPicker color={lineStyle.color} onColorChange={onLineStyleChange} />
           </div>
           <Button type="button" variant={"outline"} onClick={() => setPenOnly(!penOnly)}>
