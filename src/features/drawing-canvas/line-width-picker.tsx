@@ -20,7 +20,7 @@ export const LineWidthPicker = ({ width, onWidthChange }: LineWidthPickerProps) 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="flex min-w-10 gap-2">
+        <Button variant="outline" className="flex aspect-square gap-2 sm:aspect-auto">
           <div className="flex items-center justify-center">
             <div
               className="rounded-full bg-current"
