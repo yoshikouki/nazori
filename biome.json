@@ -12,6 +12,7 @@
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
+    "lineWidth": 96,
     "ignore": []
   },
   "organizeImports": {

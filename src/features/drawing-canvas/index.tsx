@@ -4,14 +4,11 @@ import { Button } from "@/components/ui/button";
 import { HandIcon, PencilLineIcon, Undo2Icon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { LineColorPicker } from "./line-color-picker";
+import { DefaultLineStyle, type LineStyle } from "./line-style";
 import { LineWidthPicker } from "./line-width-picker";
 import { SaveImageButton } from "./save-image-button";
 
-// LineStyle型を直接インポートする代わりに定義
-type LineStyle = {
-  width: number;
-  color: string;
-};
+export type OnLineStyleChange = (newLineStyle: Partial<LineStyle>) => void;
 
 export const DrawingCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -20,10 +17,7 @@ export const DrawingCanvas = () => {
   const midPointRef = useRef({ x: 0, y: 0 });
   const historyRef = useRef<ImageData[]>([]);
   const undoRef = useRef(0);
-  const [lineStyle, setLineStyle] = useState<LineStyle>({
-    width: 2,
-    color: "#000",
-  });
+  const [lineStyle, setLineStyle] = useState<LineStyle>(DefaultLineStyle);
   const [penOnly, setPenOnly] = useState(false);
 
   const getAllowedPointerTypes = () =>
@@ -134,23 +128,29 @@ export const DrawingCanvas = () => {
     ctx.lineJoin = "round";
   }, [lineStyle]);
 
-  const handleColorChange = (color: string) => {
-    setLineStyle((prev) => ({ ...prev, color }));
-  };
-
-  const handleLineWidthChange = (width: number) => {
-    setLineStyle((prev) => ({ ...prev, width }));
+  const onLineStyleChange = (newLineStyle: Partial<LineStyle>) => {
+    setLineStyle((prev) => ({ ...prev, ...newLineStyle }));
   };
 
   return (
     <div className="relative h-full w-full">
       <canvas ref={canvasRef} className="h-full w-full touch-none" />
       <div className="absolute inset-x-4 top-4 flex items-start justify-between">
-        <div className="inline-flex flex-col items-start justify-start gap-2 sm:flex-row">
-          <Button type="button" variant="outline" onClick={onUndo}>
-            <Undo2Icon />
-            <span className="hidden sm:inline">もどす</span>
-          </Button>
+        <div className="flex flex-col items-start justify-start gap-2 sm:flex-row">
+          <div className="inline-flex items-start justify-start gap-2">
+            <Button type="button" variant="outline" onClick={onUndo}>
+              <Undo2Icon />
+              <span className="hidden sm:inline">もどす</span>
+            </Button>
+            <LineWidthPicker
+              width={lineStyle.width}
+              onWidthChange={onLineStyleChange}
+            />
+            <LineColorPicker
+              color={lineStyle.color}
+              onColorChange={onLineStyleChange}
+            />
+          </div>
           <Button
             type="button"
             variant={"outline"}
@@ -159,14 +159,6 @@ export const DrawingCanvas = () => {
             {penOnly ? <HandIcon /> : <PencilLineIcon />}
             {penOnly ? "てもつかう" : "ペンでかく"}
           </Button>
-          <LineColorPicker
-            color={lineStyle.color}
-            onColorChange={handleColorChange}
-          />
-          <LineWidthPicker
-            width={lineStyle.width}
-            onWidthChange={handleLineWidthChange}
-          />
         </div>
         <div className="inline-flex items-center gap-2">
           <SaveImageButton canvasRef={canvasRef} />

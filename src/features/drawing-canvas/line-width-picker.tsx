@@ -7,27 +7,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import type { OnLineStyleChange } from ".";
+import { WidthOptionsArray, getCurrentWidth } from "./line-style";
 
 type LineWidthPickerProps = {
   width: number;
-  onWidthChange: (width: number) => void;
+  onWidthChange: OnLineStyleChange;
 };
 
-export const LineWidthPicker = ({
-  width,
-  onWidthChange,
-}: LineWidthPickerProps) => {
-  const lineWidthOptions = [
-    { name: "細", value: 1 },
-    { name: "中", value: 2 },
-    { name: "太", value: 4 },
-    { name: "極太", value: 8 },
-  ];
-
+export const LineWidthPicker = ({ width, onWidthChange }: LineWidthPickerProps) => {
+  const currentWidth = getCurrentWidth(width);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="flex gap-2">
+        <Button variant="outline" className="flex min-w-10 gap-2">
           <div className="flex items-center justify-center">
             <div
               className="rounded-full bg-current"
@@ -37,17 +30,17 @@ export const LineWidthPicker = ({
               }}
             />
           </div>
-          <span className="hidden sm:inline">太さ</span>
+          <span className="hidden sm:inline">{currentWidth?.name}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        {lineWidthOptions.map((option) => (
+        {WidthOptionsArray.map((option) => (
           <DropdownMenuItem
-            key={option.value}
-            onClick={() => onWidthChange(option.value)}
+            key={option.key}
+            onClick={() => onWidthChange({ width: option.value })}
             className="flex gap-2"
           >
-            <div className="flex items-center justify-center w-4">
+            <div className="flex w-4 items-center justify-center">
               <div
                 className="rounded-full bg-current"
                 style={{

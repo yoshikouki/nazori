@@ -7,44 +7,36 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import type { OnLineStyleChange } from ".";
+import { ColorOptionsArray, getCurrentColor } from "./line-style";
 
 type LineColorPickerProps = {
   color: string;
-  onColorChange: (color: string) => void;
+  onColorChange: OnLineStyleChange;
 };
 
-export const LineColorPicker = ({
-  color,
-  onColorChange,
-}: LineColorPickerProps) => {
-  const colorOptions = [
-    { name: "黒", value: "#000000" },
-    { name: "赤", value: "#FF0000" },
-    { name: "青", value: "#0000FF" },
-    { name: "緑", value: "#008000" },
-    { name: "黄", value: "#FFFF00" },
-  ];
-
+export const LineColorPicker = ({ color, onColorChange }: LineColorPickerProps) => {
+  const currentColor = getCurrentColor(color);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="flex gap-2">
-          <div
-            className="w-4 h-4 rounded-full"
-            style={{ backgroundColor: color }}
-          />
-          <span className="hidden sm:inline">色</span>
+        <Button
+          variant={currentColor?.lightness === "dark" ? "default" : "outline"}
+          className="flex min-w-10 gap-2 font-bold"
+          style={{ backgroundColor: color }}
+        >
+          <span className="hidden sm:inline">{currentColor?.name}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        {colorOptions.map((colorOption) => (
+        {ColorOptionsArray.map((colorOption) => (
           <DropdownMenuItem
-            key={colorOption.value}
-            onClick={() => onColorChange(colorOption.value)}
+            key={colorOption.key}
+            onClick={() => onColorChange({ color: colorOption.value })}
             className="flex gap-2"
           >
             <div
-              className="w-4 h-4 rounded-full"
+              className="h-4 w-4 rounded-full"
               style={{ backgroundColor: colorOption.value }}
             />
             {colorOption.name}
