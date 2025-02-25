@@ -1,13 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  DownloadIcon,
-  HandIcon,
-  PencilLineIcon,
-  Undo2Icon,
-} from "lucide-react";
+import { HandIcon, PencilLineIcon, Undo2Icon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { SaveImageButton } from "./components/save-image-button";
 
 export const DrawingCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -65,28 +61,6 @@ export const DrawingCanvas = () => {
     isDrawingRef.current = false;
     canvasRef.current.releasePointerCapture(e.pointerId);
     pushHistory();
-  };
-
-  const onSaveImage = async () => {
-    if (!canvasRef.current) return;
-    const dataUrl = canvasRef.current.toDataURL("image/png");
-    const blob = await (await fetch(dataUrl)).blob();
-    const title = `おもいで-${new Date().toLocaleString().replace(/[\s/:]/g, "")}`;
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          files: [new File([blob], `${title}.png`, { type: "image/png" })],
-          title,
-        });
-        return;
-      } catch (error) {
-        console.error("保存に失敗しました:", error);
-      }
-    }
-    const link = document.createElement("a");
-    link.href = dataUrl;
-    link.download = `${title}.png`;
-    link.click();
   };
 
   const pushHistory = () => {
@@ -169,10 +143,7 @@ export const DrawingCanvas = () => {
           </Button>
         </div>
         <div className="inline-flex items-center gap-2">
-          <Button type="button" onClick={onSaveImage}>
-            <DownloadIcon />
-            ほぞん
-          </Button>
+          <SaveImageButton canvasRef={canvasRef} />
         </div>
       </div>
     </div>
