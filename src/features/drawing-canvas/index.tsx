@@ -91,6 +91,27 @@ export const DrawingCanvas = () => {
     }
   };
 
+  const handleResize = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+    const tempCanvas = document.createElement("canvas");
+    const tempCtx = tempCanvas.getContext("2d");
+    if (!tempCtx) return;
+    tempCanvas.width = canvas.width;
+    tempCanvas.height = canvas.height;
+    tempCtx.drawImage(canvas, 0, 0);
+    pushHistory();
+    // FIXME: Drawings outside the visible area are lost after resize
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+    ctx.drawImage(tempCanvas, 0, 0);
+    ctx.strokeStyle = lineStyle.color;
+    ctx.lineWidth = lineStyle.width;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+  };
+
   // Initialize drawing canvas
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -106,13 +127,15 @@ export const DrawingCanvas = () => {
     canvas.addEventListener("pointerdown", onPointerStart);
     canvas.addEventListener("pointermove", onPointerMove);
     canvas.addEventListener("pointerup", onPointerEnd);
+    window.addEventListener("resize", handleResize);
     return () => {
       canvas.removeEventListener("pointerdown", onPointerStart);
       canvas.removeEventListener("pointermove", onPointerMove);
       canvas.removeEventListener("pointerup", onPointerEnd);
+      window.removeEventListener("resize", handleResize);
     };
     // biome-ignore lint/correctness/useExhaustiveDependencies: React Compiler
-  }, [onPointerStart, onPointerMove, onPointerEnd]);
+  }, [onPointerStart, onPointerMove, onPointerEnd, handleResize]);
 
   useEffect(() => {
     const ctx = canvasRef.current?.getContext("2d");
