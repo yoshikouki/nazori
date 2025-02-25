@@ -20,8 +20,7 @@ export const DrawingCanvas = () => {
   const [lineStyle, setLineStyle] = useState<LineStyle>(DefaultLineStyle);
   const [penOnly, setPenOnly] = useState(false);
 
-  const getAllowedPointerTypes = () =>
-    penOnly ? ["pen"] : ["pen", "mouse", "touch"];
+  const getAllowedPointerTypes = () => (penOnly ? ["pen"] : ["pen", "mouse", "touch"]);
 
   const isAllowedPointerType = (type: string) => {
     return getAllowedPointerTypes().includes(type);
@@ -39,8 +38,7 @@ export const DrawingCanvas = () => {
 
   const onPointerMove = (e: PointerEvent) => {
     const ctx = canvasRef.current?.getContext("2d");
-    if (!ctx || !isDrawingRef.current || !isAllowedPointerType(e.pointerType))
-      return;
+    if (!ctx || !isDrawingRef.current || !isAllowedPointerType(e.pointerType)) return;
     const currentPos = { x: e.offsetX, y: e.offsetY };
     const newMidPoint = {
       x: (lastPosRef.current.x + currentPos.x) / 2,
@@ -73,10 +71,7 @@ export const DrawingCanvas = () => {
     if (!canvas || !ctx) return;
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     historyRef.current = [
-      ...historyRef.current.slice(
-        0,
-        historyRef.current.length - undoRef.current,
-      ),
+      ...historyRef.current.slice(0, historyRef.current.length - undoRef.current),
       imageData,
     ];
     undoRef.current = 0;
@@ -142,20 +137,10 @@ export const DrawingCanvas = () => {
               <Undo2Icon />
               <span className="hidden sm:inline">もどす</span>
             </Button>
-            <LineWidthPicker
-              width={lineStyle.width}
-              onWidthChange={onLineStyleChange}
-            />
-            <LineColorPicker
-              color={lineStyle.color}
-              onColorChange={onLineStyleChange}
-            />
+            <LineWidthPicker width={lineStyle.width} onWidthChange={onLineStyleChange} />
+            <LineColorPicker color={lineStyle.color} onColorChange={onLineStyleChange} />
           </div>
-          <Button
-            type="button"
-            variant={"outline"}
-            onClick={() => setPenOnly(!penOnly)}
-          >
+          <Button type="button" variant={"outline"} onClick={() => setPenOnly(!penOnly)}>
             {penOnly ? <HandIcon /> : <PencilLineIcon />}
             {penOnly ? "てもつかう" : "ペンでかく"}
           </Button>
