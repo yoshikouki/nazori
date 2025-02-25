@@ -1,7 +1,12 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { DownloadIcon, PencilLineIcon, Undo2Icon } from "lucide-react";
+import {
+  DownloadIcon,
+  HandIcon,
+  PencilLineIcon,
+  Undo2Icon,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 export const DrawingCanvas = () => {
@@ -66,7 +71,7 @@ export const DrawingCanvas = () => {
     if (!canvasRef.current) return;
     const dataUrl = canvasRef.current.toDataURL("image/png");
     const blob = await (await fetch(dataUrl)).blob();
-    const title = `なぞり-${new Date().toLocaleString().replace(/[\s/:]/g, "")}`;
+    const title = `おもいで-${new Date().toLocaleString().replace(/[\s/:]/g, "")}`;
     if (navigator.share) {
       try {
         await navigator.share({
@@ -75,7 +80,7 @@ export const DrawingCanvas = () => {
         });
         return;
       } catch (error) {
-        console.error("共有に失敗しました:", error);
+        console.error("保存に失敗しました:", error);
       }
     }
     const link = document.createElement("a");
@@ -150,23 +155,23 @@ export const DrawingCanvas = () => {
       <canvas ref={canvasRef} className="h-full w-full touch-none" />
       <div className="absolute inset-x-4 top-4 flex items-center justify-between">
         <div className="inline-flex items-center gap-2">
+          <Button type="button" variant="outline" onClick={onUndo}>
+            <Undo2Icon />
+            もどす
+          </Button>
           <Button
             type="button"
-            variant={penOnly ? "default" : "outline"}
+            variant={"outline"}
             onClick={() => setPenOnly(!penOnly)}
           >
-            <PencilLineIcon />
-            ペン{penOnly ? "のみ" : ""}
+            {penOnly ? <HandIcon /> : <PencilLineIcon />}
+            {penOnly ? "てもつかう" : "ペンでかく"}
           </Button>
         </div>
         <div className="inline-flex items-center gap-2">
           <Button type="button" onClick={onSaveImage}>
             <DownloadIcon />
             ほぞん
-          </Button>
-          <Button type="button" variant="outline" onClick={onUndo}>
-            <Undo2Icon />
-            もどる
           </Button>
         </div>
       </div>
