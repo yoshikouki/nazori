@@ -127,11 +127,11 @@ export const DrawingCanvas = () => {
   return (
     <div className="relative h-full w-full">
       <canvas ref={canvasRef} className="h-full w-full touch-none" />
-      <div className="absolute inset-x-4 top-4 flex items-center justify-between">
-        <div className="inline-flex items-center gap-2">
+      <div className="absolute inset-x-4 top-4 flex items-start justify-between">
+        <div className="inline-flex flex-col items-start justify-start gap-2 sm:flex-row">
           <Button type="button" variant="outline" onClick={onUndo}>
             <Undo2Icon />
-            もどす
+            <span className="hidden sm:inline">もどす</span>
           </Button>
           <Button
             type="button"
