@@ -8,6 +8,7 @@ export const DrawingCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isDrawingRef = useRef(false);
   const lastPosRef = useRef({ x: 0, y: 0 });
+  const midPointRef = useRef({ x: 0, y: 0 });
   const historyRef = useRef<ImageData[]>([]);
   const undoRef = useRef(0);
   // const [lineStyle, _setLineStyle] = useState({ width: 2, color: "#000" });
@@ -25,7 +26,9 @@ export const DrawingCanvas = () => {
     if (!canvasRef.current || !isAllowedPointerType(e.pointerType)) return;
     e.preventDefault();
     isDrawingRef.current = true;
-    lastPosRef.current = { x: e.offsetX, y: e.offsetY };
+    const pos = { x: e.offsetX, y: e.offsetY };
+    lastPosRef.current = pos;
+    midPointRef.current = pos;
     canvasRef.current.setPointerCapture(e.pointerId);
   };
 
@@ -33,11 +36,22 @@ export const DrawingCanvas = () => {
     const ctx = canvasRef.current?.getContext("2d");
     if (!ctx || !isDrawingRef.current || !isAllowedPointerType(e.pointerType))
       return;
+    const currentPos = { x: e.offsetX, y: e.offsetY };
+    const newMidPoint = {
+      x: (lastPosRef.current.x + currentPos.x) / 2,
+      y: (lastPosRef.current.y + currentPos.y) / 2,
+    };
     ctx.beginPath();
-    ctx.moveTo(lastPosRef.current.x, lastPosRef.current.y);
-    ctx.lineTo(e.offsetX, e.offsetY);
+    ctx.moveTo(midPointRef.current.x, midPointRef.current.y);
+    ctx.quadraticCurveTo(
+      lastPosRef.current.x,
+      lastPosRef.current.y,
+      newMidPoint.x,
+      newMidPoint.y,
+    );
     ctx.stroke();
-    lastPosRef.current = { x: e.offsetX, y: e.offsetY };
+    lastPosRef.current = currentPos;
+    midPointRef.current = newMidPoint;
   };
 
   const onPointerEnd = (e: PointerEvent) => {
@@ -52,7 +66,7 @@ export const DrawingCanvas = () => {
     if (!canvasRef.current) return;
     const dataUrl = canvasRef.current.toDataURL("image/png");
     const blob = await (await fetch(dataUrl)).blob();
-    const title = `お絵描き-${new Date().toLocaleString().replace(/[\s/:]/g, "")}`;
+    const title = `なぞり-${new Date().toLocaleString().replace(/[\s/:]/g, "")}`;
     if (navigator.share) {
       try {
         await navigator.share({
@@ -125,9 +139,10 @@ export const DrawingCanvas = () => {
   useEffect(() => {
     const ctx = canvasRef.current?.getContext("2d");
     if (!ctx) return;
+    ctx.strokeStyle = lineStyle.color;
     ctx.lineWidth = lineStyle.width;
     ctx.lineCap = "round";
-    ctx.strokeStyle = lineStyle.color;
+    ctx.lineJoin = "round";
   }, [lineStyle]);
 
   return (
