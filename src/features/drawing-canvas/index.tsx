@@ -3,9 +3,9 @@
 import { Button } from "@/components/ui/button";
 import { HandIcon, PencilLineIcon, Undo2Icon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { LineColorPicker } from "./components/line-color-picker";
-import { LineWidthPicker } from "./components/line-width-picker";
-import { SaveImageButton } from "./components/save-image-button";
+import { LineColorPicker } from "./line-color-picker";
+import { LineWidthPicker } from "./line-width-picker";
+import { SaveImageButton } from "./save-image-button";
 
 // LineStyle型を直接インポートする代わりに定義
 type LineStyle = {

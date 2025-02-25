@@ -1,4 +1,4 @@
-import { DrawingCanvas } from "./drawing-canvas";
+import { DrawingCanvas } from "../features/drawing-canvas";
 
 export default function Home() {
   return (
