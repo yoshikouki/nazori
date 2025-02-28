@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# なぞり
 
-## Getting Started
+手書きの絵や文字を描くためのシンプルなウェブアプリケーションです。
 
-First, run the development server:
+## 概要
+
+「なぞり」は、Next.jsとTailwind CSSを使用して構築された、シンプルな描画キャンバスアプリケーションです。ペン、マウス、タッチを使って直感的に描画ができます。
+
+### 主な機能
+
+- マルチデバイス対応（ペン、マウス、タッチ操作）
+- カラーピッカー（黒、赤、青、緑、黄色）
+- 線の太さ調整（細い、普通、太い、極太）
+- 手書き入力のサポート
+- 描画履歴（元に戻す機能）
+- 画像として保存
+
+## インストール方法
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
+# リポジトリをクローン
+git clone https://github.com/yoshikouki/nazori.git
+cd nazori
+
+# 依存関係をインストール
+bun install
+
+# 開発サーバーを起動
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+ブラウザで [http://localhost:80](http://localhost:80) を開くと、アプリケーションにアクセスできます。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 技術スタック
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- [Next.js](https://nextjs.org/) - Reactフレームワーク
+- [React](https://reactjs.org/) - UIライブラリ
+- [TypeScript](https://www.typescriptlang.org/) - 型付きJavaScript
+- [Tailwind CSS](https://tailwindcss.com/) - CSSフレームワーク
+- [Radix UI](https://www.radix-ui.com/) - アクセシブルなUIコンポーネント
+- [Lucide React](https://lucide.dev/) - アイコンライブラリ
+- [Biome](https://biomejs.dev/) - リンターとフォーマッター
 
-## Learn More
+## プロジェクト構造
 
-To learn more about Next.js, take a look at the following resources:
+```
+nazori/
+├── src/
+│   ├── app/              # Next.jsアプリケーションのルート
+│   │   ├── globals.css   # グローバルスタイル
+│   │   ├── layout.tsx    # ルートレイアウト
+│   │   └── page.tsx      # メインページ
+│   ├── components/       # 再利用可能なUIコンポーネント
+│   │   └── drawing-canvas/  # 描画キャンバス機能
+│   │       ├── index.tsx    # メインの描画コンポーネント
+│   │       ├── line-color-picker.tsx  # 色選択コンポーネント
+│   │       ├── line-width-picker.tsx  # 線幅選択コンポーネント
+│   │       ├── line-style.ts          # 線のスタイル定義
+│   │       └── save-image-button.tsx  # 画像保存機能
+│   └── lib/              # ユーティリティ関数やフック
+├── public/               # 静的ファイル
+└── ...                   # 各種設定ファイル
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 開発ルール
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### コード規約
 
-## Deploy on Vercel
+- TypeScriptの型を適切に使用する
+- コンポーネントは機能ごとにディレクトリを分ける
+- UIコンポーネントは`src/components`に、機能コンポーネントは`src/features`に配置
+- Biomeを使用してコードのフォーマットとリントを行う
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### ブランチ管理
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `main`: 安定版ブランチ
+- 機能追加は機能ブランチで行い、PRを通してマージする
+
+### コミットメッセージ
+
+コミットメッセージは以下の形式に従う：
+```
+feat: 新機能の追加
+fix: バグ修正
+docs: ドキュメントの変更
+style: コードスタイルの変更
+refactor: リファクタリング
+test: テストの追加や修正
+```
+
+## ライセンス
+
+このプロジェクトはMITライセンスの下で公開されています。
