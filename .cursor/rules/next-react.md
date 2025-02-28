@@ -14,22 +14,26 @@ src/**/*.{ts,tsx}
 - 大きなコンポーネントは小さな再利用可能なコンポーネントに分割する
 - プレゼンテーショナルコンポーネントとコンテナコンポーネントを分離する
 - コンポーネントの`props`は明示的に型定義する
+- ファイル名は kebab-case.tsx / use-kebab-case.ts で命名する
+- テスト可能な処理はコンポーネントから分離して、同階層にテストコード *.test.ts を書く
 
 ## Next.js固有のルール
 
 - ページコンポーネントは`src/app`ディレクトリに配置する
 - クライアントコンポーネントには必ず`"use client"`ディレクティブを付ける
 - サーバーコンポーネントとクライアントコンポーネントを適切に分離する
+- 過剰に複雑にならなければクライアントコンポーネントではなくサーバーコンポーネントを使用する
 - メタデータはページごとに適切に設定する
 - 画像最適化には`next/image`の`Image`コンポーネントを使用する
 
 ## Reactフック
 
 - 複雑なステート管理ではReducerパターンを使用する
-- メモ化が必要な場合は`useMemo`や`useCallback`を適切に使用する
+- React Compiler を使用しているため useCallback や useMemo などのキャッシュ戦略は不要
 - サイドエフェクトは`useEffect`内で処理し、依存配列を適切に設定する
+  - 可能な限りサイドエフェクトに頼らない設計・実装を優先する
 - カスタムフックは`use`プレフィックスで命名する
-- React Compilerを活用する場合は適切にlintルールを無視する（`biome-ignore lint/correctness/useExhaustiveDependencies`）
+- React Compilerを活用する場合は適切にlintルールを無視する（`biome-ignore lint/correctness/useExhaustiveDependencies: React Compiler`）
 
 ## パフォーマンス最適化
 
