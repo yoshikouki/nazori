@@ -19,11 +19,10 @@ export const DrawingCanvas = () => {
   const undoRef = useRef(0);
   const [drawingStyle, setDrawingStyle] = useState<DrawingStyle>(DefaultDrawingStyle);
 
-  const getAllowedPointerTypes = () =>
-    drawingStyle.penOnly ? ["pen"] : ["pen", "mouse", "touch"];
+  const allowedPointerTypes = drawingStyle.penOnly ? ["pen"] : ["pen", "mouse", "touch"];
 
   const isAllowedPointerType = (type: string) => {
-    return getAllowedPointerTypes().includes(type);
+    return allowedPointerTypes.includes(type);
   };
 
   const onPointerStart = (e: PointerEvent) => {
