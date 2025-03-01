@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { DownloadIcon } from "lucide-react";
+import { toast } from "sonner";
 
 interface SaveImageButtonProps {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
@@ -20,9 +21,12 @@ export const SaveImageButton = ({ canvasRef }: SaveImageButtonProps) => {
           files: [new File([blob], `${title}.png`, { type: "image/png" })],
           title,
         });
+        toast.success("ほぞんしました");
         return;
       } catch (error) {
         console.error("保存に失敗しました:", error);
+        toast.error("ほぞんできませんでした");
+        return;
       }
     }
 
@@ -30,6 +34,7 @@ export const SaveImageButton = ({ canvasRef }: SaveImageButtonProps) => {
     link.href = dataUrl;
     link.download = `${title}.png`;
     link.click();
+    toast.success("ほぞんしました");
   };
 
   return (
