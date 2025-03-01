@@ -1,12 +1,9 @@
-# なぞりプロジェクト：Next.js/Reactルール
-
-このルールは、Next.jsとReactの使用に関する規約とベストプラクティスを定義します。
-
-## 適用範囲
-
-```glob
-src/**/*.{ts,tsx}
-```
+---
+description: このルールは、Next.jsとReactの使用に関する規約とベストプラクティスを定義します。
+globs: src/**/*.{ts,tsx}
+alwaysApply: false
+---
+# Next.js/Reactルール
 
 ## コンポーネント設計
 

@@ -1,12 +1,9 @@
-# なぞりプロジェクト：描画キャンバスルール
-
-このルールは、プロジェクトの中核機能である描画キャンバスに関連するファイルに適用されます。
-
-## 適用範囲
-
-```glob
-src/features/drawing-canvas/**/*.{ts,tsx}
-```
+---
+description: このルールは、プロジェクトの中核機能である描画キャンバスに関連するファイルに適用されます。
+globs: src/features/drawing-canvas/**/*.{ts,tsx}
+alwaysApply: false
+---
+# 描画キャンバスルール
 
 ## 参照ファイル
 

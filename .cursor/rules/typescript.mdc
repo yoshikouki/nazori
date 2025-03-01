@@ -1,12 +1,9 @@
-# なぞりプロジェクト：TypeScriptルール
-
-このルールは、TypeScriptの型定義や使用方法に関する規約を定義します。
-
-## 適用範囲
-
-```glob
-**/*.{ts,tsx}
-```
+---
+description: このルールは、TypeScriptの型定義や使用方法に関する規約を定義します。
+globs: *.ts,*.tsx
+alwaysApply: false
+---
+# TypeScript
 
 ## 型定義の基本原則
 
