@@ -22,6 +22,7 @@ export const LineColorPicker = ({ color, onColorChange }: LineColorPickerProps) 
       <DropdownMenuTrigger asChild>
         <Button
           variant={currentColor?.lightness === "dark" ? "default" : "outline"}
+          size="lg"
           className="flex aspect-square gap-2 font-bold sm:aspect-auto"
           style={{ backgroundColor: color }}
         >

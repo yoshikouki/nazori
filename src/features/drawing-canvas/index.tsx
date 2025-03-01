@@ -155,8 +155,8 @@ export const DrawingCanvas = () => {
       <canvas ref={canvasRef} className="h-full w-full touch-none" />
       <div className="absolute inset-x-4 top-4 flex items-start justify-between">
         <div className="flex flex-col items-start justify-start gap-2 sm:flex-row">
-          <div className="inline-flex items-start justify-start gap-2">
-            <Button type="button" variant="outline" onClick={onUndo}>
+          <div className="inline-flex flex-col items-start justify-start gap-2 sm:flex-row">
+            <Button type="button" size="lg" variant="outline" onClick={onUndo}>
               <Undo2Icon />
               <span className="hidden sm:inline">もどす</span>
             </Button>
