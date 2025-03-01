@@ -91,7 +91,7 @@ export const DrawingCanvas = () => {
     }
   };
 
-  const handleResize = () => {
+  const onResize = () => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
@@ -127,15 +127,15 @@ export const DrawingCanvas = () => {
     canvas.addEventListener("pointerdown", onPointerStart);
     canvas.addEventListener("pointermove", onPointerMove);
     canvas.addEventListener("pointerup", onPointerEnd);
-    window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", onResize);
     return () => {
       canvas.removeEventListener("pointerdown", onPointerStart);
       canvas.removeEventListener("pointermove", onPointerMove);
       canvas.removeEventListener("pointerup", onPointerEnd);
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", onResize);
     };
     // biome-ignore lint/correctness/useExhaustiveDependencies: React Compiler
-  }, [onPointerStart, onPointerMove, onPointerEnd, handleResize]);
+  }, [onPointerStart, onPointerMove, onPointerEnd, onResize]);
 
   useEffect(() => {
     const ctx = canvasRef.current?.getContext("2d");
