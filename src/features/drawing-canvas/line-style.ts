@@ -15,13 +15,16 @@ export const WidthOptions = {
 } as const;
 export const WidthOptionsArray = Object.values(WidthOptions);
 
-export type LineStyle = {
+export type DrawingStyle = {
   width: number;
   color: string;
+  penOnly: boolean;
 };
-export const DefaultLineStyle: LineStyle = {
+
+export const DefaultDrawingStyle: DrawingStyle = {
   width: WidthOptions.medium.value,
   color: ColorOptions.black.value,
+  penOnly: false,
 };
 
 export const getCurrentColor = (color: string) => {
@@ -29,4 +32,11 @@ export const getCurrentColor = (color: string) => {
 };
 export const getCurrentWidth = (width: number) => {
   return WidthOptionsArray.find((option) => option.value === width);
+};
+
+// 後方互換性のために残しておく
+export type LineStyle = Omit<DrawingStyle, "penOnly">;
+export const DefaultLineStyle: LineStyle = {
+  width: DefaultDrawingStyle.width,
+  color: DefaultDrawingStyle.color,
 };

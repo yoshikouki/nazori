@@ -4,6 +4,14 @@
 
 「なぞり」は、Next.jsとReactを使用したシンプルな描画キャンバスアプリケーションです。ユーザーはペン、マウス、タッチを使って自由に絵や文字を描くことができます。
 
+## データモデリング
+
+- users: ユーザー
+- profiles: ユーザーのプロフィール。絵や設定はプロフィールに紐付く。users:profiles = n:n
+- drawings: ユーザーが描いた絵。profiles:drawings = 1:n
+- drawing_histories: 現在描いている絵の履歴。profiles:drawing_histories = 1:n
+- drawing_styles: 線のスタイル。profiles:drawing_style = 1:n
+
 ## 技術スタック
 
 - **フロントエンド**:

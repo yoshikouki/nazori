@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button";
 import { HandIcon, PencilLineIcon, Undo2Icon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { LineColorPicker } from "./line-color-picker";
-import { DefaultLineStyle, type LineStyle } from "./line-style";
+import { DefaultDrawingStyle, type DrawingStyle } from "./line-style";
 import { LineWidthPicker } from "./line-width-picker";
 import { SaveImageButton } from "./save-image-button";
 
-export type OnLineStyleChange = (newLineStyle: Partial<LineStyle>) => void;
+export type OnDrawingStyleChange = (newDrawingStyle: Partial<DrawingStyle>) => void;
 
 export const DrawingCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -17,10 +17,10 @@ export const DrawingCanvas = () => {
   const midPointRef = useRef({ x: 0, y: 0 });
   const historyRef = useRef<ImageData[]>([]);
   const undoRef = useRef(0);
-  const [lineStyle, setLineStyle] = useState<LineStyle>(DefaultLineStyle);
-  const [penOnly, setPenOnly] = useState(false);
+  const [drawingStyle, setDrawingStyle] = useState<DrawingStyle>(DefaultDrawingStyle);
 
-  const getAllowedPointerTypes = () => (penOnly ? ["pen"] : ["pen", "mouse", "touch"]);
+  const getAllowedPointerTypes = () =>
+    drawingStyle.penOnly ? ["pen"] : ["pen", "mouse", "touch"];
 
   const isAllowedPointerType = (type: string) => {
     return getAllowedPointerTypes().includes(type);
@@ -106,8 +106,8 @@ export const DrawingCanvas = () => {
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
     ctx.drawImage(tempCanvas, 0, 0);
-    ctx.strokeStyle = lineStyle.color;
-    ctx.lineWidth = lineStyle.width;
+    ctx.strokeStyle = drawingStyle.color;
+    ctx.lineWidth = drawingStyle.width;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
   };
@@ -140,14 +140,18 @@ export const DrawingCanvas = () => {
   useEffect(() => {
     const ctx = canvasRef.current?.getContext("2d");
     if (!ctx) return;
-    ctx.strokeStyle = lineStyle.color;
-    ctx.lineWidth = lineStyle.width;
+    ctx.strokeStyle = drawingStyle.color;
+    ctx.lineWidth = drawingStyle.width;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
-  }, [lineStyle]);
+  }, [drawingStyle.color, drawingStyle.width]);
 
-  const onLineStyleChange = (newLineStyle: Partial<LineStyle>) => {
-    setLineStyle((prev) => ({ ...prev, ...newLineStyle }));
+  const onDrawingStyleChange = (newDrawingStyle: Partial<DrawingStyle>) => {
+    setDrawingStyle((prev) => ({ ...prev, ...newDrawingStyle }));
+  };
+
+  const togglePenOnly = () => {
+    setDrawingStyle((prev) => ({ ...prev, penOnly: !prev.penOnly }));
   };
 
   return (
@@ -161,18 +165,18 @@ export const DrawingCanvas = () => {
               <span className="hidden sm:inline">もどす</span>
             </Button>
             <LineWidthPicker
-              width={lineStyle.width}
-              color={lineStyle.color}
-              onWidthChange={onLineStyleChange}
+              width={drawingStyle.width}
+              color={drawingStyle.color}
+              onWidthChange={onDrawingStyleChange}
             />
-            <LineColorPicker color={lineStyle.color} onColorChange={onLineStyleChange} />
+            <LineColorPicker color={drawingStyle.color} onColorChange={onDrawingStyleChange} />
           </div>
         </div>
         <div className="flex flex-col items-end gap-2 sm:flex-row-reverse sm:items-center">
           <SaveImageButton canvasRef={canvasRef} />
-          <Button type="button" variant={"outline"} onClick={() => setPenOnly(!penOnly)}>
-            {penOnly ? <HandIcon /> : <PencilLineIcon />}
-            {penOnly ? "てもつかう" : "ペンでかく"}
+          <Button type="button" variant={"outline"} onClick={togglePenOnly}>
+            {drawingStyle.penOnly ? <HandIcon /> : <PencilLineIcon />}
+            {drawingStyle.penOnly ? "てもつかう" : "ペンでかく"}
           </Button>
         </div>
       </div>

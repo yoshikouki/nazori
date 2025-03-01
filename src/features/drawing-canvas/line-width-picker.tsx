@@ -7,12 +7,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { OnLineStyleChange } from ".";
+import type { OnDrawingStyleChange } from ".";
 import { WidthOptionsArray, getCurrentWidth } from "./line-style";
 type LineWidthPickerProps = {
   width: number;
   color: string;
-  onWidthChange: OnLineStyleChange;
+  onWidthChange: OnDrawingStyleChange;
 };
 
 export const LineWidthPicker = ({ width, color, onWidthChange }: LineWidthPickerProps) => {

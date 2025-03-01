@@ -7,12 +7,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { OnLineStyleChange } from ".";
+import type { OnDrawingStyleChange } from ".";
 import { ColorOptionsArray, getCurrentColor } from "./line-style";
 
 type LineColorPickerProps = {
   color: string;
-  onColorChange: OnLineStyleChange;
+  onColorChange: OnDrawingStyleChange;
 };
 
 export const LineColorPicker = ({ color, onColorChange }: LineColorPickerProps) => {
