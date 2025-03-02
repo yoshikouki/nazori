@@ -34,7 +34,9 @@ export const LineWidthPicker = ({ width, color, onWidthChange }: LineWidthPicker
               }}
             />
           </div>
-          <span className="hidden sm:inline">{currentWidth?.name}</span>
+          <span className="hidden text-white mix-blend-difference sm:inline">
+            {currentWidth?.name}
+          </span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="flex flex-col gap-1">
@@ -55,7 +57,7 @@ export const LineWidthPicker = ({ width, color, onWidthChange }: LineWidthPicker
                 backgroundColor: color,
               }}
             />
-            <span className="z-1">{option.name}</span>
+            <span className="z-1 text-white mix-blend-difference">{option.name}</span>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
