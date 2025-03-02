@@ -1,3 +1,4 @@
+// ref: https://github.com/shadcn-ui/ui/blob/d44971b6c23d60ccef11e303fddaf94b90c01eda/apps/www/registry/registry-colors.ts#L1477
 export const LineColorOptions = {
   black: { key: "black", name: "くろ", value: "#000000", lightness: "dark" },
   red: { key: "red", name: "あか", value: "#ef4444", lightness: "dark" },
