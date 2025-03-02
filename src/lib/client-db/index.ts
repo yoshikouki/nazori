@@ -1,5 +1,6 @@
 import type { DrawingStyle } from "@/features/drawing-canvas/drawing-style";
 import { type DBSchema, openDB } from "idb";
+import { ulid } from "ulid";
 
 export interface Profile {
   id: string;
@@ -108,7 +109,7 @@ export const clientDB = async () => {
 };
 
 export const generateId = (): string => {
-  return crypto.randomUUID();
+  return ulid();
 };
 
 export const profileOperations = {
