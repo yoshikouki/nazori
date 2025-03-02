@@ -40,25 +40,21 @@ export const useDrawingStore = ({ profileId }: UseDrawingStoreProps): UseDrawing
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  // 元に戻す・やり直しが可能かどうかを計算
   const canUndo = drawingHistory ? drawingHistory.currentIndex > 0 : false;
   const canRedo = drawingHistory
     ? drawingHistory.currentIndex < drawingHistory.imageDataList.length - 1
     : false;
 
-  // 初期データの読み込み
   useEffect(() => {
     const loadData = async () => {
       try {
         setIsLoading(true);
 
-        // スタイルの読み込み
         const styleRecord = await drawingStyleOperations.getByProfileId(profileId);
         if (styleRecord) {
           setDrawingStyleRecord(styleRecord);
           setDrawingStyle(styleRecord.style);
         } else {
-          // スタイルが存在しない場合は新規作成
           const newStyleRecord = await drawingStyleOperations.create(
             profileId,
             DefaultDrawingStyle,
@@ -66,10 +62,8 @@ export const useDrawingStore = ({ profileId }: UseDrawingStoreProps): UseDrawing
           setDrawingStyleRecord(newStyleRecord);
         }
 
-        // 履歴の読み込み
         let history = await drawingHistoryOperations.getByProfileId(profileId);
         if (!history) {
-          // 履歴が存在しない場合は新規作成
           history = await drawingHistoryOperations.create(profileId);
         }
         setDrawingHistory(history);
@@ -85,7 +79,6 @@ export const useDrawingStore = ({ profileId }: UseDrawingStoreProps): UseDrawing
     }
   }, [profileId]);
 
-  // 描画スタイルの更新
   const updateDrawingStyle = async (newStyle: Partial<DrawingStyle>) => {
     try {
       const updatedStyle = { ...drawingStyle, ...newStyle };
@@ -105,7 +98,6 @@ export const useDrawingStore = ({ profileId }: UseDrawingStoreProps): UseDrawing
     }
   };
 
-  // 画像データの追加
   const addImageData = async (imageData: string) => {
     if (!drawingHistory) return;
 
@@ -119,7 +111,6 @@ export const useDrawingStore = ({ profileId }: UseDrawingStoreProps): UseDrawing
     }
   };
 
-  // 元に戻す
   const undo = async () => {
     if (!drawingHistory || !canUndo) return;
 
@@ -133,7 +124,6 @@ export const useDrawingStore = ({ profileId }: UseDrawingStoreProps): UseDrawing
     }
   };
 
-  // やり直し
   const redo = async () => {
     if (!drawingHistory || !canRedo) return;
 
@@ -147,12 +137,10 @@ export const useDrawingStore = ({ profileId }: UseDrawingStoreProps): UseDrawing
     }
   };
 
-  // 描画をクリア
   const clearDrawing = async () => {
     if (!drawingHistory) return;
 
     try {
-      // 新しい履歴を作成
       const newHistory = await drawingHistoryOperations.create(profileId);
       setDrawingHistory(newHistory);
     } catch (err) {
@@ -160,7 +148,6 @@ export const useDrawingStore = ({ profileId }: UseDrawingStoreProps): UseDrawing
     }
   };
 
-  // 現在の画像データを取得
   const getCurrentImageData = () => {
     if (!drawingHistory) return null;
 
