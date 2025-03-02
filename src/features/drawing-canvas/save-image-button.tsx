@@ -40,7 +40,7 @@ export const SaveImageButton = ({ canvasRef }: SaveImageButtonProps) => {
   return (
     <Button type="button" onClick={onSaveImage}>
       <DownloadIcon />
-      ほぞん
+      <span className="hidden sm:inline">ほぞん</span>
     </Button>
   );
 };

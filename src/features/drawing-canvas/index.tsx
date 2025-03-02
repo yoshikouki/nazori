@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { EraserIcon, HandIcon, PencilLineIcon, Undo2Icon } from "lucide-react";
+import { EraserIcon, HandIcon, PencilLineIcon, PlusIcon, Undo2Icon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
@@ -195,61 +195,67 @@ export const DrawingCanvas = () => {
       )}
     >
       <canvas ref={canvasRef} className="h-full w-full touch-none select-none" />
-      <div className="pointer-events-none absolute inset-x-4 top-4 flex touch-none select-none items-start justify-between">
-        <div className="flex flex-col items-start justify-start gap-2 sm:flex-row">
-          <div className="inline-flex flex-col items-start justify-start gap-2 *:pointer-events-auto sm:flex-row">
-            <Button
-              type="button"
-              size="default"
-              variant="ghost"
-              className="select-none aspect-square p-0"
-              asChild
-            >
-              <Link href="/">
-                <Image src="/logo-no-padding.webp" alt="logo" width={20} height={20} />
-              </Link>
-            </Button>
-            <Button
-              type="button"
-              size="lg"
-              variant="outline"
-              onClick={onUndo}
-              className="select-none"
-            >
-              <Undo2Icon />
-              <span className="hidden sm:inline">もどす</span>
-            </Button>
-            <Button
-              type="button"
-              size="lg"
-              variant={drawingStyle.isEraser ? "default" : "outline"}
-              onClick={toggleEraser}
-              className="select-none"
-            >
-              <EraserIcon />
-              <span className="hidden sm:inline">けしごむ</span>
-            </Button>
-            <LineWidthPicker
-              width={drawingStyle.lineWidth}
-              color={drawingStyle.lineColor}
-              onWidthChange={onDrawingStyleChange}
-            />
-            <LineColorPicker
-              color={drawingStyle.lineColor}
-              onColorChange={onDrawingStyleChange}
-            />
-          </div>
+      <div
+        // className="pointer-events-none absolute inset-x-4 top-4 flex touch-none select-none items-start justify-between"
+        className="pointer-events-none absolute inset-x-4 top-4 grid touch-none select-none grid-cols-3 items-start justify-between"
+      >
+        <div className="flex flex-col items-start justify-start gap-2 *:pointer-events-auto">
+          <Button
+            type="button"
+            size="default"
+            variant="ghost"
+            className="aspect-square select-none p-0"
+            asChild
+          >
+            <Link href="/">
+              <Image src="/logo-no-padding.webp" alt="logo" width={20} height={20} />
+            </Link>
+          </Button>
+          <Button
+            type="button"
+            size="lg"
+            variant="outline"
+            onClick={onUndo}
+            className="select-none"
+          >
+            <Undo2Icon />
+            <span className="hidden sm:inline">もどす</span>
+          </Button>
+          <Button
+            type="button"
+            size="lg"
+            variant={drawingStyle.isEraser ? "default" : "outline"}
+            onClick={toggleEraser}
+            className="select-none"
+          >
+            <EraserIcon />
+            <span className="hidden sm:inline">けしごむ</span>
+          </Button>
+          <LineWidthPicker
+            width={drawingStyle.lineWidth}
+            color={drawingStyle.lineColor}
+            onWidthChange={onDrawingStyleChange}
+          />
+          <LineColorPicker
+            color={drawingStyle.lineColor}
+            onColorChange={onDrawingStyleChange}
+          />
         </div>
-        <div className="flex flex-col items-end gap-2 *:pointer-events-auto sm:flex-row-reverse sm:items-center">
+        <div className="flex items-center justify-center gap-2 *:pointer-events-auto">
+          <Button type="button" variant="outline" className="aspect-square select-none p-0">
+            <PlusIcon />
+          </Button>
+        </div>
+        <div className="flex flex-col items-end gap-2 *:pointer-events-auto">
           <SaveImageButton canvasRef={canvasRef} />
           <Button
             type="button"
-            variant={"outline"}
+            variant={drawingStyle.penOnly ? "default" : "outline"}
             onClick={togglePenOnly}
             className="pointer-events-auto select-none"
           >
-            {drawingStyle.penOnly ? <HandIcon /> : <PencilLineIcon />}
-            {drawingStyle.penOnly ? "てもつかう" : "ペンでかく"}
+            {drawingStyle.penOnly ? <PencilLineIcon /> : <HandIcon />}
+            <span className="hidden sm:inline">{drawingStyle.penOnly ? "ペン" : "て"}</span>
           </Button>
         </div>
       </div>
