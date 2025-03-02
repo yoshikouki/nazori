@@ -194,12 +194,18 @@ export const DrawingCanvas = () => {
   }, [drawingStyle.color, drawingStyle.width]);
 
   return (
-    <div className="relative h-full w-full">
-      <canvas ref={canvasRef} className="h-full w-full touch-none" />
-      <div className="absolute inset-x-4 top-4 flex items-start justify-between">
+    <div className="relative h-full w-full select-none">
+      <canvas ref={canvasRef} className="h-full w-full touch-none select-none" />
+      <div className="absolute inset-x-4 top-4 flex select-none items-start justify-between">
         <div className="flex flex-col items-start justify-start gap-2 sm:flex-row">
           <div className="inline-flex flex-col items-start justify-start gap-2 sm:flex-row">
-            <Button type="button" size="lg" variant="outline" onClick={onUndo}>
+            <Button
+              type="button"
+              size="lg"
+              variant="outline"
+              onClick={onUndo}
+              className="select-none"
+            >
               <Undo2Icon />
               <span className="hidden sm:inline">もどす</span>
             </Button>
@@ -213,7 +219,12 @@ export const DrawingCanvas = () => {
         </div>
         <div className="flex flex-col items-end gap-2 sm:flex-row-reverse sm:items-center">
           <SaveImageButton canvasRef={canvasRef} />
-          <Button type="button" variant={"outline"} onClick={togglePenOnly}>
+          <Button
+            type="button"
+            variant={"outline"}
+            onClick={togglePenOnly}
+            className="select-none"
+          >
             {drawingStyle.penOnly ? <HandIcon /> : <PencilLineIcon />}
             {drawingStyle.penOnly ? "てもつかう" : "ペンでかく"}
           </Button>
