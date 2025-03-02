@@ -3,34 +3,16 @@
 import {
   type DrawingHistory,
   type DrawingStyleRecord,
+  type Profile,
   drawingHistoryOperations,
   drawingStyleOperations,
+  profileOperations,
 } from "@/lib/client-db";
 import { useEffect, useState } from "react";
 import { DefaultDrawingStyle, type DrawingStyle } from "./drawing-style";
 
-interface UseDrawingStoreProps {
-  profileId: string;
-}
-
-interface UseDrawingStoreReturn {
-  drawingStyle: DrawingStyle;
-  updateDrawingStyle: (newStyle: Partial<DrawingStyle>) => Promise<void>;
-
-  drawingHistory: DrawingHistory | null;
-  addImageData: (imageData: string) => Promise<void>;
-  undo: () => Promise<void>;
-  redo: () => Promise<void>;
-  clearDrawing: () => Promise<void>;
-  getCurrentImageData: () => string | null;
-  canUndo: boolean;
-  canRedo: boolean;
-
-  isLoading: boolean;
-  error: Error | null;
-}
-
-export const useDrawingStore = ({ profileId }: UseDrawingStoreProps): UseDrawingStoreReturn => {
+export const useDrawingStore = () => {
+  const [currentProfile, setCurrentProfile] = useState<Profile | null>(null);
   const [drawingStyleRecord, setDrawingStyleRecord] = useState<DrawingStyleRecord | null>(null);
   const [drawingHistory, setDrawingHistory] = useState<DrawingHistory | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,22 +27,18 @@ export const useDrawingStore = ({ profileId }: UseDrawingStoreProps): UseDrawing
     const loadData = async () => {
       try {
         setIsLoading(true);
-
-        const styleRecord = await drawingStyleOperations.getByProfileId(profileId);
-        if (styleRecord) {
-          setDrawingStyleRecord(styleRecord);
-        } else {
-          const newStyleRecord = await drawingStyleOperations.create(
-            profileId,
-            DefaultDrawingStyle,
-          );
-          setDrawingStyleRecord(newStyleRecord);
-        }
-
-        let history = await drawingHistoryOperations.getByProfileId(profileId);
-        if (!history) {
-          history = await drawingHistoryOperations.create(profileId);
-        }
+        const profile =
+          currentProfile ??
+          (await profileOperations.getFirst()) ??
+          (await profileOperations.create());
+        setCurrentProfile(profile);
+        const styleRecord =
+          (await drawingStyleOperations.getByProfileId(profile.id)) ||
+          (await drawingStyleOperations.create(profile.id, DefaultDrawingStyle));
+        setDrawingStyleRecord(styleRecord);
+        const history =
+          (await drawingHistoryOperations.getByProfileId(profile.id)) ||
+          (await drawingHistoryOperations.create(profile.id));
         setDrawingHistory(history);
       } catch (err) {
         setError(err instanceof Error ? err : new Error("データの読み込みに失敗しました"));
@@ -68,11 +46,8 @@ export const useDrawingStore = ({ profileId }: UseDrawingStoreProps): UseDrawing
         setIsLoading(false);
       }
     };
-
-    if (profileId) {
-      loadData();
-    }
-  }, [profileId]);
+    loadData();
+  }, [currentProfile]);
 
   const updateDrawingStyle = async (newStyle: Partial<DrawingStyle>) => {
     try {

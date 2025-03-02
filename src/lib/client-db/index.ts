@@ -112,6 +112,17 @@ export const generateId = (): string => {
 };
 
 export const profileOperations = {
+  async getFirst(): Promise<DrawingStyleRecord | undefined> {
+    const db = await clientDB();
+    const styles = await db.getAll("drawing_styles");
+    return styles.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
+  },
+
+  async getById(id: string): Promise<Profile | undefined> {
+    const db = await clientDB();
+    return db.get("profiles", id);
+  },
+
   async create(name?: string): Promise<Profile> {
     const db = await clientDB();
     const now = new Date();
@@ -123,11 +134,6 @@ export const profileOperations = {
     };
     await db.add("profiles", profile);
     return profile;
-  },
-
-  async getById(id: string): Promise<Profile | undefined> {
-    const db = await clientDB();
-    return db.get("profiles", id);
   },
 
   async update(
@@ -248,6 +254,20 @@ export const drawingHistoryOperations = {
 };
 
 export const drawingStyleOperations = {
+  async getFirst(): Promise<DrawingStyleRecord | undefined> {
+    const db = await clientDB();
+    const styles = await db.getAll("drawing_styles");
+    return styles.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
+  },
+
+  async getByProfileId(profileId: string): Promise<DrawingStyleRecord | undefined> {
+    const db = await clientDB();
+    const index = db.transaction("drawing_styles").store.index("by-profile-id");
+    const styles = await index.getAll(profileId);
+    // 最新のスタイルを返す
+    return styles.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
+  },
+
   async create(profileId: string, style: DrawingStyle): Promise<DrawingStyleRecord> {
     const db = await clientDB();
     const now = new Date();
@@ -260,14 +280,6 @@ export const drawingStyleOperations = {
     };
     await db.add("drawing_styles", styleRecord);
     return styleRecord;
-  },
-
-  async getByProfileId(profileId: string): Promise<DrawingStyleRecord | undefined> {
-    const db = await clientDB();
-    const index = db.transaction("drawing_styles").store.index("by-profile-id");
-    const styles = await index.getAll(profileId);
-    // 最新のスタイルを返す
-    return styles.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
   },
 
   async update(id: string, style: DrawingStyle): Promise<DrawingStyleRecord | undefined> {
