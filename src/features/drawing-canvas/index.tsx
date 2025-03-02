@@ -7,6 +7,7 @@ import { DefaultDrawingStyle, type DrawingStyle } from "./drawing-style";
 import { LineColorPicker } from "./line-color-picker";
 import { LineWidthPicker } from "./line-width-picker";
 import { SaveImageButton } from "./save-image-button";
+import { useDrawingHistory } from "./use-drawing-history";
 
 export type OnDrawingStyleChange = (newDrawingStyle: Partial<DrawingStyle>) => void;
 
@@ -15,8 +16,9 @@ export const DrawingCanvas = () => {
   const isDrawingRef = useRef(false);
   const lastPosRef = useRef({ x: 0, y: 0 });
   const midPointRef = useRef({ x: 0, y: 0 });
-  const historyRef = useRef<ImageData[]>([]);
-  const undoRef = useRef(0);
+  const { pushHistory, onUndo } = useDrawingHistory({
+    canvasRef,
+  });
   const [drawingStyle, setDrawingStyle] = useState<DrawingStyle>(DefaultDrawingStyle);
   const pendingPointsRef = useRef<{ x: number; y: number }[]>([]);
   const animationFrameRef = useRef<number | null>(null);
@@ -96,32 +98,6 @@ export const DrawingCanvas = () => {
     }
     if (isDrawingRef.current) {
       animationFrameRef.current = requestAnimationFrame(drawPoints);
-    }
-  };
-
-  const pushHistory = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (!canvas || !ctx) return;
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    historyRef.current = [
-      ...historyRef.current.slice(0, historyRef.current.length - undoRef.current),
-      imageData,
-    ];
-    undoRef.current = 0;
-  };
-
-  const onUndo = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (!canvas || !ctx) return;
-    undoRef.current++;
-    const historyIndex = historyRef.current.length - undoRef.current - 1;
-    const prevState = historyRef.current[historyIndex];
-    if (prevState) {
-      ctx.putImageData(prevState, 0, 0);
-    } else {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
   };
 
