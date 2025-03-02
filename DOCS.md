@@ -139,7 +139,7 @@ Canvas APIの理解が重要です。特に以下の点に注意してくださ�
 
 - `getContext("2d")` メソッドを使用して描画コンテキストを取得
 - 線の描画には `beginPath()`, `moveTo()`, `lineTo()`, `stroke()` などのメソッドを使用
-- 画像データの操作には `getImageData()` と `putImageData()` を使用
+- 画像データの操作には `getImage()` と `putImage()` を使用
 
 ### イベント処理
 

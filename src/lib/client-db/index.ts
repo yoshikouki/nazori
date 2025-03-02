@@ -219,7 +219,7 @@ export const drawingHistoryOperations = {
     return histories.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
   },
 
-  async addImageData(id: string, image: Blob): Promise<DrawingHistory | undefined> {
+  async addImage(id: string, image: Blob): Promise<DrawingHistory | undefined> {
     const db = await clientDB();
     const history = await db.get("drawing_histories", id);
     if (!history) return undefined;

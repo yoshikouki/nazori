@@ -31,13 +31,10 @@ export const useDrawingStore = () => {
       }
     : DefaultDrawingStyle;
 
-  const addToHistory = async (imageData: Blob): Promise<DrawingHistory | undefined> => {
+  const addToHistory = async (image: Blob): Promise<DrawingHistory | undefined> => {
     if (!drawingHistory || !currentProfile) return undefined;
     try {
-      const updatedHistory = await drawingHistoryOperations.addImageData(
-        drawingHistory.id,
-        imageData,
-      );
+      const updatedHistory = await drawingHistoryOperations.addImage(drawingHistory.id, image);
       if (!updatedHistory) {
         setError(new Error("履歴の追加に失敗しました"));
         return undefined;

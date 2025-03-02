@@ -30,7 +30,7 @@ export const useDrawingHistory = ({ canvasRef }: UseDrawingHistoryProps) => {
     const updatedHistory = await undoHistory();
     if (!updatedHistory) return;
     if (updatedHistory.currentIndex >= 0) {
-      const prevBlob = updatedHistory.imageDataList[updatedHistory.currentIndex];
+      const prevBlob = updatedHistory.imageList[updatedHistory.currentIndex];
       if (prevBlob) {
         await drawBlobToCanvas(ctx, prevBlob);
         return;
