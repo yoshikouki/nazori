@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { OnDrawingStyleChange } from ".";
-import { WidthOptionsArray, getCurrentWidth } from "./line-style";
+import { LineWidthOptionsArray, getCurrentLineWidth } from "./line-style";
 type LineWidthPickerProps = {
   width: number;
   color: string;
@@ -16,7 +16,7 @@ type LineWidthPickerProps = {
 };
 
 export const LineWidthPicker = ({ width, color, onWidthChange }: LineWidthPickerProps) => {
-  const currentWidth = getCurrentWidth(width);
+  const currentWidth = getCurrentLineWidth(width);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -35,11 +35,11 @@ export const LineWidthPicker = ({ width, color, onWidthChange }: LineWidthPicker
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        {WidthOptionsArray.map((option) => (
+        {LineWidthOptionsArray.map((option) => (
           <DropdownMenuItem
             key={option.key}
-            onClick={() => onWidthChange({ width: option.value })}
-            onPointerUp={() => onWidthChange({ width: option.value })}
+            onClick={() => onWidthChange({ lineWidth: option.value })}
+            onPointerUp={() => onWidthChange({ lineWidth: option.value })}
             className="flex gap-2"
           >
             <div className="flex w-4 items-center justify-center">

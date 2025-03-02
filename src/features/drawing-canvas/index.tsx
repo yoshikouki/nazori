@@ -140,9 +140,9 @@ export const DrawingCanvas = () => {
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
     ctx.drawImage(tempCanvas, 0, 0);
-    ctx.strokeStyle = drawingStyle.color;
-    ctx.fillStyle = drawingStyle.color; // Also set fillStyle for point drawing
-    ctx.lineWidth = drawingStyle.width;
+    ctx.strokeStyle = drawingStyle.lineColor;
+    ctx.fillStyle = drawingStyle.lineColor; // Also set fillStyle for point drawing
+    ctx.lineWidth = drawingStyle.lineWidth;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
   };
@@ -188,12 +188,12 @@ export const DrawingCanvas = () => {
   useEffect(() => {
     const ctx = canvasRef.current?.getContext("2d");
     if (!ctx) return;
-    ctx.strokeStyle = drawingStyle.color;
-    ctx.fillStyle = drawingStyle.color; // Also set fillStyle for point drawing
-    ctx.lineWidth = drawingStyle.width;
+    ctx.strokeStyle = drawingStyle.lineColor;
+    ctx.fillStyle = drawingStyle.lineColor; // Also set fillStyle for point drawing
+    ctx.lineWidth = drawingStyle.lineWidth;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
-  }, [drawingStyle.color, drawingStyle.width]);
+  }, [drawingStyle.lineColor, drawingStyle.lineWidth]);
 
   return (
     <div className="relative h-full w-full select-none">
@@ -212,11 +212,14 @@ export const DrawingCanvas = () => {
               <span className="hidden sm:inline">もどす</span>
             </Button>
             <LineWidthPicker
-              width={drawingStyle.width}
-              color={drawingStyle.color}
+              width={drawingStyle.lineWidth}
+              color={drawingStyle.lineColor}
               onWidthChange={onDrawingStyleChange}
             />
-            <LineColorPicker color={drawingStyle.color} onColorChange={onDrawingStyleChange} />
+            <LineColorPicker
+              color={drawingStyle.lineColor}
+              onColorChange={onDrawingStyleChange}
+            />
           </div>
         </div>
         <div className="flex flex-col items-end gap-2 *:pointer-events-auto sm:flex-row-reverse sm:items-center">

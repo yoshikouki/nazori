@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { OnDrawingStyleChange } from ".";
-import { ColorOptionsArray, getCurrentColor } from "./line-style";
+import { LineColorOptionsArray, getCurrentLineColor } from "./line-style";
 
 type LineColorPickerProps = {
   color: string;
@@ -16,7 +16,7 @@ type LineColorPickerProps = {
 };
 
 export const LineColorPicker = ({ color, onColorChange }: LineColorPickerProps) => {
-  const currentColor = getCurrentColor(color);
+  const currentColor = getCurrentLineColor(color);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -30,11 +30,11 @@ export const LineColorPicker = ({ color, onColorChange }: LineColorPickerProps) 
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        {ColorOptionsArray.map((colorOption) => (
+        {LineColorOptionsArray.map((colorOption) => (
           <DropdownMenuItem
             key={colorOption.key}
-            onClick={() => onColorChange({ color: colorOption.value })}
-            onPointerUp={() => onColorChange({ color: colorOption.value })}
+            onClick={() => onColorChange({ lineColor: colorOption.value })}
+            onPointerUp={() => onColorChange({ lineColor: colorOption.value })}
             className="flex gap-2"
           >
             <div
