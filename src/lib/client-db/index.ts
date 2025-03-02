@@ -11,7 +11,7 @@ export interface Profile {
 export interface Drawing {
   id: string;
   profileId: string;
-  imageData: Blob;
+  image: Blob;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -19,7 +19,7 @@ export interface Drawing {
 export interface DrawingHistory {
   id: string;
   profileId: string;
-  imageDataList: Blob[]; // Blob
+  imageList: Blob[]; // Blob
   currentIndex: number;
   createdAt: Date;
   updatedAt: Date;
@@ -161,7 +161,7 @@ export const drawingOperations = {
     const drawing: Drawing = {
       id: generateId(),
       profileId,
-      imageData,
+      image,
       createdAt: now,
       updatedAt: now,
     };
@@ -169,15 +169,17 @@ export const drawingOperations = {
     return drawing;
   },
 
-  async getById(id: string): Promise<Drawing | undefined> {
+  async updateImage(id: string, image: Blob): Promise<Drawing | undefined> {
     const db = await clientDB();
-    return db.get("drawings", id);
-  },
-
-  async getByProfileId(profileId: string): Promise<Drawing[]> {
-    const db = await clientDB();
-    const index = db.transaction("drawings").store.index("by-profile-id");
-    return index.getAll(profileId);
+    const drawing = await db.get("drawings", id);
+    if (!drawing) return undefined;
+    const updatedDrawing: Drawing = {
+      ...drawing,
+      image,
+      updatedAt: new Date(),
+    };
+    await db.put("drawings", updatedDrawing);
+    return updatedDrawing;
   },
 };
 
@@ -188,7 +190,7 @@ export const drawingHistoryOperations = {
     const history: DrawingHistory = {
       id: generateId(),
       profileId,
-      imageDataList: [],
+      imageList: [],
       currentIndex: -1,
       createdAt: now,
       updatedAt: now,
@@ -205,18 +207,18 @@ export const drawingHistoryOperations = {
     return histories.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
   },
 
-  async addImageData(id: string, imageData: Blob): Promise<DrawingHistory | undefined> {
+  async addImageData(id: string, image: Blob): Promise<DrawingHistory | undefined> {
     const db = await clientDB();
     const history = await db.get("drawing_histories", id);
     if (!history) return undefined;
 
     // 現在のインデックス以降のデータを削除し、新しいデータを追加
-    const newList = history.imageDataList.slice(0, history.currentIndex + 1);
-    newList.push(imageData);
+    const newList = history.imageList.slice(0, history.currentIndex + 1);
+    newList.push(image);
 
     const updatedHistory: DrawingHistory = {
       ...history,
-      imageDataList: newList,
+      imageList: newList,
       currentIndex: newList.length - 1,
       updatedAt: new Date(),
     };
@@ -241,7 +243,7 @@ export const drawingHistoryOperations = {
   async redo(id: string): Promise<DrawingHistory | undefined> {
     const db = await clientDB();
     const history = await db.get("drawing_histories", id);
-    if (!history || history.currentIndex >= history.imageDataList.length - 1) return history;
+    if (!history || history.currentIndex >= history.imageList.length - 1) return history;
 
     const updatedHistory: DrawingHistory = {
       ...history,
