@@ -130,6 +130,66 @@ export const DrawingCanvas = () => {
     setIsDrawingListOpen(false);
   };
 
+  const onPointerStart = (e: PointerEvent) => {
+    const canvas = canvasRef.current;
+    if (!canvas || !isAllowedPointerType(e.pointerType)) return;
+    e.preventDefault();
+    isDrawingRef.current = true;
+    const pos = { x: e.offsetX, y: e.offsetY };
+    lastPosRef.current = pos;
+    midPointRef.current = pos;
+    pendingPointsRef.current = [pos];
+    canvas.setPointerCapture(e.pointerId);
+    if (animationFrameRef.current !== null) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    animationFrameRef.current = requestAnimationFrame(drawPoints);
+  };
+
+  const onPointerMove = (e: PointerEvent) => {
+    if (!isDrawingRef.current || !isAllowedPointerType(e.pointerType)) return;
+    pendingPointsRef.current.push({ x: e.offsetX, y: e.offsetY });
+  };
+
+  const onPointerEnd = (e: PointerEvent) => {
+    const canvas = canvasRef.current;
+    if (!canvas || !isAllowedPointerType(e.pointerType)) return;
+    e.preventDefault();
+    isDrawingRef.current = false;
+    canvas.releasePointerCapture(e.pointerId);
+    if (pendingPointsRef.current.length > 0) {
+      drawPoints();
+    }
+    if (animationFrameRef.current !== null) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    pushHistory();
+  };
+
+  const onResize = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+    const tempCanvas = document.createElement("canvas");
+    const tempCtx = tempCanvas.getContext("2d");
+    if (!tempCtx) return;
+    tempCanvas.width = canvas.width;
+    tempCanvas.height = canvas.height;
+    tempCtx.drawImage(canvas, 0, 0);
+    pushHistory();
+    // FIXME: Drawings outside the visible area are lost after resize
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+    ctx.drawImage(tempCanvas, 0, 0);
+    ctx.strokeStyle = drawingStyle.lineColor;
+    ctx.fillStyle = drawingStyle.lineColor; // Also set fillStyle for point drawing
+    ctx.lineWidth = drawingStyle.lineWidth;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+  };
+
   // Initialize drawing canvas
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -144,66 +204,10 @@ export const DrawingCanvas = () => {
   }, []);
 
   // Register event listeners
-  // biome-ignore lint/correctness/useExhaustiveDependencies: React Compiler
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
-
-    const onPointerStart = (e: PointerEvent) => {
-      if (!isAllowedPointerType(e.pointerType)) return;
-      e.preventDefault();
-      isDrawingRef.current = true;
-      const pos = { x: e.offsetX, y: e.offsetY };
-      lastPosRef.current = pos;
-      midPointRef.current = pos;
-      pendingPointsRef.current = [pos];
-      canvas.setPointerCapture(e.pointerId);
-      if (animationFrameRef.current !== null) {
-        cancelAnimationFrame(animationFrameRef.current);
-        animationFrameRef.current = null;
-      }
-      animationFrameRef.current = requestAnimationFrame(drawPoints);
-    };
-
-    const onPointerMove = (e: PointerEvent) => {
-      if (!isDrawingRef.current || !isAllowedPointerType(e.pointerType)) return;
-      pendingPointsRef.current.push({ x: e.offsetX, y: e.offsetY });
-    };
-
-    const onPointerEnd = (e: PointerEvent) => {
-      if (!isAllowedPointerType(e.pointerType)) return;
-      e.preventDefault();
-      isDrawingRef.current = false;
-      canvas.releasePointerCapture(e.pointerId);
-      if (pendingPointsRef.current.length > 0) {
-        drawPoints();
-      }
-      if (animationFrameRef.current !== null) {
-        cancelAnimationFrame(animationFrameRef.current);
-        animationFrameRef.current = null;
-      }
-      pushHistory();
-    };
-
-    const onResize = () => {
-      const tempCanvas = document.createElement("canvas");
-      const tempCtx = tempCanvas.getContext("2d");
-      if (!tempCtx) return;
-      tempCanvas.width = canvas.width;
-      tempCanvas.height = canvas.height;
-      tempCtx.drawImage(canvas, 0, 0);
-      pushHistory();
-      // FIXME: Drawings outside the visible area are lost after resize
-      canvas.width = canvas.clientWidth;
-      canvas.height = canvas.clientHeight;
-      ctx.drawImage(tempCanvas, 0, 0);
-      ctx.strokeStyle = drawingStyle.lineColor;
-      ctx.fillStyle = drawingStyle.lineColor; // Also set fillStyle for point drawing
-      ctx.lineWidth = drawingStyle.lineWidth;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-    };
 
     canvas.addEventListener("pointerdown", onPointerStart);
     canvas.addEventListener("pointermove", onPointerMove);
@@ -215,7 +219,8 @@ export const DrawingCanvas = () => {
       canvas.removeEventListener("pointerup", onPointerEnd);
       window.removeEventListener("resize", onResize);
     };
-  }, []);
+    // biome-ignore lint/correctness/useExhaustiveDependencies: React Compiler
+  }, [onPointerEnd, onPointerMove, onPointerStart, onResize]);
 
   useEffect(() => {
     const ctx = canvasRef.current?.getContext("2d");
