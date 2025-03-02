@@ -141,6 +141,7 @@ export const DrawingCanvas = () => {
     canvas.height = canvas.clientHeight;
     ctx.drawImage(tempCanvas, 0, 0);
     ctx.strokeStyle = drawingStyle.color;
+    ctx.fillStyle = drawingStyle.color; // Also set fillStyle for point drawing
     ctx.lineWidth = drawingStyle.width;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
@@ -188,6 +189,7 @@ export const DrawingCanvas = () => {
     const ctx = canvasRef.current?.getContext("2d");
     if (!ctx) return;
     ctx.strokeStyle = drawingStyle.color;
+    ctx.fillStyle = drawingStyle.color; // Also set fillStyle for point drawing
     ctx.lineWidth = drawingStyle.width;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
@@ -196,9 +198,9 @@ export const DrawingCanvas = () => {
   return (
     <div className="relative h-full w-full select-none">
       <canvas ref={canvasRef} className="h-full w-full touch-none select-none" />
-      <div className="absolute inset-x-4 top-4 flex select-none items-start justify-between">
+      <div className="pointer-events-none absolute inset-x-4 top-4 flex touch-none select-none items-start justify-between">
         <div className="flex flex-col items-start justify-start gap-2 sm:flex-row">
-          <div className="inline-flex flex-col items-start justify-start gap-2 sm:flex-row">
+          <div className="inline-flex flex-col items-start justify-start gap-2 *:pointer-events-auto sm:flex-row">
             <Button
               type="button"
               size="lg"
@@ -217,13 +219,13 @@ export const DrawingCanvas = () => {
             <LineColorPicker color={drawingStyle.color} onColorChange={onDrawingStyleChange} />
           </div>
         </div>
-        <div className="flex flex-col items-end gap-2 sm:flex-row-reverse sm:items-center">
+        <div className="flex flex-col items-end gap-2 *:pointer-events-auto sm:flex-row-reverse sm:items-center">
           <SaveImageButton canvasRef={canvasRef} />
           <Button
             type="button"
             variant={"outline"}
             onClick={togglePenOnly}
-            className="select-none"
+            className="pointer-events-auto select-none"
           >
             {drawingStyle.penOnly ? <HandIcon /> : <PencilLineIcon />}
             {drawingStyle.penOnly ? "てもつかう" : "ペンでかく"}
