@@ -146,6 +146,14 @@ export const DrawingCanvas = () => {
     ctx.lineJoin = "round";
   };
 
+  const onDrawingStyleChange = (newDrawingStyle: Partial<DrawingStyle>) => {
+    setDrawingStyle((prev) => ({ ...prev, ...newDrawingStyle }));
+  };
+
+  const togglePenOnly = () => {
+    setDrawingStyle((prev) => ({ ...prev, penOnly: !prev.penOnly }));
+  };
+
   // Initialize drawing canvas
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -184,14 +192,6 @@ export const DrawingCanvas = () => {
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
   }, [drawingStyle.color, drawingStyle.width]);
-
-  const onDrawingStyleChange = (newDrawingStyle: Partial<DrawingStyle>) => {
-    setDrawingStyle((prev) => ({ ...prev, ...newDrawingStyle }));
-  };
-
-  const togglePenOnly = () => {
-    setDrawingStyle((prev) => ({ ...prev, penOnly: !prev.penOnly }));
-  };
 
   return (
     <div className="relative h-full w-full">
