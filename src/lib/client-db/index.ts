@@ -156,7 +156,18 @@ export const profileOperations = {
 };
 
 export const drawingOperations = {
-  async create(profileId: string, imageData: Blob): Promise<Drawing> {
+  async getById(id: string): Promise<Drawing | undefined> {
+    const db = await clientDB();
+    return db.get("drawings", id);
+  },
+
+  async getByProfileId(profileId: string): Promise<Drawing[]> {
+    const db = await clientDB();
+    const index = db.transaction("drawings").store.index("by-profile-id");
+    return index.getAll(profileId);
+  },
+
+  async create(profileId: string, image = new Blob()): Promise<Drawing> {
     const db = await clientDB();
     const now = new Date();
     const drawing: Drawing = {

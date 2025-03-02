@@ -1,10 +1,12 @@
 "use client";
 
 import {
+  type Drawing,
   type DrawingHistory,
   type DrawingStyleRecord,
   type Profile,
   drawingHistoryOperations,
+  drawingOperations,
   drawingStyleOperations,
   profileOperations,
 } from "@/lib/client-db";
@@ -15,6 +17,7 @@ export const useDrawingStore = () => {
   const [currentProfile, setCurrentProfile] = useState<Profile | null>(null);
   const [drawingStyleRecord, setDrawingStyleRecord] = useState<DrawingStyleRecord | null>(null);
   const [drawingHistory, setDrawingHistory] = useState<DrawingHistory | null>(null);
+  const [drawings, setDrawings] = useState<Drawing[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [isEraser, setIsEraser] = useState(false);
@@ -102,6 +105,16 @@ export const useDrawingStore = () => {
     }
   };
 
+  const createDrawing = async () => {
+    if (!currentProfile) return;
+    try {
+      const drawing = await drawingOperations.create(currentProfile.id);
+      setDrawings([drawing, ...drawings]);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error("描画の作成に失敗しました"));
+    }
+  };
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -123,6 +136,8 @@ export const useDrawingStore = () => {
           (await drawingHistoryOperations.getByProfileId(profile.id)) ||
           (await drawingHistoryOperations.create(profile.id));
         setDrawingHistory(history);
+        const drawings = await drawingOperations.getByProfileId(profile.id);
+        setDrawings(drawings);
       } catch (err) {
         setError(err instanceof Error ? err : new Error("データの読み込みに失敗しました"));
       } finally {
@@ -140,5 +155,7 @@ export const useDrawingStore = () => {
     addToHistory,
     undoHistory,
     updateDrawingStyle,
+    drawings,
+    createDrawing,
   };
 };

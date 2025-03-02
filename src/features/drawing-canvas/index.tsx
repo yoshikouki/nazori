@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { drawBlobToCanvas } from "@/lib/canvas";
-import { drawingOperations } from "@/lib/client-db";
 import { cn } from "@/lib/utils";
 import { EraserIcon, HandIcon, PencilLineIcon, PlusIcon, Undo2Icon } from "lucide-react";
 import Image from "next/image";
@@ -26,13 +25,11 @@ export const DrawingCanvas = () => {
   const { pushHistory, onUndo } = useDrawingHistory({
     canvasRef,
   });
-  const { drawingStyle, updateDrawingStyle, isLoading, drawingHistory } = useDrawingStore();
+  const { drawingStyle, updateDrawingStyle, isLoading, drawings, createDrawing } =
+    useDrawingStore();
   const pendingPointsRef = useRef<{ x: number; y: number }[]>([]);
   const animationFrameRef = useRef<number | null>(null);
   const [isDrawingListOpen, setIsDrawingListOpen] = useState(false);
-  const [drawings, setDrawings] = useState<
-    Array<{ id: string; imageData: Blob; createdAt: Date }>
-  >([]);
 
   const allowedPointerTypes = drawingStyle.penOnly ? ["pen"] : ["pen", "mouse", "touch"];
 
@@ -89,30 +86,16 @@ export const DrawingCanvas = () => {
   };
 
   const openDrawingList = async () => {
-    if (!drawingHistory?.profileId) return;
-
-    try {
-      const profileDrawings = await drawingOperations.getByProfileId(drawingHistory.profileId);
-      setDrawings(
-        profileDrawings.map((d) => ({
-          id: d.id,
-          imageData: d.imageData,
-          createdAt: d.createdAt,
-        })),
-      );
-      setIsDrawingListOpen(true);
-    } catch (error) {
-      console.error("Failed to load drawings:", error);
-    }
+    setIsDrawingListOpen(true);
   };
 
-  const loadDrawing = async (imageData: Blob) => {
+  const onChangeDrawing = async (image: Blob) => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
 
     try {
-      await drawBlobToCanvas(ctx, imageData);
+      await drawBlobToCanvas(ctx, image);
       pushHistory();
       setIsDrawingListOpen(false);
     } catch (error) {
@@ -120,14 +103,13 @@ export const DrawingCanvas = () => {
     }
   };
 
-  const createNewDrawing = () => {
+  const createNewDrawing = async () => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
-
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    pushHistory();
     setIsDrawingListOpen(false);
+    await createDrawing();
   };
 
   const onPointerStart = (e: PointerEvent) => {
@@ -341,12 +323,12 @@ export const DrawingCanvas = () => {
                 type="button"
                 key={drawing.id}
                 className="cursor-pointer overflow-hidden rounded-lg border text-left hover:bg-gray-50"
-                onClick={() => loadDrawing(drawing.imageData)}
+                onClick={() => onChangeDrawing(drawing.image)}
                 aria-label={`Drawing from ${drawing.createdAt.toLocaleDateString()}`}
               >
                 <div className="relative aspect-square w-full">
                   <Image
-                    src={URL.createObjectURL(drawing.imageData)}
+                    src={URL.createObjectURL(drawing.image)}
                     alt={`Drawing from ${drawing.createdAt.toLocaleDateString()}`}
                     fill
                     style={{ objectFit: "contain" }}
