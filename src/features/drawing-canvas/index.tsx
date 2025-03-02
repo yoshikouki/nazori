@@ -3,8 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { HandIcon, PencilLineIcon, Undo2Icon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { DefaultDrawingStyle, type DrawingStyle } from "./drawing-style";
 import { LineColorPicker } from "./line-color-picker";
-import { DefaultDrawingStyle, type DrawingStyle } from "./line-style";
 import { LineWidthPicker } from "./line-width-picker";
 import { SaveImageButton } from "./save-image-button";
 

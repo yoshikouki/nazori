@@ -1,4 +1,4 @@
-import type { DrawingStyle } from "@/features/drawing-canvas/line-style";
+import type { DrawingStyle } from "@/features/drawing-canvas/drawing-style";
 import { type DBSchema, openDB } from "idb";
 
 export interface User {

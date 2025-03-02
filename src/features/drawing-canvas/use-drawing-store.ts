@@ -7,7 +7,7 @@ import {
   drawingStyleOperations,
 } from "@/lib/client-db";
 import { useEffect, useState } from "react";
-import { DefaultDrawingStyle, type DrawingStyle } from "./line-style";
+import { DefaultDrawingStyle, type DrawingStyle } from "./drawing-style";
 
 interface UseDrawingStoreProps {
   profileId: string;
