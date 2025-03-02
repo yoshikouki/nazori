@@ -39,7 +39,10 @@ export const useDrawingStore = () => {
           currentProfile ??
           (await profileOperations.getFirst()) ??
           (await profileOperations.create());
-        setCurrentProfile(profile);
+        if (profile.id !== currentProfile?.id) {
+          setCurrentProfile(profile);
+          return; // Skip subsequent processing if the profile has changed
+        }
         const styleRecord =
           (await drawingStyleOperations.getByProfileId(profile.id)) ||
           (await drawingStyleOperations.create(profile.id, DefaultDrawingStyle));
@@ -57,6 +60,92 @@ export const useDrawingStore = () => {
     loadData();
   }, [currentProfile]);
 
+  const updateDrawingHistory = async (
+    imageData: Blob | null,
+    action: "add" | "undo" | "redo" = "add",
+  ): Promise<DrawingHistory | undefined> => {
+    if (!drawingHistory || !currentProfile) return undefined;
+    try {
+      let updatedHistory: DrawingHistory | undefined;
+      switch (action) {
+        case "add":
+          if (imageData) {
+            updatedHistory = await drawingHistoryOperations.addImageData(
+              drawingHistory.id,
+              imageData,
+            );
+          }
+          break;
+        case "undo":
+          updatedHistory = await drawingHistoryOperations.undo(drawingHistory.id);
+          break;
+        case "redo":
+          updatedHistory = await drawingHistoryOperations.redo(drawingHistory.id);
+          break;
+      }
+
+      if (!updatedHistory) {
+        setError(new Error("履歴の更新に失敗しました"));
+        return undefined;
+      }
+      setDrawingHistory(updatedHistory);
+      return updatedHistory;
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error("履歴の更新に失敗しました"));
+      return undefined;
+    }
+  };
+
+  const addToHistory = async (imageData: Blob): Promise<DrawingHistory | undefined> => {
+    if (!drawingHistory || !currentProfile) return undefined;
+    try {
+      const updatedHistory = await drawingHistoryOperations.addImageData(
+        drawingHistory.id,
+        imageData,
+      );
+      if (!updatedHistory) {
+        setError(new Error("履歴の追加に失敗しました"));
+        return undefined;
+      }
+      setDrawingHistory(updatedHistory);
+      return updatedHistory;
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error("履歴の追加に失敗しました"));
+      return undefined;
+    }
+  };
+
+  const undoHistory = async (): Promise<DrawingHistory | undefined> => {
+    if (!drawingHistory || !currentProfile) return undefined;
+    try {
+      const updatedHistory = await drawingHistoryOperations.undo(drawingHistory.id);
+      if (!updatedHistory) {
+        setError(new Error("元に戻す操作に失敗しました"));
+        return undefined;
+      }
+      setDrawingHistory(updatedHistory);
+      return updatedHistory;
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error("元に戻す操作に失敗しました"));
+      return undefined;
+    }
+  };
+
+  const updateDrawingStyle = async (newStyle: Partial<DrawingStyle>) => {
+    if (!drawingStyleRecord) return;
+    try {
+      const updatedStyle = await drawingStyleOperations.update(drawingStyleRecord.id, {
+        ...drawingStyle,
+        ...newStyle,
+      });
+      if (updatedStyle) {
+        setDrawingStyleRecord(updatedStyle);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error("スタイルの更新に失敗しました"));
+    }
+  };
+
   return {
     drawingStyle,
     drawingHistory,
@@ -64,5 +153,9 @@ export const useDrawingStore = () => {
     canRedo,
     isLoading,
     error,
+    updateDrawingHistory,
+    addToHistory,
+    undoHistory,
+    updateDrawingStyle,
   };
 };

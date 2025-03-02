@@ -112,10 +112,10 @@ export const generateId = (): string => {
 };
 
 export const profileOperations = {
-  async getFirst(): Promise<DrawingStyleRecord | undefined> {
+  async getFirst(): Promise<Profile | undefined> {
     const db = await clientDB();
-    const styles = await db.getAll("drawing_styles");
-    return styles.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
+    const profiles = await db.getAll("profiles");
+    return profiles.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
   },
 
   async getById(id: string): Promise<Profile | undefined> {
@@ -227,7 +227,7 @@ export const drawingHistoryOperations = {
   async undo(id: string): Promise<DrawingHistory | undefined> {
     const db = await clientDB();
     const history = await db.get("drawing_histories", id);
-    if (!history || history.currentIndex <= 0) return history;
+    if (!history || history.currentIndex < 0) return history;
 
     const updatedHistory: DrawingHistory = {
       ...history,

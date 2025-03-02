@@ -1,41 +1,42 @@
 "use client";
 
-import { type RefObject, useRef } from "react";
+import { canvasToBlob, drawBlobToCanvas } from "@/lib/canvas";
+import type { RefObject } from "react";
+import { useDrawingStore } from "./use-drawing-store";
 
 interface UseDrawingHistoryProps {
   canvasRef: RefObject<HTMLCanvasElement | null>;
 }
 
 export const useDrawingHistory = ({ canvasRef }: UseDrawingHistoryProps) => {
-  const historyRef = useRef<ImageData[]>([]);
-  const undoRef = useRef(0);
+  const { addToHistory, undoHistory } = useDrawingStore();
 
-  const pushHistory = () => {
+  const pushHistory = async () => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    historyRef.current = [
-      ...historyRef.current.slice(0, historyRef.current.length - undoRef.current),
-      imageData,
-    ];
-    undoRef.current = 0;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+    const blob = await canvasToBlob(canvas);
+    if (!blob) {
+      console.error("Failed to convert canvas to blob");
+      return;
+    }
+    await addToHistory(blob);
   };
 
-  const onUndo = () => {
+  const onUndo = async () => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    undoRef.current++;
-    const historyIndex = historyRef.current.length - undoRef.current - 1;
-    const prevState = historyRef.current[historyIndex];
-    if (prevState) {
-      ctx.putImageData(prevState, 0, 0);
-    } else {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+    const updatedHistory = await undoHistory();
+    if (!updatedHistory) return;
+    if (updatedHistory.currentIndex >= 0) {
+      const prevBlob = updatedHistory.imageDataList[updatedHistory.currentIndex];
+      if (prevBlob) {
+        await drawBlobToCanvas(ctx, prevBlob);
+        return;
+      }
     }
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
   };
 
   return {
