@@ -3,6 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { EraserIcon, HandIcon, PencilLineIcon, Undo2Icon } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef } from "react";
 import type { DrawingStyle } from "./drawing-style";
 import { LineColorPicker } from "./line-color-picker";
@@ -10,7 +12,6 @@ import { LineWidthPicker } from "./line-width-picker";
 import { SaveImageButton } from "./save-image-button";
 import { useDrawingHistory } from "./use-drawing-history";
 import { useDrawingStore } from "./use-drawing-store";
-
 export type OnDrawingStyleChange = (newDrawingStyle: Partial<DrawingStyle>) => void;
 
 export const DrawingCanvas = () => {
@@ -197,6 +198,17 @@ export const DrawingCanvas = () => {
       <div className="pointer-events-none absolute inset-x-4 top-4 flex touch-none select-none items-start justify-between">
         <div className="flex flex-col items-start justify-start gap-2 sm:flex-row">
           <div className="inline-flex flex-col items-start justify-start gap-2 *:pointer-events-auto sm:flex-row">
+            <Button
+              type="button"
+              size="default"
+              variant="ghost"
+              className="select-none aspect-square p-0"
+              asChild
+            >
+              <Link href="/">
+                <Image src="/logo-no-padding.webp" alt="logo" width={20} height={20} />
+              </Link>
+            </Button>
             <Button
               type="button"
               size="lg"
