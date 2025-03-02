@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { HandIcon, PencilLineIcon, Undo2Icon } from "lucide-react";
+import { EraserIcon, HandIcon, PencilLineIcon, Undo2Icon } from "lucide-react";
 import { useEffect, useRef } from "react";
 import type { DrawingStyle } from "./drawing-style";
 import { LineColorPicker } from "./line-color-picker";
@@ -73,6 +73,10 @@ export const DrawingCanvas = () => {
 
   const togglePenOnly = () => {
     updateDrawingStyle({ penOnly: !drawingStyle.penOnly });
+  };
+
+  const toggleEraser = () => {
+    updateDrawingStyle({ isEraser: !drawingStyle.isEraser });
   };
 
   // Initialize drawing canvas
@@ -165,12 +169,22 @@ export const DrawingCanvas = () => {
   useEffect(() => {
     const ctx = canvasRef.current?.getContext("2d");
     if (!ctx) return;
-    ctx.strokeStyle = drawingStyle.lineColor;
-    ctx.fillStyle = drawingStyle.lineColor; // Also set fillStyle for point drawing
+
+    if (drawingStyle.isEraser) {
+      // 消しゴムモードの場合は合成モードを変更
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.strokeStyle = "rgba(0,0,0,1)"; // 透明度は関係ないが、形式上設定
+    } else {
+      // 通常の描画モード
+      ctx.globalCompositeOperation = "source-over";
+      ctx.strokeStyle = drawingStyle.lineColor;
+      ctx.fillStyle = drawingStyle.lineColor; // Also set fillStyle for point drawing
+    }
+
     ctx.lineWidth = drawingStyle.lineWidth;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
-  }, [drawingStyle.lineColor, drawingStyle.lineWidth]);
+  }, [drawingStyle.lineColor, drawingStyle.lineWidth, drawingStyle.isEraser]);
 
   return (
     <div
@@ -193,6 +207,16 @@ export const DrawingCanvas = () => {
               <Undo2Icon />
               <span className="hidden sm:inline">もどす</span>
             </Button>
+            <Button
+              type="button"
+              size="lg"
+              variant={drawingStyle.isEraser ? "secondary" : "outline"}
+              onClick={toggleEraser}
+              className="select-none"
+            >
+              <EraserIcon />
+              <span className="hidden sm:inline">けしごむ</span>
+            </Button>
             <LineWidthPicker
               width={drawingStyle.lineWidth}
               color={drawingStyle.lineColor}
@@ -201,6 +225,7 @@ export const DrawingCanvas = () => {
             <LineColorPicker
               color={drawingStyle.lineColor}
               onColorChange={onDrawingStyleChange}
+              disabled={drawingStyle.isEraser}
             />
           </div>
         </div>

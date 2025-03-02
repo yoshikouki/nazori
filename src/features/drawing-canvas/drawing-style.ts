@@ -33,12 +33,14 @@ export type DrawingStyle = {
   lineWidth: number;
   lineColor: string;
   penOnly: boolean;
+  isEraser: boolean;
 };
 
 export const DefaultDrawingStyle: DrawingStyle = {
   lineWidth: LineWidthOptions.medium.value,
   lineColor: LineColorOptions.black.value,
   penOnly: false,
+  isEraser: false,
 };
 
 export const getCurrentLineColor = (color: string) => {
@@ -53,4 +55,5 @@ export type LineStyle = Omit<DrawingStyle, "penOnly">;
 export const DefaultLineStyle: LineStyle = {
   lineWidth: DefaultDrawingStyle.lineWidth,
   lineColor: DefaultDrawingStyle.lineColor,
+  isEraser: DefaultDrawingStyle.isEraser,
 };

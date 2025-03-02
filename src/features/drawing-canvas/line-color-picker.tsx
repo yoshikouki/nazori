@@ -13,18 +13,24 @@ import { LineColorOptionsArray, getCurrentLineColor } from "./drawing-style";
 type LineColorPickerProps = {
   color: string;
   onColorChange: OnDrawingStyleChange;
+  disabled?: boolean;
 };
 
-export const LineColorPicker = ({ color, onColorChange }: LineColorPickerProps) => {
+export const LineColorPicker = ({
+  color,
+  onColorChange,
+  disabled = false,
+}: LineColorPickerProps) => {
   const currentColor = getCurrentLineColor(color);
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger asChild disabled={disabled}>
         <Button
           variant={currentColor?.lightness === "dark" ? "default" : "outline"}
           size="lg"
           className="flex aspect-square gap-2 font-bold sm:aspect-auto"
           style={{ backgroundColor: color }}
+          disabled={disabled}
         >
           <span className="hidden sm:inline">{currentColor?.name}</span>
         </Button>

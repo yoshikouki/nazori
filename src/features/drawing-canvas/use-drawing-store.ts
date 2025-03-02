@@ -17,12 +17,14 @@ export const useDrawingStore = () => {
   const [drawingHistory, setDrawingHistory] = useState<DrawingHistory | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [isEraser, setIsEraser] = useState(false);
 
   const drawingStyle: DrawingStyle = drawingStyleRecord
     ? {
         lineWidth: drawingStyleRecord.lineWidth,
         lineColor: drawingStyleRecord.lineColor,
         penOnly: drawingStyleRecord.penOnly,
+        isEraser: isEraser,
       }
     : DefaultDrawingStyle;
 
@@ -63,10 +65,34 @@ export const useDrawingStore = () => {
 
   const updateDrawingStyle = async (newStyle: Partial<DrawingStyle>) => {
     if (!drawingStyleRecord) return;
+
+    if ("isEraser" in newStyle) {
+      setIsEraser(!!newStyle.isEraser);
+      const { isEraser: _, ...styleWithoutEraser } = newStyle;
+      if (Object.keys(styleWithoutEraser).length === 0) return;
+
+      const styleToUpdate = styleWithoutEraser;
+
+      try {
+        const updatedStyle = await drawingStyleOperations.update(drawingStyleRecord.id, {
+          ...drawingStyle,
+          ...styleToUpdate,
+          isEraser: drawingStyleRecord.isEraser,
+        });
+        if (updatedStyle) {
+          setDrawingStyleRecord(updatedStyle);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error("スタイルの更新に失敗しました"));
+      }
+      return;
+    }
+
     try {
       const updatedStyle = await drawingStyleOperations.update(drawingStyleRecord.id, {
         ...drawingStyle,
         ...newStyle,
+        isEraser: drawingStyleRecord.isEraser,
       });
       if (updatedStyle) {
         setDrawingStyleRecord(updatedStyle);
@@ -86,7 +112,8 @@ export const useDrawingStore = () => {
           (await profileOperations.create());
         if (profile.id !== currentProfile?.id) {
           setCurrentProfile(profile);
-          return; // Skip subsequent processing if the profile has changed
+          // Skip subsequent processing if the profile has changed
+          return;
         }
         const styleRecord =
           (await drawingStyleOperations.getByProfileId(profile.id)) ||
