@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     description,
     images: [
       {
-        url: "/favicon",
+        url: "/favicon.ico",
         alt: title,
         width: 256,
         height: 256,
