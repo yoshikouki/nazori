@@ -11,7 +11,7 @@ export interface Profile {
 export interface Drawing {
   id: string;
   profileId: string;
-  imageData: ImageData;
+  imageData: Blob;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -19,7 +19,7 @@ export interface Drawing {
 export interface DrawingHistory {
   id: string;
   profileId: string;
-  imageDataList: string[]; // Base64エンコードされた画像データの配列
+  imageDataList: Blob[]; // Blob
   currentIndex: number;
   createdAt: Date;
   updatedAt: Date;
@@ -155,7 +155,7 @@ export const profileOperations = {
 };
 
 export const drawingOperations = {
-  async create(profileId: string, imageData: ImageData): Promise<Drawing> {
+  async create(profileId: string, imageData: Blob): Promise<Drawing> {
     const db = await clientDB();
     const now = new Date();
     const drawing: Drawing = {
@@ -205,7 +205,7 @@ export const drawingHistoryOperations = {
     return histories.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
   },
 
-  async addImageData(id: string, imageData: string): Promise<DrawingHistory | undefined> {
+  async addImageData(id: string, imageData: Blob): Promise<DrawingHistory | undefined> {
     const db = await clientDB();
     const history = await db.get("drawing_histories", id);
     if (!history) return undefined;

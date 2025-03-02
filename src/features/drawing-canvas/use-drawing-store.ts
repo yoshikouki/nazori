@@ -18,6 +18,14 @@ export const useDrawingStore = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
+  const drawingStyle: DrawingStyle = drawingStyleRecord
+    ? {
+        lineWidth: drawingStyleRecord.lineWidth,
+        lineColor: drawingStyleRecord.lineColor,
+        penOnly: drawingStyleRecord.penOnly,
+      }
+    : DefaultDrawingStyle;
+
   const canUndo = drawingHistory ? drawingHistory.currentIndex > 0 : false;
   const canRedo = drawingHistory
     ? drawingHistory.currentIndex < drawingHistory.imageDataList.length - 1
@@ -49,99 +57,9 @@ export const useDrawingStore = () => {
     loadData();
   }, [currentProfile]);
 
-  const updateDrawingStyle = async (newStyle: Partial<DrawingStyle>) => {
-    try {
-      if (drawingStyleRecord) {
-        const updatedStyle = { ...drawingStyleRecord, ...newStyle };
-        const updated = await drawingStyleOperations.update(
-          drawingStyleRecord.id,
-          updatedStyle,
-        );
-        if (updated) {
-          setDrawingStyleRecord(updated);
-        }
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error("スタイルの更新に失敗しました"));
-    }
-  };
-
-  const addImageData = async (imageData: string) => {
-    if (!drawingHistory) return;
-
-    try {
-      const updated = await drawingHistoryOperations.addImageData(drawingHistory.id, imageData);
-      if (updated) {
-        setDrawingHistory(updated);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error("画像データの追加に失敗しました"));
-    }
-  };
-
-  const undo = async () => {
-    if (!drawingHistory || !canUndo) return;
-
-    try {
-      const updated = await drawingHistoryOperations.undo(drawingHistory.id);
-      if (updated) {
-        setDrawingHistory(updated);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error("元に戻す操作に失敗しました"));
-    }
-  };
-
-  const redo = async () => {
-    if (!drawingHistory || !canRedo) return;
-
-    try {
-      const updated = await drawingHistoryOperations.redo(drawingHistory.id);
-      if (updated) {
-        setDrawingHistory(updated);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error("やり直し操作に失敗しました"));
-    }
-  };
-
-  const clearDrawing = async () => {
-    if (!drawingHistory) return;
-
-    try {
-      const newHistory = await drawingHistoryOperations.create(profileId);
-      setDrawingHistory(newHistory);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error("描画のクリアに失敗しました"));
-    }
-  };
-
-  const getCurrentImageData = () => {
-    if (!drawingHistory) return null;
-
-    const { imageDataList, currentIndex } = drawingHistory;
-    if (currentIndex < 0 || imageDataList.length === 0) return null;
-
-    return imageDataList[currentIndex];
-  };
-
-  const drawingStyle: DrawingStyle = drawingStyleRecord
-    ? {
-        lineWidth: drawingStyleRecord.lineWidth,
-        lineColor: drawingStyleRecord.lineColor,
-        penOnly: drawingStyleRecord.penOnly,
-      }
-    : DefaultDrawingStyle;
-
   return {
     drawingStyle,
-    updateDrawingStyle,
     drawingHistory,
-    addImageData,
-    undo,
-    redo,
-    clearDrawing,
-    getCurrentImageData,
     canUndo,
     canRedo,
     isLoading,
