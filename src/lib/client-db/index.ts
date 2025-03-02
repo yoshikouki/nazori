@@ -31,10 +31,9 @@ export interface DrawingHistory {
   updatedAt: Date;
 }
 
-export interface DrawingStyleRecord {
+export interface DrawingStyleRecord extends DrawingStyle {
   id: string;
   profileId: string;
-  style: DrawingStyle;
   createdAt: Date;
   updatedAt: Date;
 }
