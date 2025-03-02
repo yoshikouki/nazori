@@ -7,6 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 import type { OnDrawingStyleChange } from ".";
 import { LineWidthOptionsArray, getCurrentLineWidth } from "./drawing-style";
 type LineWidthPickerProps = {
@@ -18,6 +19,7 @@ type LineWidthPickerProps = {
 export const LineWidthPicker = ({ width, color, onWidthChange }: LineWidthPickerProps) => {
   const currentWidth = getCurrentLineWidth(width);
   const calculateSize = (width: number) => width;
+  const isCurrentWidth = (width: number) => width === currentWidth?.value;
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -41,7 +43,10 @@ export const LineWidthPicker = ({ width, color, onWidthChange }: LineWidthPicker
             key={option.key}
             onClick={() => onWidthChange({ lineWidth: option.value })}
             onPointerUp={() => onWidthChange({ lineWidth: option.value })}
-            className="relative flex h-10 items-center justify-start font-bold"
+            className={cn(
+              "relative flex h-10 items-center justify-start font-bold",
+              isCurrentWidth(option.value) && "bg-secondary",
+            )}
           >
             <div
               className="absolute inset-x-0 bottom-0 w-full rounded-full"
