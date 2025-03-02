@@ -14,13 +14,13 @@ import { useEffect, useState } from "react";
 import { DefaultDrawingStyle, type DrawingStyle } from "./drawing-style";
 
 export const useDrawingStore = () => {
-  const [currentProfile, setCurrentProfile] = useState<Profile | null>(null);
-  const [drawingStyleRecord, setDrawingStyleRecord] = useState<DrawingStyleRecord | null>(null);
-  const [drawingHistory, setDrawingHistory] = useState<DrawingHistory | null>(null);
-  const [drawings, setDrawings] = useState<Drawing[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [currentProfile, setCurrentProfile] = useState<Profile | null>(null);
+  const [drawingStyleRecord, setDrawingStyleRecord] = useState<DrawingStyleRecord | null>(null);
   const [isEraser, setIsEraser] = useState(false);
+  const [drawingHistory, setDrawingHistory] = useState<DrawingHistory | null>(null);
+  const [drawings, setDrawings] = useState<Drawing[]>([]);
 
   const drawingStyle: DrawingStyle = drawingStyleRecord
     ? {
