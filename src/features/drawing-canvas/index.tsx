@@ -18,6 +18,8 @@ export const DrawingCanvas = () => {
   const historyRef = useRef<ImageData[]>([]);
   const undoRef = useRef(0);
   const [drawingStyle, setDrawingStyle] = useState<DrawingStyle>(DefaultDrawingStyle);
+  const pendingPointsRef = useRef<{ x: number; y: number }[]>([]);
+  const animationFrameRef = useRef<number | null>(null);
 
   const allowedPointerTypes = drawingStyle.penOnly ? ["pen"] : ["pen", "mouse", "touch"];
 
@@ -32,28 +34,18 @@ export const DrawingCanvas = () => {
     const pos = { x: e.offsetX, y: e.offsetY };
     lastPosRef.current = pos;
     midPointRef.current = pos;
+    pendingPointsRef.current = [pos];
     canvasRef.current.setPointerCapture(e.pointerId);
+    if (animationFrameRef.current !== null) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    animationFrameRef.current = requestAnimationFrame(drawPoints);
   };
 
   const onPointerMove = (e: PointerEvent) => {
-    const ctx = canvasRef.current?.getContext("2d");
-    if (!ctx || !isDrawingRef.current || !isAllowedPointerType(e.pointerType)) return;
-    const currentPos = { x: e.offsetX, y: e.offsetY };
-    const newMidPoint = {
-      x: (lastPosRef.current.x + currentPos.x) / 2,
-      y: (lastPosRef.current.y + currentPos.y) / 2,
-    };
-    ctx.beginPath();
-    ctx.moveTo(midPointRef.current.x, midPointRef.current.y);
-    ctx.quadraticCurveTo(
-      lastPosRef.current.x,
-      lastPosRef.current.y,
-      newMidPoint.x,
-      newMidPoint.y,
-    );
-    ctx.stroke();
-    lastPosRef.current = currentPos;
-    midPointRef.current = newMidPoint;
+    if (!isDrawingRef.current || !isAllowedPointerType(e.pointerType)) return;
+    pendingPointsRef.current.push({ x: e.offsetX, y: e.offsetY });
   };
 
   const onPointerEnd = (e: PointerEvent) => {
@@ -61,7 +53,50 @@ export const DrawingCanvas = () => {
     e.preventDefault();
     isDrawingRef.current = false;
     canvasRef.current.releasePointerCapture(e.pointerId);
+    if (pendingPointsRef.current.length > 0) {
+      drawPoints();
+    }
+    if (animationFrameRef.current !== null) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
     pushHistory();
+  };
+
+  const drawPoints = () => {
+    const ctx = canvasRef.current?.getContext("2d");
+    if (!ctx || pendingPointsRef.current.length === 0) {
+      if (animationFrameRef.current !== null && !isDrawingRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      } else if (isDrawingRef.current) {
+        animationFrameRef.current = requestAnimationFrame(drawPoints);
+      }
+      return;
+    }
+    const points = [...pendingPointsRef.current];
+    pendingPointsRef.current = [];
+
+    for (const currentPos of points) {
+      const newMidPoint = {
+        x: (lastPosRef.current.x + currentPos.x) / 2,
+        y: (lastPosRef.current.y + currentPos.y) / 2,
+      };
+      ctx.beginPath();
+      ctx.moveTo(midPointRef.current.x, midPointRef.current.y);
+      ctx.quadraticCurveTo(
+        lastPosRef.current.x,
+        lastPosRef.current.y,
+        newMidPoint.x,
+        newMidPoint.y,
+      );
+      ctx.stroke();
+      lastPosRef.current = currentPos;
+      midPointRef.current = newMidPoint;
+    }
+    if (isDrawingRef.current) {
+      animationFrameRef.current = requestAnimationFrame(drawPoints);
+    }
   };
 
   const pushHistory = () => {
@@ -117,6 +152,11 @@ export const DrawingCanvas = () => {
     const canvas = canvasRef.current;
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
+    return () => {
+      if (animationFrameRef.current === null) return;
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    };
   }, []);
 
   // Register event listeners
