@@ -210,7 +210,7 @@ export const DrawingCanvas = () => {
             <Button
               type="button"
               size="lg"
-              variant={drawingStyle.isEraser ? "secondary" : "outline"}
+              variant={drawingStyle.isEraser ? "default" : "outline"}
               onClick={toggleEraser}
               className="select-none"
             >
@@ -225,7 +225,6 @@ export const DrawingCanvas = () => {
             <LineColorPicker
               color={drawingStyle.lineColor}
               onColorChange={onDrawingStyleChange}
-              disabled={drawingStyle.isEraser}
             />
           </div>
         </div>
