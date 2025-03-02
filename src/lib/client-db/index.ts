@@ -303,7 +303,7 @@ export const drawingStyleOperations = {
     const styleRecord: DrawingStyleRecord = {
       id: generateId(),
       profileId,
-      style,
+      ...style,
       createdAt: now,
       updatedAt: now,
     };
@@ -326,7 +326,7 @@ export const drawingStyleOperations = {
 
     const updatedStyle: DrawingStyleRecord = {
       ...styleRecord,
-      style,
+      ...style,
       updatedAt: new Date(),
     };
     await db.put("drawing_styles", updatedStyle);
