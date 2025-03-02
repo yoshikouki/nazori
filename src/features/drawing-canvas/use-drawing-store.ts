@@ -6,7 +6,7 @@ import {
   drawingHistoryOperations,
   drawingStyleOperations,
 } from "@/lib/client-db";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { DefaultDrawingStyle, type DrawingStyle } from "./line-style";
 
 interface UseDrawingStoreProps {
@@ -41,15 +41,10 @@ export const useDrawingStore = ({ profileId }: UseDrawingStoreProps): UseDrawing
   const [error, setError] = useState<Error | null>(null);
 
   // 元に戻す・やり直しが可能かどうかを計算
-  const canUndo = useMemo(() => {
-    if (!drawingHistory) return false;
-    return drawingHistory.currentIndex > 0;
-  }, [drawingHistory]);
-
-  const canRedo = useMemo(() => {
-    if (!drawingHistory) return false;
-    return drawingHistory.currentIndex < drawingHistory.imageDataList.length - 1;
-  }, [drawingHistory]);
+  const canUndo = drawingHistory ? drawingHistory.currentIndex > 0 : false;
+  const canRedo = drawingHistory
+    ? drawingHistory.currentIndex < drawingHistory.imageDataList.length - 1
+    : false;
 
   // 初期データの読み込み
   useEffect(() => {
@@ -91,50 +86,41 @@ export const useDrawingStore = ({ profileId }: UseDrawingStoreProps): UseDrawing
   }, [profileId]);
 
   // 描画スタイルの更新
-  const updateDrawingStyle = useCallback(
-    async (newStyle: Partial<DrawingStyle>) => {
-      try {
-        const updatedStyle = { ...drawingStyle, ...newStyle };
-        setDrawingStyle(updatedStyle);
+  const updateDrawingStyle = async (newStyle: Partial<DrawingStyle>) => {
+    try {
+      const updatedStyle = { ...drawingStyle, ...newStyle };
+      setDrawingStyle(updatedStyle);
 
-        if (drawingStyleRecord) {
-          const updated = await drawingStyleOperations.update(
-            drawingStyleRecord.id,
-            updatedStyle,
-          );
-          if (updated) {
-            setDrawingStyleRecord(updated);
-          }
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error("スタイルの更新に失敗しました"));
-      }
-    },
-    [drawingStyle, drawingStyleRecord],
-  );
-
-  // 画像データの追加
-  const addImageData = useCallback(
-    async (imageData: string) => {
-      if (!drawingHistory) return;
-
-      try {
-        const updated = await drawingHistoryOperations.addImageData(
-          drawingHistory.id,
-          imageData,
+      if (drawingStyleRecord) {
+        const updated = await drawingStyleOperations.update(
+          drawingStyleRecord.id,
+          updatedStyle,
         );
         if (updated) {
-          setDrawingHistory(updated);
+          setDrawingStyleRecord(updated);
         }
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error("画像データの追加に失敗しました"));
       }
-    },
-    [drawingHistory],
-  );
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error("スタイルの更新に失敗しました"));
+    }
+  };
+
+  // 画像データの追加
+  const addImageData = async (imageData: string) => {
+    if (!drawingHistory) return;
+
+    try {
+      const updated = await drawingHistoryOperations.addImageData(drawingHistory.id, imageData);
+      if (updated) {
+        setDrawingHistory(updated);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error("画像データの追加に失敗しました"));
+    }
+  };
 
   // 元に戻す
-  const undo = useCallback(async () => {
+  const undo = async () => {
     if (!drawingHistory || !canUndo) return;
 
     try {
@@ -145,10 +131,10 @@ export const useDrawingStore = ({ profileId }: UseDrawingStoreProps): UseDrawing
     } catch (err) {
       setError(err instanceof Error ? err : new Error("元に戻す操作に失敗しました"));
     }
-  }, [drawingHistory, canUndo]);
+  };
 
   // やり直し
-  const redo = useCallback(async () => {
+  const redo = async () => {
     if (!drawingHistory || !canRedo) return;
 
     try {
@@ -159,10 +145,10 @@ export const useDrawingStore = ({ profileId }: UseDrawingStoreProps): UseDrawing
     } catch (err) {
       setError(err instanceof Error ? err : new Error("やり直し操作に失敗しました"));
     }
-  }, [drawingHistory, canRedo]);
+  };
 
   // 描画をクリア
-  const clearDrawing = useCallback(async () => {
+  const clearDrawing = async () => {
     if (!drawingHistory) return;
 
     try {
@@ -172,17 +158,17 @@ export const useDrawingStore = ({ profileId }: UseDrawingStoreProps): UseDrawing
     } catch (err) {
       setError(err instanceof Error ? err : new Error("描画のクリアに失敗しました"));
     }
-  }, [drawingHistory, profileId]);
+  };
 
   // 現在の画像データを取得
-  const getCurrentImageData = useCallback(() => {
+  const getCurrentImageData = () => {
     if (!drawingHistory) return null;
 
     const { imageDataList, currentIndex } = drawingHistory;
     if (currentIndex < 0 || imageDataList.length === 0) return null;
 
     return imageDataList[currentIndex];
-  }, [drawingHistory]);
+  };
 
   return {
     drawingStyle,
