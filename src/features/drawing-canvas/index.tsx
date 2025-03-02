@@ -1,17 +1,21 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { drawBlobToCanvas } from "@/lib/canvas";
+import { drawingOperations } from "@/lib/client-db";
 import { cn } from "@/lib/utils";
 import { EraserIcon, HandIcon, PencilLineIcon, PlusIcon, Undo2Icon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { DrawingStyle } from "./drawing-style";
 import { LineColorPicker } from "./line-color-picker";
 import { LineWidthPicker } from "./line-width-picker";
 import { SaveImageButton } from "./save-image-button";
 import { useDrawingHistory } from "./use-drawing-history";
 import { useDrawingStore } from "./use-drawing-store";
+
 export type OnDrawingStyleChange = (newDrawingStyle: Partial<DrawingStyle>) => void;
 
 export const DrawingCanvas = () => {
@@ -22,9 +26,13 @@ export const DrawingCanvas = () => {
   const { pushHistory, onUndo } = useDrawingHistory({
     canvasRef,
   });
-  const { drawingStyle, updateDrawingStyle, isLoading } = useDrawingStore();
+  const { drawingStyle, updateDrawingStyle, isLoading, drawingHistory } = useDrawingStore();
   const pendingPointsRef = useRef<{ x: number; y: number }[]>([]);
   const animationFrameRef = useRef<number | null>(null);
+  const [isDrawingListOpen, setIsDrawingListOpen] = useState(false);
+  const [drawings, setDrawings] = useState<
+    Array<{ id: string; imageData: Blob; createdAt: Date }>
+  >([]);
 
   const allowedPointerTypes = drawingStyle.penOnly ? ["pen"] : ["pen", "mouse", "touch"];
 
@@ -78,6 +86,48 @@ export const DrawingCanvas = () => {
 
   const toggleEraser = () => {
     updateDrawingStyle({ isEraser: !drawingStyle.isEraser });
+  };
+
+  const openDrawingList = async () => {
+    if (!drawingHistory?.profileId) return;
+
+    try {
+      const profileDrawings = await drawingOperations.getByProfileId(drawingHistory.profileId);
+      setDrawings(
+        profileDrawings.map((d) => ({
+          id: d.id,
+          imageData: d.imageData,
+          createdAt: d.createdAt,
+        })),
+      );
+      setIsDrawingListOpen(true);
+    } catch (error) {
+      console.error("Failed to load drawings:", error);
+    }
+  };
+
+  const loadDrawing = async (imageData: Blob) => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+
+    try {
+      await drawBlobToCanvas(ctx, imageData);
+      pushHistory();
+      setIsDrawingListOpen(false);
+    } catch (error) {
+      console.error("Failed to load drawing:", error);
+    }
+  };
+
+  const createNewDrawing = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pushHistory();
+    setIsDrawingListOpen(false);
   };
 
   // Initialize drawing canvas
@@ -242,7 +292,12 @@ export const DrawingCanvas = () => {
           />
         </div>
         <div className="flex items-center justify-center gap-2 *:pointer-events-auto">
-          <Button type="button" variant="outline" className="aspect-square select-none p-0">
+          <Button
+            type="button"
+            variant="outline"
+            className="aspect-square select-none p-0"
+            onClick={openDrawingList}
+          >
             <PlusIcon />
           </Button>
         </div>
@@ -259,6 +314,50 @@ export const DrawingCanvas = () => {
           </Button>
         </div>
       </div>
+
+      <Dialog open={isDrawingListOpen} onOpenChange={setIsDrawingListOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>なぞりを選ぶ</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4 py-4">
+            <button
+              type="button"
+              className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-lg border border-gray-300 border-dashed p-2 hover:bg-gray-50"
+              onClick={createNewDrawing}
+              aria-label="あたらしくつくる"
+            >
+              <PlusIcon className="h-8 w-8 text-gray-400" />
+              <span className="mt-2 text-gray-500 text-sm">あたらしくつくる</span>
+            </button>
+
+            {drawings.map((drawing) => (
+              <button
+                type="button"
+                key={drawing.id}
+                className="cursor-pointer overflow-hidden rounded-lg border text-left hover:bg-gray-50"
+                onClick={() => loadDrawing(drawing.imageData)}
+                aria-label={`Drawing from ${drawing.createdAt.toLocaleDateString()}`}
+              >
+                <div className="relative aspect-square w-full">
+                  <Image
+                    src={URL.createObjectURL(drawing.imageData)}
+                    alt={`Drawing from ${drawing.createdAt.toLocaleDateString()}`}
+                    fill
+                    style={{ objectFit: "contain" }}
+                    onLoad={(e) => {
+                      URL.revokeObjectURL((e.target as HTMLImageElement).src);
+                    }}
+                  />
+                </div>
+                <div className="p-2 text-gray-500 text-xs">
+                  {drawing.createdAt.toLocaleDateString()}
+                </div>
+              </button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

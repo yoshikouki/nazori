@@ -67,9 +67,8 @@ export const useDrawingStore = () => {
     if (!drawingStyleRecord) return;
 
     if ("isEraser" in newStyle) {
-      setIsEraser(!!newStyle.isEraser);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { isEraser: _, ...styleWithoutEraser } = newStyle;
+      const { isEraser, ...styleWithoutEraser } = newStyle;
+      setIsEraser(!!isEraser);
       if (Object.keys(styleWithoutEraser).length === 0) return;
 
       const styleToUpdate = styleWithoutEraser;
