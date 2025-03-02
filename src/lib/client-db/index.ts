@@ -1,14 +1,8 @@
 import type { DrawingStyle } from "@/features/drawing-canvas/drawing-style";
 import { type DBSchema, openDB } from "idb";
 
-export interface User {
-  id: string;
-  createdAt: Date;
-}
-
 export interface Profile {
   id: string;
-  userId: string;
   name?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -39,18 +33,10 @@ export interface DrawingStyleRecord extends DrawingStyle {
 }
 
 interface NazoriDB extends DBSchema {
-  users: {
-    key: string;
-    value: User;
-    indexes: {
-      "by-created-at": Date;
-    };
-  };
   profiles: {
     key: string;
     value: Profile;
     indexes: {
-      "by-user-id": string;
       "by-created-at": Date;
     };
   };
@@ -86,14 +72,8 @@ const DB_NAME = "nazori-db";
 export const initDB = async () => {
   return openDB<NazoriDB>(DB_NAME, DB_VERSION, {
     upgrade(db) {
-      if (!db.objectStoreNames.contains("users")) {
-        const usersStore = db.createObjectStore("users", { keyPath: "id" });
-        usersStore.createIndex("by-created-at", "createdAt");
-      }
-
       if (!db.objectStoreNames.contains("profiles")) {
         const profilesStore = db.createObjectStore("profiles", { keyPath: "id" });
-        profilesStore.createIndex("by-user-id", "userId");
         profilesStore.createIndex("by-created-at", "createdAt");
       }
 
@@ -131,35 +111,12 @@ export const generateId = (): string => {
   return crypto.randomUUID();
 };
 
-export const userOperations = {
-  async create(): Promise<User> {
-    const db = await clientDB();
-    const user: User = {
-      id: generateId(),
-      createdAt: new Date(),
-    };
-    await db.add("users", user);
-    return user;
-  },
-
-  async getById(id: string): Promise<User | undefined> {
-    const db = await clientDB();
-    return db.get("users", id);
-  },
-
-  async getAll(): Promise<User[]> {
-    const db = await clientDB();
-    return db.getAll("users");
-  },
-};
-
 export const profileOperations = {
-  async create(userId: string, name?: string): Promise<Profile> {
+  async create(name?: string): Promise<Profile> {
     const db = await clientDB();
     const now = new Date();
     const profile: Profile = {
       id: generateId(),
-      userId,
       name,
       createdAt: now,
       updatedAt: now,
@@ -171,12 +128,6 @@ export const profileOperations = {
   async getById(id: string): Promise<Profile | undefined> {
     const db = await clientDB();
     return db.get("profiles", id);
-  },
-
-  async getByUserId(userId: string): Promise<Profile[]> {
-    const db = await clientDB();
-    const index = db.transaction("profiles").store.index("by-user-id");
-    return index.getAll(userId);
   },
 
   async update(
