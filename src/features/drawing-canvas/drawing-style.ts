@@ -22,10 +22,10 @@ export const LineColorOptions = {
 export const LineColorOptionsArray = Object.values(LineColorOptions);
 
 export const LineWidthOptions = {
-  thin: { key: "thin", name: "ほそい", value: 2 },
-  medium: { key: "medium", name: "ふつう", value: 4 },
-  thick: { key: "thick", name: "ふとい", value: 6 },
-  extraThick: { key: "extraThick", name: "ごくぶと", value: 12 },
+  thin: { key: "thin", name: "ほそい", value: 4 },
+  medium: { key: "medium", name: "ふつう", value: 8 },
+  thick: { key: "thick", name: "ふとい", value: 20 },
+  extraThick: { key: "extraThick", name: "ごくぶと", value: 40 },
 } as const;
 export const LineWidthOptionsArray = Object.values(LineWidthOptions);
 

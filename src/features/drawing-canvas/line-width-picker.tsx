@@ -17,6 +17,7 @@ type LineWidthPickerProps = {
 
 export const LineWidthPicker = ({ width, color, onWidthChange }: LineWidthPickerProps) => {
   const currentWidth = getCurrentLineWidth(width);
+  const calculateSize = (width: number) => width;
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -25,8 +26,8 @@ export const LineWidthPicker = ({ width, color, onWidthChange }: LineWidthPicker
             <div
               className="absolute rounded-full"
               style={{
-                width: `${Math.min(16, width * 2)}px`,
-                height: `${Math.min(16, width * 2)}px`,
+                width: `${calculateSize(width)}px`,
+                height: `${calculateSize(width)}px`,
                 backgroundColor: color,
               }}
             />
@@ -34,24 +35,22 @@ export const LineWidthPicker = ({ width, color, onWidthChange }: LineWidthPicker
           <span className="hidden sm:inline">{currentWidth?.name}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
+      <DropdownMenuContent className="flex flex-col gap-1">
         {LineWidthOptionsArray.map((option) => (
           <DropdownMenuItem
             key={option.key}
             onClick={() => onWidthChange({ lineWidth: option.value })}
             onPointerUp={() => onWidthChange({ lineWidth: option.value })}
-            className="flex gap-2"
+            className="relative flex h-10 items-center justify-start font-bold"
           >
-            <div className="flex w-4 items-center justify-center">
-              <div
-                className="rounded-full bg-current"
-                style={{
-                  width: `${Math.min(16, option.value * 2)}px`,
-                  height: `${Math.min(16, option.value * 2)}px`,
-                }}
-              />
-            </div>
-            {option.name}
+            <div
+              className="absolute inset-x-0 bottom-0 w-full rounded-full"
+              style={{
+                height: `${calculateSize(option.value)}px`,
+                backgroundColor: color,
+              }}
+            />
+            <span className="z-1">{option.name}</span>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
