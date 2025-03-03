@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { drawBlobToCanvas } from "@/lib/canvas";
+import type { Drawing } from "@/lib/client-db";
 import { cn } from "@/lib/utils";
 import { EraserIcon, HandIcon, PencilLineIcon, PlusIcon, Undo2Icon } from "lucide-react";
 import Image from "next/image";
@@ -25,8 +26,14 @@ export const DrawingCanvas = () => {
   const { pushHistory, onUndo } = useDrawingHistory({
     canvasRef,
   });
-  const { drawingStyle, updateDrawingStyle, isLoading, drawings, createDrawing } =
-    useDrawingStore();
+  const {
+    drawingStyle,
+    updateDrawingStyle,
+    isLoading,
+    drawings,
+    createDrawing,
+    selectDrawing,
+  } = useDrawingStore();
   const pendingPointsRef = useRef<{ x: number; y: number }[]>([]);
   const animationFrameRef = useRef<number | null>(null);
   const [isDrawingListOpen, setIsDrawingListOpen] = useState(false);
@@ -89,13 +96,14 @@ export const DrawingCanvas = () => {
     setIsDrawingListOpen(true);
   };
 
-  const onChangeDrawing = async (image: Blob) => {
+  const onChangeDrawing = async (drawing: Drawing) => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
 
     try {
-      await drawBlobToCanvas(ctx, image);
+      await drawBlobToCanvas(ctx, drawing.image);
+      selectDrawing(drawing.id);
       pushHistory();
       setIsDrawingListOpen(false);
     } catch (error) {
@@ -323,7 +331,7 @@ export const DrawingCanvas = () => {
                 type="button"
                 key={drawing.id}
                 className="cursor-pointer overflow-hidden rounded-lg border text-left hover:bg-gray-50"
-                onClick={() => onChangeDrawing(drawing.image)}
+                onClick={() => onChangeDrawing(drawing)}
                 aria-label={`Drawing from ${drawing.createdAt.toLocaleDateString()}`}
               >
                 <div className="relative aspect-square w-full">

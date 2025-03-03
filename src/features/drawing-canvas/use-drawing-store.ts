@@ -21,6 +21,7 @@ export const useDrawingStore = () => {
   const [isEraser, setIsEraser] = useState(false);
   const [drawingHistory, setDrawingHistory] = useState<DrawingHistory | null>(null);
   const [drawings, setDrawings] = useState<Drawing[]>([]);
+  const [currentDrawingId, setCurrentDrawingId] = useState<string | null>(null);
 
   const drawingStyle: DrawingStyle = drawingStyleRecord
     ? {
@@ -107,9 +108,42 @@ export const useDrawingStore = () => {
     try {
       const drawing = await drawingOperations.create(currentProfile.id);
       setDrawings([drawing, ...drawings]);
+      setCurrentDrawingId(drawing.id);
+      return drawing;
     } catch (err) {
       setError(err instanceof Error ? err : new Error("描画の作成に失敗しました"));
     }
+  };
+
+  const updateCurrentDrawing = async (image: Blob): Promise<Drawing | undefined> => {
+    if (!currentProfile || !currentDrawingId) {
+      setError(
+        new Error("描画の更新に失敗しました: プロファイルまたは描画が選択されていません"),
+      );
+      return;
+    }
+
+    try {
+      // 描画を保存
+      const updatedDrawing = await drawingOperations.updateImage(currentDrawingId, image);
+      if (!updatedDrawing) {
+        setError(new Error("描画の更新に失敗しました"));
+        return;
+      }
+      setDrawings(drawings.map((d) => (d.id === currentDrawingId ? updatedDrawing : d)));
+
+      // 履歴に追加
+      await addToHistory(image);
+
+      return updatedDrawing;
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error("描画の更新に失敗しました"));
+      return;
+    }
+  };
+
+  const selectDrawing = (id: string) => {
+    setCurrentDrawingId(id);
   };
 
   useEffect(() => {
@@ -154,5 +188,8 @@ export const useDrawingStore = () => {
     updateDrawingStyle,
     drawings,
     createDrawing,
+    updateCurrentDrawing,
+    currentDrawingId,
+    selectDrawing,
   };
 };

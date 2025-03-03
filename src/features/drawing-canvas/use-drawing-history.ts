@@ -1,7 +1,7 @@
 "use client";
 
-import { canvasToBlob, drawBlobToCanvas } from "@/lib/canvas";
 import type { RefObject } from "react";
+import { useRef } from "react";
 import { useDrawingStore } from "./use-drawing-store";
 
 interface UseDrawingHistoryProps {
@@ -9,38 +9,38 @@ interface UseDrawingHistoryProps {
 }
 
 export const useDrawingHistory = ({ canvasRef }: UseDrawingHistoryProps) => {
-  const { addToHistory, undoHistory } = useDrawingStore();
+  const { updateCurrentDrawing } = useDrawingStore();
+  const historyRef = useRef<ImageData[]>([]);
 
   const pushHistory = async () => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
-    const blob = await canvasToBlob(canvas);
-    if (!blob) {
-      console.error("Failed to convert canvas to blob");
-      return;
-    }
-    await addToHistory(blob);
+
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    historyRef.current.push(imageData);
+
+    // 描画内容を保存
+    canvas.toBlob(async (blob) => {
+      if (!blob) return;
+      const result = await updateCurrentDrawing(blob);
+      if (!result) {
+        // 保存に失敗した場合は履歴からも削除
+        historyRef.current.pop();
+      }
+    });
   };
 
-  const onUndo = async () => {
+  const onUndo = () => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
-    const updatedHistory = await undoHistory();
-    if (!updatedHistory) return;
-    if (updatedHistory.currentIndex >= 0) {
-      const prevBlob = updatedHistory.imageList[updatedHistory.currentIndex];
-      if (prevBlob) {
-        await drawBlobToCanvas(ctx, prevBlob);
-        return;
-      }
-    }
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const lastImageData = historyRef.current.pop();
+    if (!lastImageData) return;
+
+    ctx.putImageData(lastImageData, 0, 0);
   };
 
-  return {
-    pushHistory,
-    onUndo,
-  };
+  return { pushHistory, onUndo };
 };
