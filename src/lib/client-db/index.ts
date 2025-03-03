@@ -112,6 +112,9 @@ export const generateId = (): string => {
   return ulid();
 };
 
+/**
+ * @deprecated リポジトリパターンを使用してください。代わりに `import { profileRepository } from "@/lib/client-db/repositories"` を使用してください。
+ */
 export const profileOperations = {
   async getFirst(): Promise<Profile | undefined> {
     const db = await clientDB();
@@ -155,6 +158,9 @@ export const profileOperations = {
   },
 };
 
+/**
+ * @deprecated リポジトリパターンを使用してください。代わりに `import { drawingRepository } from "@/lib/client-db/repositories"` を使用してください。
+ */
 export const drawingOperations = {
   async getById(id: string): Promise<Drawing | undefined> {
     const db = await clientDB();
@@ -195,6 +201,9 @@ export const drawingOperations = {
   },
 };
 
+/**
+ * @deprecated リポジトリパターンを使用してください。代わりに `import { drawingHistoryRepository } from "@/lib/client-db/repositories"` を使用してください。
+ */
 export const drawingHistoryOperations = {
   async create(profileId: string): Promise<DrawingHistory> {
     const db = await clientDB();
@@ -267,6 +276,9 @@ export const drawingHistoryOperations = {
   },
 };
 
+/**
+ * @deprecated リポジトリパターンを使用してください。代わりに `import { drawingStyleRepository } from "@/lib/client-db/repositories"` を使用してください。
+ */
 export const drawingStyleOperations = {
   async getFirst(): Promise<DrawingStyleRecord | undefined> {
     const db = await clientDB();

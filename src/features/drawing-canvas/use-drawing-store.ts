@@ -1,18 +1,19 @@
 "use client";
 
+import type { Drawing, DrawingHistory, DrawingStyleRecord, Profile } from "@/lib/client-db";
 import {
-  type Drawing,
-  type DrawingHistory,
-  type DrawingStyleRecord,
-  type Profile,
-  drawingHistoryOperations,
-  drawingOperations,
-  drawingStyleOperations,
-  profileOperations,
-} from "@/lib/client-db";
+  drawingHistoryRepository,
+  drawingRepository,
+  drawingStyleRepository,
+  profileRepository,
+} from "@/lib/client-db/repositories";
 import { useEffect, useState } from "react";
 import { DefaultDrawingStyle, type DrawingStyle } from "./drawing-style";
 
+/**
+ * 描画データストアを管理するカスタムフック
+ * データの永続化と状態管理を担当します
+ */
 export const useDrawingStore = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -23,6 +24,7 @@ export const useDrawingStore = () => {
   const [drawings, setDrawings] = useState<Drawing[]>([]);
   const [currentDrawingId, setCurrentDrawingId] = useState<string | null>(null);
 
+  // 現在の描画スタイル
   const drawingStyle: DrawingStyle = drawingStyleRecord
     ? {
         lineWidth: drawingStyleRecord.lineWidth,
@@ -32,89 +34,70 @@ export const useDrawingStore = () => {
       }
     : DefaultDrawingStyle;
 
-  const addToHistory = async (image: Blob): Promise<DrawingHistory | undefined> => {
-    if (!drawingHistory || !currentProfile) return undefined;
-    try {
-      const updatedHistory = await drawingHistoryOperations.addImage(drawingHistory.id, image);
-      if (!updatedHistory) {
-        setError(new Error("履歴の追加に失敗しました"));
-        return undefined;
-      }
-      setDrawingHistory(updatedHistory);
-      return updatedHistory;
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error("履歴の追加に失敗しました"));
-      return undefined;
-    }
-  };
-
-  const undoHistory = async (): Promise<DrawingHistory | undefined> => {
-    if (!drawingHistory || !currentProfile) return undefined;
-    try {
-      const updatedHistory = await drawingHistoryOperations.undo(drawingHistory.id);
-      if (!updatedHistory) {
-        setError(new Error("元に戻す操作に失敗しました"));
-        return undefined;
-      }
-      setDrawingHistory(updatedHistory);
-      return updatedHistory;
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error("元に戻す操作に失敗しました"));
-      return undefined;
-    }
-  };
-
+  /**
+   * 描画スタイルを更新する
+   */
   const updateDrawingStyle = async (newStyle: Partial<DrawingStyle>) => {
     if (!drawingStyleRecord) return;
 
-    if ("isEraser" in newStyle) {
-      const { isEraser, ...styleWithoutEraser } = newStyle;
-      setIsEraser(!!isEraser);
-      if (Object.keys(styleWithoutEraser).length === 0) return;
+    try {
+      // 消しゴムモードの更新は特別扱い（DBには保存しない）
+      if ("isEraser" in newStyle) {
+        const { isEraser, ...styleWithoutEraser } = newStyle;
+        setIsEraser(!!isEraser);
 
-      const styleToUpdate = styleWithoutEraser;
+        // 消しゴムモード以外の更新がなければ終了
+        if (Object.keys(styleWithoutEraser).length === 0) return;
 
-      try {
-        const updatedStyle = await drawingStyleOperations.update(drawingStyleRecord.id, {
+        // 消しゴムモード以外の更新があれば、DBに保存
+        const updatedStyle = await drawingStyleRepository.update(drawingStyleRecord.id, {
           ...drawingStyle,
-          ...styleToUpdate,
+          ...styleWithoutEraser,
           isEraser: drawingStyleRecord.isEraser,
         });
+
         if (updatedStyle) {
           setDrawingStyleRecord(updatedStyle);
         }
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error("スタイルの更新に失敗しました"));
+        return;
       }
-      return;
-    }
 
-    try {
-      const updatedStyle = await drawingStyleOperations.update(drawingStyleRecord.id, {
+      // 通常のスタイル更新
+      const updatedStyle = await drawingStyleRepository.update(drawingStyleRecord.id, {
         ...drawingStyle,
         ...newStyle,
         isEraser: drawingStyleRecord.isEraser,
       });
+
       if (updatedStyle) {
         setDrawingStyleRecord(updatedStyle);
       }
     } catch (err) {
+      console.error("スタイルの更新に失敗しました", err);
       setError(err instanceof Error ? err : new Error("スタイルの更新に失敗しました"));
     }
   };
 
+  /**
+   * 新しい描画を作成する
+   */
   const createDrawing = async () => {
     if (!currentProfile) return;
+
     try {
-      const drawing = await drawingOperations.create(currentProfile.id);
+      const drawing = await drawingRepository.create(currentProfile.id);
       setDrawings([drawing, ...drawings]);
       setCurrentDrawingId(drawing.id);
       return drawing;
     } catch (err) {
+      console.error("描画の作成に失敗しました", err);
       setError(err instanceof Error ? err : new Error("描画の作成に失敗しました"));
     }
   };
 
+  /**
+   * 現在の描画を更新する
+   */
   const updateCurrentDrawing = async (image: Blob): Promise<Drawing | undefined> => {
     if (!currentProfile || !currentDrawingId) {
       setError(
@@ -125,56 +108,71 @@ export const useDrawingStore = () => {
 
     try {
       // 描画を保存
-      const updatedDrawing = await drawingOperations.updateImage(currentDrawingId, image);
+      const updatedDrawing = await drawingRepository.updateImage(currentDrawingId, image);
       if (!updatedDrawing) {
-        setError(new Error("描画の更新に失敗しました"));
-        return;
+        throw new Error("描画の更新に失敗しました");
       }
+
+      // 描画リストを更新
       setDrawings(drawings.map((d) => (d.id === currentDrawingId ? updatedDrawing : d)));
-
-      // 履歴に追加
-      await addToHistory(image);
-
       return updatedDrawing;
     } catch (err) {
+      console.error("描画の更新に失敗しました", err);
       setError(err instanceof Error ? err : new Error("描画の更新に失敗しました"));
       return;
     }
   };
 
+  /**
+   * 描画を選択する
+   */
   const selectDrawing = (id: string) => {
     setCurrentDrawingId(id);
   };
 
+  /**
+   * データを読み込む
+   */
   useEffect(() => {
     const loadData = async () => {
       try {
         setIsLoading(true);
+
+        // プロファイルの取得または作成
         const profile =
           currentProfile ??
-          (await profileOperations.getFirst()) ??
-          (await profileOperations.create());
+          (await profileRepository.getFirst()) ??
+          (await profileRepository.create());
+
         if (profile.id !== currentProfile?.id) {
           setCurrentProfile(profile);
-          // Skip subsequent processing if the profile has changed
+          // プロファイルが変更された場合は、後続の処理をスキップ
           return;
         }
+
+        // 描画スタイルの取得または作成
         const styleRecord =
-          (await drawingStyleOperations.getByProfileId(profile.id)) ||
-          (await drawingStyleOperations.create(profile.id, DefaultDrawingStyle));
+          (await drawingStyleRepository.getByProfileId(profile.id)) ||
+          (await drawingStyleRepository.create(profile.id, DefaultDrawingStyle));
         setDrawingStyleRecord(styleRecord);
+
+        // 描画履歴の取得または作成
         const history =
-          (await drawingHistoryOperations.getByProfileId(profile.id)) ||
-          (await drawingHistoryOperations.create(profile.id));
+          (await drawingHistoryRepository.getByProfileId(profile.id)) ||
+          (await drawingHistoryRepository.create(profile.id));
         setDrawingHistory(history);
-        const drawings = await drawingOperations.getByProfileId(profile.id);
+
+        // 描画リストの取得
+        const drawings = await drawingRepository.getByProfileId(profile.id);
         setDrawings(drawings);
       } catch (err) {
+        console.error("データの読み込みに失敗しました", err);
         setError(err instanceof Error ? err : new Error("データの読み込みに失敗しました"));
       } finally {
         setIsLoading(false);
       }
     };
+
     loadData();
   }, [currentProfile]);
 
@@ -183,8 +181,6 @@ export const useDrawingStore = () => {
     drawingHistory,
     isLoading,
     error,
-    addToHistory,
-    undoHistory,
     updateDrawingStyle,
     drawings,
     createDrawing,
