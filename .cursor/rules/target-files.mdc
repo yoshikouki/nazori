@@ -1,5 +1,5 @@
 ---
-description: 
+description: プロジェクト内の特定のファイルタイプやディレクトリに対して、どのルールを適用するかを定義します。
 globs: *
 alwaysApply: false
 ---
@@ -14,8 +14,8 @@ alwaysApply: false
 ```
 
 ```reference
-@file .cursor/rules/typescript.md
-@file .cursor/rules/general.md
+@file .cursor/rules/typescript.mdc
+@file .cursor/rules/coding.mdc
 ```
 
 ## Reactコンポーネントファイル
@@ -25,9 +25,9 @@ alwaysApply: false
 ```
 
 ```reference
-@file .cursor/rules/next-react.md
-@file .cursor/rules/typescript.md
-@file .cursor/rules/general.md
+@file .cursor/rules/react.mdc
+@file .cursor/rules/typescript.mdc
+@file .cursor/rules/coding.mdc
 ```
 
 ## 描画キャンバス関連ファイル
@@ -37,7 +37,7 @@ src/features/drawing-canvas/**/*
 ```
 
 ```reference
-@file .cursor/rules/drawing-canvas.md
+@file .cursor/rules/canvas.mdc
 ```
 
 ## ドキュメントファイル
@@ -47,17 +47,18 @@ src/features/drawing-canvas/**/*
 ```
 
 ```reference
-@file .cursor/rules/japanese.md
+@file .cursor/rules/japanese.mdc
 ```
 
 ## Next.js設定ファイル
 
 ```glob
-next.config.ts
+next.config.js
+next.config.mjs
 ```
 
 ```reference
-@file .cursor/rules/next-react.md
+@file .cursor/rules/react.mdc
 ```
 
 ## スタイリングファイル
@@ -68,7 +69,7 @@ src/app/globals.css
 ```
 
 ```reference
-@file .cursor/rules/general.md
+@file .cursor/rules/coding.mdc
 ```
 
 ## 画像ファイル
@@ -84,7 +85,7 @@ public/**/*.{png,jpg,svg,ico}
 ```
 
 ```reference
-@file .cursor/rules/typescript.md
+@file .cursor/rules/typescript.mdc
 ```
 
 ## 設定ファイル
@@ -97,5 +98,5 @@ tsconfig.json
 ```
 
 ```reference
-@file .cursor/rules/general.md
+@file .cursor/rules/coding.mdc
 ``` 

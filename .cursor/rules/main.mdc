@@ -1,18 +1,18 @@
 ---
-description: このルールは、なぞりプロジェクト全体に適用されるCursor AIの動作を定義します。
+description: なぞりプロジェクト全体に適用されるCursor AIの動作を定義します。
 globs: *
-alwaysApply: false
+alwaysApply: true
 ---
-# メインルール
+# なぞりプロジェクト - メインルール
 
 ## 参照ルール
 
 ```reference
-@file .cursor/rules/general.md
-@file .cursor/rules/drawing-canvas.md
-@file .cursor/rules/typescript.md
-@file .cursor/rules/next-react.md
-@file .cursor/rules/japanese.md
+@file .cursor/rules/coding.mdc
+@file .cursor/rules/typescript.mdc
+@file .cursor/rules/react.mdc
+@file .cursor/rules/japanese.mdc
+@file .cursor/rules/canvas.mdc
 ```
 
 ## プロジェクト概要
@@ -21,11 +21,10 @@ alwaysApply: false
 
 ### 対象ユーザー
 
-- 3〜12 歳の子供
-  - ボリュームゾーンは 4 歳とする
+- 3〜12 歳の子供（ボリュームゾーンは 4 歳）
 - 利用端末はタッチデバイス
 - ユーザーはなぞりを通して、書くことと描くことを楽しむ
-  - 楽しみながら続け、続けることで上達した達成感を得る
+- 楽しみながら続け、続けることで上達した達成感を得る
 - 上達したらなぞりではなく、白紙に書くことを楽しむ
 
 ## 開発スタイル
@@ -37,6 +36,7 @@ alwaysApply: false
 
 ## AIの応答スタイル
 
+- モジュールを追加するとき、 packages.json にすでに install されていないか確認する
 - 簡潔で明確な日本語での応答
 - コード例を提示する際は具体的で実行可能なものを優先
 - ベストプラクティスに基づく提案
@@ -63,7 +63,7 @@ alwaysApply: false
 
 ## コーディング時の注意点
 
-- 理由がない限り SOLID の原則を守る
+- SOLID の原則を厳守する
 - コード中の自明なコメントは避ける。コメントは必ず英語で書く
 - モジュールを追加するとき、 packages.json にすでに install されていないか確認する
 - プロジェクト内の既存のコードスタイルに合わせる
@@ -84,6 +84,3 @@ alwaysApply: false
 - Next.jsの最新機能（App Router, Server Components）を活用
 - Reactパターンとアンチパターンを理解した提案
   - React Compiler を使用しているため useCallback や useMemo などのキャッシュ戦略は不要
-- TypeScriptの型安全性を最大限に活用
-- アクセシビリティ（WCAG）ガイドラインに準拠
-- パフォーマンス最適化テクニック（メモ化、遅延読み込みなど）を適用

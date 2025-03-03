@@ -1,0 +1,136 @@
+---
+description: プロジェクトの中核機能である描画キャンバスに関連するファイルに適用される規約を定義します。
+globs: src/features/drawing-canvas/**/*.{ts,tsx}
+alwaysApply: false
+---
+# 描画キャンバス規約
+
+## 基本原則
+
+- SOLID原則に従ったコード設計
+- 純粋関数を優先
+- 不変データ構造を使用
+- 副作用を分離
+- 型安全性を確保
+
+## Canvas API の実装
+
+- HTML5 Canvas APIの適切な使用方法に従う
+- `getContext("2d")`を使用して描画コンテキストを取得する
+- パフォーマンスを考慮し、不必要なキャンバスの再描画を避ける
+- キャンバスのリサイズ処理では画像データの退行を防ぐ
+
+```typescript
+// キャンバスコンテキストの取得と設定
+const ctx = canvasRef.current?.getContext("2d");
+if (ctx) {
+  // 線のスタイル設定
+  ctx.strokeStyle = drawingStyle.color;
+  ctx.lineWidth = drawingStyle.lineWidth;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  
+  // 描画処理
+  ctx.beginPath();
+  ctx.moveTo(lastPos.x, lastPos.y);
+  ctx.quadraticCurveTo(
+    midPoint.x, 
+    midPoint.y, 
+    currentPos.x, 
+    currentPos.y
+  );
+  ctx.stroke();
+}
+```
+
+## ポインターイベント処理
+
+- マウス、タッチ、ペン入力を統一的に処理するためにPointer Eventsを使用する
+- イベントリスナーの登録/削除は`useEffect`内で適切に行う
+- `e.preventDefault()`を適切に使用して、ブラウザのデフォルト動作を防止する
+- `e.pointerType`を確認して、入力デバイスの種類に応じた処理を行う
+
+## 描画スタイリング
+
+- 線のスタイル（色、太さなど）は一元管理し、適切な型定義を行う
+- ユーザーに提供する線の色や太さの選択肢は、使いやすさと見やすさを考慮する
+- 色の名前は日本語で、わかりやすく簡潔な表現を使用する
+
+```typescript
+// 描画スタイルの型定義
+interface DrawingStyle {
+  color: string;
+  lineWidth: number;
+  opacity: number;
+  penOnly: boolean;
+  isEraser: boolean;
+}
+
+// 色の定義
+const COLORS = [
+  { id: 'black', name: 'くろ', value: '#000000' },
+  { id: 'red', name: 'あか', value: '#FF0000' },
+  { id: 'blue', name: 'あお', value: '#0000FF' },
+  { id: 'green', name: 'みどり', value: '#00FF00' },
+  { id: 'yellow', name: 'きいろ', value: '#FFFF00' },
+];
+
+// 線の太さの定義
+const LINE_WIDTHS = [
+  { id: 'thin', name: 'ほそい', value: 2 },
+  { id: 'medium', name: 'ふつう', value: 5 },
+  { id: 'thick', name: 'ふとい', value: 10 },
+];
+```
+
+## パフォーマンス最適化
+
+- `requestAnimationFrame`を使用して描画処理を最適化する
+- 描画ポイントをバッファリングして一括処理する
+- 不要なレンダリングを避けるために`useRef`を活用する
+- キャンバスサイズの変更時は効率的に処理する
+
+```typescript
+// requestAnimationFrameを使用した描画最適化
+const drawPoints = () => {
+  const ctx = canvasRef.current?.getContext("2d");
+  if (!ctx || pendingPointsRef.current.length === 0) {
+    if (animationFrameRef.current !== null && !isDrawingRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    } else if (isDrawingRef.current) {
+      animationFrameRef.current = requestAnimationFrame(drawPoints);
+    }
+    return;
+  }
+  
+  // バッファリングされたポイントを処理
+  const points = [...pendingPointsRef.current];
+  pendingPointsRef.current = [];
+  
+  // 描画処理
+  // ...
+  
+  // 次のフレームをリクエスト
+  animationFrameRef.current = requestAnimationFrame(drawPoints);
+};
+
+// ポインター移動時のポイント追加
+const onPointerMove = (e: PointerEvent) => {
+  if (!isDrawingRef.current) return;
+  
+  const rect = canvasRef.current?.getBoundingClientRect();
+  if (!rect) return;
+  
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  
+  // ポイントをバッファに追加
+  pendingPointsRef.current.push({ x, y });
+  
+  // 描画処理が開始されていなければ開始
+  if (animationFrameRef.current === null) {
+    animationFrameRef.current = requestAnimationFrame(drawPoints);
+  }
+};
+```

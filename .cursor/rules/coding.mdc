@@ -1,0 +1,55 @@
+---
+description: プロジェクト全体のコーディング規約と基本原則を定義します。
+globs: *
+alwaysApply: true
+---
+# コーディング規約
+
+## 基本原則
+
+- SOLID原則に従ったコード設計
+- 純粋関数を優先
+- 不変データ構造を使用
+- 副作用を分離
+- 型安全性を確保
+
+## コードスタイル
+
+- 命名はコードの質を示す。ドメインや体験の知識を命名に反映する
+- テスト可能性、副作用の注入可能性を考える
+- 不要な再レンダリングを防止するためにuseRefを適切に活用
+
+## 命名規則
+
+- コンポーネント名: パスカルケース（例：`DrawingCanvas`）
+- 変数名・関数名: キャメルケース（例：`getContext`）
+- 定数: 大文字のスネークケース（例：`DEFAULT_COLOR`）
+- 型定義名: パスカルケース（例：`LineStyle`）
+- ファイル名: ケバブケース（例: `drawing-canvas.tsx`）
+- カスタムフック: `use`プレフィックス（例：`useDrawingStore`）
+- コンポーネントのコールバック: `on`プレフィックス（例：`onPointerDown`）
+
+## コメント
+
+- 自明なコメントは避け、「なぜ」そのコードが必要かを説明
+- コメントは英語で記述
+- 複雑なロジックには適切な説明を追加
+- 例:
+  ```typescript
+  // Good: Explains why
+  // Using requestAnimationFrame for smooth drawing and better performance
+  animationFrameRef.current = requestAnimationFrame(drawPoints);
+  
+  // Bad: States the obvious
+  // DB name and version
+  static readonly DB_NAME = "nazoriDB";
+  ```
+
+## ファイル構成
+
+- 体験・機能単位でのディレクトリ構成 (`src/features/`)
+- `src/` 直下の多くの機能で共有される場合に配置する (`src/components`, `src/lib`)
+- 関連するファイルは同じディレクトリに配置 (コロケーションパターン)
+- テストファイルも同じ階層に配置する
+- テストファイルは対象ファイルと同じディレクトリに配置（`*.test.ts`）
+- 循環依存を避ける設計

@@ -1,0 +1,224 @@
+---
+description: Next.jsとReactの使用に関する規約とベストプラクティスを定義します。
+globs: **/*.{tsx,jsx}
+alwaysApply: false
+---
+# Next.js/React規約
+
+## コンポーネント設計
+
+- コンポーネントは SOLID の原則に従って設計する
+- コンポーネントの分離は基本的に処理単位の責務で分け、見た目のための分離は基本的に避ける
+- コンポーネントの`props`は明示的に型定義する
+- イベントリスナー、イベントハンドリングの関数は宣言型 `on*` で命名し、命令型 `handle*` 使用しない
+- React Compiler を使用しているため useCallback や useMemo などのキャッシュ戦略は不要
+
+```tsx
+// 良い例: 単一責任の原則に従ったコンポーネント
+const ColorPicker = ({ colors, selectedColor, onColorSelect }: ColorPickerProps) => {
+  return (
+    <div className="color-picker">
+      {colors.map((color) => (
+        <ColorButton
+          key={color}
+          color={color}
+          isSelected={color === selectedColor}
+          onClick={() => onColorSelect(color)}
+        />
+      ))}
+    </div>
+  );
+};
+
+// 悪い例: 複数の責任を持つコンポーネント
+const DrawingTools = () => {
+  const [selectedColor, setSelectedColor] = useState('black');
+  const [lineWidth, setLineWidth] = useState(2);
+  // 色選択UIと線幅選択UIが混在している
+  return (
+    <div>
+      <div className="colors">
+        {['black', 'red', 'blue'].map((color) => (
+          <button
+            key={color}
+            style={{ backgroundColor: color }}
+            onClick={() => setSelectedColor(color)}
+          />
+        ))}
+      </div>
+      <div className="line-width">
+        {[1, 2, 5].map((width) => (
+          <button
+            key={width}
+            onClick={() => setLineWidth(width)}
+          >
+            {width}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+```
+
+## Next.js固有のルール
+
+- クライアントコンポーネントには必ず`"use client"`ディレクティブを付ける
+- サーバーコンポーネントとクライアントコンポーネントを適切に分離する
+- 過剰に複雑にならない限りサーバーコンポーネントを優先し、クライアントコンポーネントはクライアントの機能を使用する場合に採用する
+
+```tsx
+// クライアントコンポーネントの例
+"use client";
+
+import { useState } from 'react';
+
+export const Counter = () => {
+  const [count, setCount] = useState(0);
+  
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+    </div>
+  );
+};
+
+// サーバーコンポーネントの例
+import { getDrawings } from '@/lib/drawings';
+import { DrawingCard } from '@/components/drawing-card';
+
+export default async function DrawingGallery() {
+  const drawings = await getDrawings();
+  
+  return (
+    <div className="gallery">
+      {drawings.map((drawing) => (
+        <DrawingCard key={drawing.id} drawing={drawing} />
+      ))}
+    </div>
+  );
+}
+```
+
+## Reactフック
+
+- React Compiler を使用しているため useCallback や useMemo などのキャッシュ戦略は不要
+- サイドエフェクトは`useEffect`内で処理し、依存配列を適切に設定する
+- カスタムフックは`use`プレフィックスで命名する
+- 複雑なステート管理ではReducerパターンを使用も視野に入れる
+
+```tsx
+// カスタムフックの例
+function useDrawingHistory({ canvasRef }: { canvasRef: React.RefObject<HTMLCanvasElement> }) {
+  const [history, setHistory] = useState<string[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(-1);
+
+  const pushHistory = useCallback(() => {
+    if (!canvasRef.current) return;
+    
+    const dataUrl = canvasRef.current.toDataURL();
+    setHistory(prev => [...prev.slice(0, currentIndex + 1), dataUrl]);
+    setCurrentIndex(prev => prev + 1);
+  }, [canvasRef, currentIndex]);
+
+  const onUndo = useCallback(() => {
+    if (currentIndex <= 0) return;
+    
+    setCurrentIndex(prev => prev - 1);
+    // 履歴から画像を復元する処理
+  }, [currentIndex]);
+
+  return { pushHistory, onUndo };
+}
+```
+
+## パフォーマンス最適化
+
+- 不要な再レンダリングを避けるためにステート設計を最適化する
+- 非同期処理の結果を表示する際は `use` と `<Suspense>` を用いたローディング状態を提供する
+
+```tsx
+// 良い例: Server ComponentとSuspenseを使用した実装
+// DrawingList.tsx (Server Component)
+import { Suspense } from 'react';
+import { getDrawings } from '@/lib/drawings';
+import { DrawingItem } from './DrawingItem';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+
+// 描画一覧を取得するコンポーネント
+async function DrawingListContent() {
+  // Server Componentで直接非同期データを取得
+  const drawings = await getDrawings();
+  
+  return (
+    <ul className="drawing-list">
+      {drawings.map(drawing => (
+        <DrawingItem key={drawing.id} drawing={drawing} />
+      ))}
+    </ul>
+  );
+}
+
+// 親コンポーネント
+export default function DrawingList() {
+  return (
+    <ErrorBoundary fallback={<p>描画の読み込み中にエラーが発生しました</p>}>
+      <Suspense fallback={<LoadingSpinner />}>
+        <DrawingListContent />
+      </Suspense>
+    </ErrorBoundary>
+  );
+}
+
+// クライアントコンポーネントでの実装例（use hookを使用）
+"use client";
+
+import { use } from 'react';
+import { DrawingItem } from './DrawingItem';
+
+// データ取得用のPromiseを作成
+const drawingsPromise = fetch('/api/drawings').then(res => res.json());
+
+export function ClientDrawingList() {
+  // useフックでPromiseの結果を直接使用
+  const drawings = use(drawingsPromise);
+  
+  return (
+    <ul className="drawing-list">
+      {drawings.map(drawing => (
+        <DrawingItem key={drawing.id} drawing={drawing} />
+      ))}
+    </ul>
+  );
+}
+
+// 使用例
+// page.tsx
+import { Suspense } from 'react';
+import { DrawingList } from './DrawingList';
+import { ClientDrawingList } from './ClientDrawingList';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+
+export default function GalleryPage() {
+  return (
+    <div>
+      <h1>描画ギャラリー</h1>
+      {/* サーバーコンポーネントバージョン */}
+      <section>
+        <h2>サーバーコンポーネント</h2>
+        <DrawingList />
+      </section>
+      
+      {/* クライアントコンポーネントバージョン */}
+      <section>
+        <h2>クライアントコンポーネント</h2>
+        <Suspense fallback={<LoadingSpinner />}>
+          <ClientDrawingList />
+        </Suspense>
+      </section>
+    </div>
+  );
+}
+```

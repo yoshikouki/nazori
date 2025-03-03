@@ -1,48 +1,84 @@
 ---
-description: このルールは、TypeScriptの型定義や使用方法に関する規約を定義します。
-globs: *.ts,*.tsx
+description: TypeScriptの型定義や使用方法に関する規約を定義します。
+globs: **/*.{ts,tsx}
 alwaysApply: false
 ---
-# TypeScript
+# TypeScript規約
+
+## 原則
+
+- SOLID の原則を絶対とする
+
+## 関数型アプローチ (FP)
+
+- 純粋関数を優先
+- 不変データ構造を使用
+- 副作用を分離
+- 型安全性を確保
 
 ## 型定義の基本原則
 
-- `any`型の使用は避け、具体的な型を使用する
-- ジェネリック型は必要な場合のみ使用し、過度に複雑にしない
+- `any`型の使用は禁止。具体的な型を使用する
 - 型定義はエクスポートして再利用できるようにする
 - 関数の引数と戻り値には明示的に型を指定する
 
+```typescript
+// Good
+function calculateTotal(items: CartItem[]): number {
+  return items.reduce((total, item) => total + item.price * item.quantity, 0);
+}
+
+// Bad
+function calculateTotal(items: any): any {
+  return items.reduce((total, item) => total + item.price * item.quantity, 0);
+}
+```
+
 ## インターフェースと型エイリアス
 
-- 拡張が必要な型にはインターフェース（`interface`）を使用する
-- 単純な型の組み合わせには型エイリアス（`type`）を使用する
 - 命名規則はパスカルケース（例：`LineStyle`）を使用する
-- 関連する型はグループ化してひとつのファイルに定義する
 
-## React固有の型定義
+```typescript
+// インターフェースの例（拡張可能）
+interface DrawingStyle {
+  color: string;
+  lineWidth: number;
+  opacity: number;
+}
 
-- Reactコンポーネントの`props`は適切に型定義する
-- イベントハンドラーには適切なイベント型を使用する（例：`React.MouseEvent`）
-- `children`を受け取るコンポーネントには`ReactNode`型を使用する
-- カスタムフックの戻り値は配列や複雑なオブジェクトではなく、明確な名前を持つオブジェクトにする
+// 拡張の例
+interface EraseDrawingStyle extends DrawingStyle {
+  isEraser: boolean;
+}
 
-## DOM関連の型定義
+// 型エイリアスの例（単純な型の組み合わせ）
+type Point = {
+  x: number;
+  y: number;
+};
 
-- HTML要素の参照には`useRef<HTMLElement>(null)`のように具体的な要素型を指定する
-- Canvas操作では`CanvasRenderingContext2D`型を適切に使用する
-- ポインターイベントでは`PointerEvent`型を使用する
-- SVG要素を操作する場合は`SVGElement`とその派生型を使用する
+type DrawingMode = 'pen' | 'eraser' | 'highlighter';
+```
 
-## コンパイラオプション
+## 型安全性の確保
 
-- `strict`モードを有効にする
-- `noImplicitAny`を有効にして暗黙の`any`型を禁止する
-- `strictNullChecks`を有効にしてnull/undefinedのチェックを強制する
-- `strictFunctionTypes`を有効にして関数の型チェックを厳密に行う
+- 型安全の確保には zod を使用する
+- `null`や`undefined`の可能性がある値は適切に処理する
+- オプショナルチェイニング（`?.`）とnullish結合演算子（`??`）を活用する
 
-## 型定義のドキュメント
+```typescript
+// オプショナルチェイニングの例
+const width = canvasRef.current?.width ?? 0;
 
-- 複雑な型定義にはJSDocコメントを追加する
-- 各プロパティの意味や制約を説明する
-- 使用例があれば記載する
-- 型の制約や条件がある場合は明記する 
+// 型ガードの例
+function isPoint(value: unknown): value is Point {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'x' in value &&
+    'y' in value &&
+    typeof value.x === 'number' &&
+    typeof value.y === 'number'
+  );
+}
+```
