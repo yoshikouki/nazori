@@ -1,3 +1,4 @@
+// Color options derived from shadcn-ui color palette
 // ref: https://github.com/shadcn-ui/ui/blob/d44971b6c23d60ccef11e303fddaf94b90c01eda/apps/www/registry/registry-colors.ts#L1477
 export const LineColorOptions = {
   black: { key: "black", name: "くろ", value: "#000000", lightness: "dark" },
@@ -21,6 +22,7 @@ export const LineColorOptions = {
 } as const;
 export const LineColorOptionsArray = Object.values(LineColorOptions);
 
+// Line width options with child-friendly names
 export const LineWidthOptions = {
   thin: { key: "thin", name: "ほそい", value: 4 },
   medium: { key: "medium", name: "ふつう", value: 8 },
@@ -29,6 +31,7 @@ export const LineWidthOptions = {
 } as const;
 export const LineWidthOptionsArray = Object.values(LineWidthOptions);
 
+// Core drawing style configuration type
 export type DrawingStyle = {
   lineWidth: number;
   lineColor: string;
@@ -36,6 +39,7 @@ export type DrawingStyle = {
   isEraser: boolean;
 };
 
+// Default drawing style settings
 export const DefaultDrawingStyle: DrawingStyle = {
   lineWidth: LineWidthOptions.medium.value,
   lineColor: LineColorOptions.black.value,
@@ -43,6 +47,7 @@ export const DefaultDrawingStyle: DrawingStyle = {
   isEraser: false,
 };
 
+// Helper functions to find color/width options by value
 export const getCurrentLineColor = (color: string) => {
   return LineColorOptionsArray.find((option) => option.value === color);
 };
@@ -50,7 +55,8 @@ export const getCurrentLineWidth = (width: number) => {
   return LineWidthOptionsArray.find((option) => option.value === width);
 };
 
-// 後方互換性のために残しておく
+// Legacy type for backward compatibility
+// Kept for supporting older code that doesn't use penOnly
 export type LineStyle = Omit<DrawingStyle, "penOnly">;
 export const DefaultLineStyle: LineStyle = {
   lineWidth: DefaultDrawingStyle.lineWidth,

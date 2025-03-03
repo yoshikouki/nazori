@@ -14,8 +14,8 @@ import { useDrawingStore } from "./use-drawing-store";
 export type OnDrawingStyleChange = (newDrawingStyle: Partial<DrawingStyle>) => void;
 
 /**
- * 描画キャンバスのメインコンポーネント
- * 各サブコンポーネントを組み合わせて全体の機能を提供します
+ * Main drawing canvas component
+ * Combines subcomponents to provide the complete drawing experience
  */
 export const DrawingCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -36,12 +36,12 @@ export const DrawingCanvas = () => {
     historyId: currentDrawingId,
   });
 
-  // 描画スタイルの更新ハンドラー
+  // Handler for drawing style updates
   const onDrawingStyleChange = (newDrawingStyle: Partial<DrawingStyle>) => {
     updateDrawingStyle(newDrawingStyle);
   };
 
-  // 描画リストダイアログの開閉ハンドラー
+  // Drawing list dialog handlers
   const openDrawingList = () => {
     setIsDrawingListOpen(true);
   };
@@ -50,7 +50,7 @@ export const DrawingCanvas = () => {
     setIsDrawingListOpen(false);
   };
 
-  // 描画変更ハンドラー
+  // Handler for switching to a different drawing
   const onChangeDrawing = async (drawing: Drawing) => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
@@ -59,34 +59,34 @@ export const DrawingCanvas = () => {
     try {
       await drawBlobToCanvas(ctx, drawing.image);
       selectDrawing(drawing.id);
-      clearHistory(); // 履歴をクリア
-      pushHistory(); // 新しい状態を履歴に追加
+      clearHistory(); // Clear history for the new drawing
+      pushHistory(); // Add initial state to history
       setIsDrawingListOpen(false);
     } catch (error) {
       console.error("Failed to load drawing:", error);
     }
   };
 
-  // 新規描画作成ハンドラー
+  // Handler for creating a new drawing
   const createNewDrawing = async () => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     setIsDrawingListOpen(false);
-    clearHistory(); // 履歴をクリア
+    clearHistory(); // Clear history for the new drawing
     await createDrawing();
   };
 
-  // 描画終了ハンドラー
+  // Save drawing state after each drawing operation
   const onDrawEnd = () => {
     pushHistory();
   };
 
-  // アニメーションフレームのクリーンアップ
+  // Cleanup animation frames on unmount
   useEffect(() => {
     return () => {
-      // クリーンアップは各コンポーネント内で行うため、ここでは何もしない
+      // Cleanup handled in individual components
     };
   }, []);
 

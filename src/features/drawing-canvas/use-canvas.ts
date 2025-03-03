@@ -33,18 +33,19 @@ export const useCanvas = ({ canvasRef, drawingStyle, onDrawEnd }: UseCanvasProps
         cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;
       } else if (isDrawingRef.current) {
+        // Using requestAnimationFrame for smooth drawing and better performance
         animationFrameRef.current = requestAnimationFrame(drawPoints);
       }
       return;
     }
 
-    // 描画スタイルの適用
+    // Apply drawing style settings
     applyDrawingStyle(ctx, drawingStyle);
 
     const points = [...pendingPointsRef.current];
     pendingPointsRef.current = [];
 
-    // 滑らかな線を描画
+    // Draw smooth curve through collected points
     const { lastPos, midPoint } = drawSmoothLine(
       ctx,
       points,
@@ -52,11 +53,12 @@ export const useCanvas = ({ canvasRef, drawingStyle, onDrawEnd }: UseCanvasProps
       midPointRef.current,
     );
 
-    // 参照を更新
+    // Update reference points for next drawing segment
     lastPosRef.current = lastPos;
     midPointRef.current = midPoint;
 
     if (isDrawingRef.current) {
+      // Continue animation loop while drawing
       animationFrameRef.current = requestAnimationFrame(drawPoints);
     }
   };
@@ -70,6 +72,7 @@ export const useCanvas = ({ canvasRef, drawingStyle, onDrawEnd }: UseCanvasProps
     lastPosRef.current = pos;
     midPointRef.current = pos;
     pendingPointsRef.current = [pos];
+    // Capture pointer to receive events outside canvas bounds
     canvas.setPointerCapture(e.pointerId);
     if (animationFrameRef.current !== null) {
       cancelAnimationFrame(animationFrameRef.current);
@@ -91,6 +94,7 @@ export const useCanvas = ({ canvasRef, drawingStyle, onDrawEnd }: UseCanvasProps
     if (!canvas || !isAllowedPointerType(e.pointerType)) return;
     e.preventDefault();
     isDrawingRef.current = false;
+    // Release pointer capture when drawing ends
     canvas.releasePointerCapture(e.pointerId);
     if (pendingPointsRef.current.length > 0) {
       drawPoints();

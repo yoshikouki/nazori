@@ -1,12 +1,12 @@
 /**
- * 描画関連の純粋関数を定義するモジュール
- * 状態変更を返り値として表現し、副作用を分離します
+ * Core module for drawing functionality with pure functions
+ * Separates state changes as return values to isolate side effects
  */
 
 import type { DrawingStyle } from "./drawing-style";
 
 /**
- * 座標点を表すインターフェース
+ * Interface representing a coordinate point
  */
 export interface Point {
   x: number;
@@ -14,10 +14,10 @@ export interface Point {
 }
 
 /**
- * 描画コンテキストの設定を適用する
- * @param ctx キャンバスコンテキスト
- * @param drawingStyle 描画スタイル
- * @returns 設定を適用したコンテキスト
+ * Applies drawing style settings to the canvas context
+ * @param ctx Canvas context
+ * @param drawingStyle Drawing style configuration
+ * @returns Context with applied settings
  */
 export const applyDrawingStyle = (
   ctx: CanvasRenderingContext2D,
@@ -39,10 +39,10 @@ export const applyDrawingStyle = (
 };
 
 /**
- * 2点間の中点を計算する
- * @param point1 1つ目の点
- * @param point2 2つ目の点
- * @returns 中点
+ * Calculates the midpoint between two points
+ * @param point1 First point
+ * @param point2 Second point
+ * @returns Midpoint
  */
 export const calculateMidPoint = (point1: Point, point2: Point): Point => {
   return {
@@ -52,12 +52,13 @@ export const calculateMidPoint = (point1: Point, point2: Point): Point => {
 };
 
 /**
- * 点列を滑らかな曲線として描画する
- * @param ctx キャンバスコンテキスト
- * @param points 描画する点列
- * @param lastPos 最後の描画位置
- * @param midPoint 中間点
- * @returns 更新された最後の位置と中間点
+ * Draws a smooth curve through a series of points
+ * Uses quadratic curves between midpoints for better visual quality
+ * @param ctx Canvas context
+ * @param points Array of points to draw
+ * @param lastPos Last drawing position
+ * @param midPoint Middle point for curve control
+ * @returns Updated last position and midpoint
  */
 export const drawSmoothLine = (
   ctx: CanvasRenderingContext2D,
@@ -86,10 +87,10 @@ export const drawSmoothLine = (
 };
 
 /**
- * キャンバスをクリアする
- * @param ctx キャンバスコンテキスト
- * @param width キャンバスの幅
- * @param height キャンバスの高さ
+ * Clears the entire canvas
+ * @param ctx Canvas context
+ * @param width Canvas width
+ * @param height Canvas height
  */
 export const clearCanvas = (
   ctx: CanvasRenderingContext2D,
@@ -100,10 +101,11 @@ export const clearCanvas = (
 };
 
 /**
- * キャンバスのサイズを親要素に合わせて調整する
- * @param canvas キャンバス要素
- * @param drawingStyle 描画スタイル
- * @returns リサイズされたかどうか
+ * Resizes canvas to match parent element dimensions
+ * Preserves drawing content during resize
+ * @param canvas Canvas element
+ * @param drawingStyle Drawing style to reapply after resize
+ * @returns Whether resize was performed
  */
 export const resizeCanvasToParent = (
   canvas: HTMLCanvasElement,
@@ -135,10 +137,10 @@ export const resizeCanvasToParent = (
 };
 
 /**
- * 指定されたポインタータイプが許可されているかチェックする
- * @param type ポインタータイプ
- * @param penOnly ペンのみモードかどうか
- * @returns 許可されているかどうか
+ * Checks if the pointer type is allowed based on settings
+ * @param type Pointer type (pen, mouse, touch)
+ * @param penOnly Whether only pen input is allowed
+ * @returns Whether the pointer type is allowed
  */
 export const isAllowedPointerType = (type: string, penOnly: boolean): boolean => {
   const allowedTypes = penOnly ? ["pen"] : ["pen", "mouse", "touch"];

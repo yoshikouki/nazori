@@ -10,8 +10,8 @@ interface UseDrawingHistoryProps {
 }
 
 /**
- * 描画履歴を管理するカスタムフック
- * メモリ内履歴とIndexedDB履歴を統合します
+ * Custom hook for managing drawing history
+ * Integrates in-memory history with IndexedDB persistence
  */
 export const useDrawingHistory = ({ canvasRef, historyId }: UseDrawingHistoryProps) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -19,19 +19,20 @@ export const useDrawingHistory = ({ canvasRef, historyId }: UseDrawingHistoryPro
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
 
-  // 最後の操作のタイムスタンプを保持
+  // Timestamp of last operation for throttling
   const lastOperationTimeRef = useRef<number>(0);
-  // 自動保存の間隔（ミリ秒）
+  // Auto-save interval in milliseconds
   const autoSaveInterval = 2000;
 
   /**
-   * 現在のキャンバス状態を履歴に追加する
+   * Adds current canvas state to history
+   * Throttles saves to prevent excessive database operations
    */
   const pushHistory = async (force = false) => {
     if (!historyId || !canvasRef.current) return;
 
     const now = Date.now();
-    // 強制保存でない場合は、前回の保存から一定時間経過していない場合はスキップ
+    // Skip if not forced and within throttle interval
     if (!force && now - lastOperationTimeRef.current < autoSaveInterval) {
       return;
     }
@@ -46,24 +47,25 @@ export const useDrawingHistory = ({ canvasRef, historyId }: UseDrawingHistoryPro
       });
 
       if (!blob) {
-        throw new Error("キャンバスの画像取得に失敗しました");
+        throw new Error("Failed to get canvas image");
       }
 
       await drawingHistoryRepository.addImage(historyId, blob);
-      // 履歴が追加されたので、元に戻す操作が可能になる
+      // Enable undo after adding history
       setCanUndo(true);
-      // 履歴を追加した時点で、やり直し操作はできなくなる
+      // Disable redo since we've created a new history branch
       setCanRedo(false);
     } catch (err) {
-      console.error("履歴の保存に失敗しました", err);
-      setError(err instanceof Error ? err : new Error("履歴の保存に失敗しました"));
+      console.error("Failed to save history", err);
+      setError(err instanceof Error ? err : new Error("Failed to save history"));
     } finally {
       setIsLoading(false);
     }
   };
 
   /**
-   * 履歴を一つ戻す
+   * Moves back one step in history
+   * Updates canvas with previous state
    */
   const undo = async () => {
     if (!historyId || !canvasRef.current) return;
@@ -72,32 +74,32 @@ export const useDrawingHistory = ({ canvasRef, historyId }: UseDrawingHistoryPro
     try {
       const updatedHistory = await drawingHistoryRepository.undo(historyId);
       if (!updatedHistory) {
-        throw new Error("履歴を戻す操作に失敗しました");
+        throw new Error("Failed to undo");
       }
 
-      // 現在のインデックスが-1より大きい場合、まだ戻れる
+      // Update undo/redo availability based on current position
       setCanUndo(updatedHistory.currentIndex > -1);
-      // 現在のインデックスが最後の要素より小さい場合、やり直しできる
       setCanRedo(updatedHistory.currentIndex < updatedHistory.imageList.length - 1);
 
-      // キャンバスに現在の履歴を描画
+      // Draw current history state to canvas
       if (updatedHistory.currentIndex >= 0) {
         const currentImage = updatedHistory.imageList[updatedHistory.currentIndex];
         await drawImageToCanvas(currentImage);
       } else {
-        // 履歴がない場合はキャンバスをクリア
+        // Clear canvas if we've undone all history
         clearCanvas();
       }
     } catch (err) {
-      console.error("履歴を戻す操作に失敗しました", err);
-      setError(err instanceof Error ? err : new Error("履歴を戻す操作に失敗しました"));
+      console.error("Failed to undo", err);
+      setError(err instanceof Error ? err : new Error("Failed to undo"));
     } finally {
       setIsLoading(false);
     }
   };
 
   /**
-   * 履歴を一つ進める
+   * Moves forward one step in history
+   * Updates canvas with next state
    */
   const redo = async () => {
     if (!historyId || !canvasRef.current) return;
@@ -106,29 +108,28 @@ export const useDrawingHistory = ({ canvasRef, historyId }: UseDrawingHistoryPro
     try {
       const updatedHistory = await drawingHistoryRepository.redo(historyId);
       if (!updatedHistory) {
-        throw new Error("履歴を進める操作に失敗しました");
+        throw new Error("Failed to redo");
       }
 
-      // 現在のインデックスが-1より大きい場合、まだ戻れる
+      // Update undo/redo availability based on current position
       setCanUndo(updatedHistory.currentIndex > -1);
-      // 現在のインデックスが最後の要素より小さい場合、やり直しできる
       setCanRedo(updatedHistory.currentIndex < updatedHistory.imageList.length - 1);
 
-      // キャンバスに現在の履歴を描画
+      // Draw current history state to canvas
       if (updatedHistory.currentIndex >= 0) {
         const currentImage = updatedHistory.imageList[updatedHistory.currentIndex];
         await drawImageToCanvas(currentImage);
       }
     } catch (err) {
-      console.error("履歴を進める操作に失敗しました", err);
-      setError(err instanceof Error ? err : new Error("履歴を進める操作に失敗しました"));
+      console.error("Failed to redo", err);
+      setError(err instanceof Error ? err : new Error("Failed to redo"));
     } finally {
       setIsLoading(false);
     }
   };
 
   /**
-   * 履歴をクリアする
+   * Clears all history and resets canvas
    */
   const clearHistory = async () => {
     if (!historyId) return;
@@ -140,15 +141,15 @@ export const useDrawingHistory = ({ canvasRef, historyId }: UseDrawingHistoryPro
       setCanRedo(false);
       clearCanvas();
     } catch (err) {
-      console.error("履歴のクリアに失敗しました", err);
-      setError(err instanceof Error ? err : new Error("履歴のクリアに失敗しました"));
+      console.error("Failed to clear history", err);
+      setError(err instanceof Error ? err : new Error("Failed to clear history"));
     } finally {
       setIsLoading(false);
     }
   };
 
   /**
-   * キャンバスをクリアする
+   * Clears the canvas content
    */
   const clearCanvas = () => {
     const canvas = canvasRef.current;
@@ -159,14 +160,15 @@ export const useDrawingHistory = ({ canvasRef, historyId }: UseDrawingHistoryPro
   };
 
   /**
-   * Blobをキャンバスに描画する
+   * Draws a blob image to the canvas
+   * Used for restoring history states
    */
   const drawImageToCanvas = async (blob: Blob): Promise<void> => {
     return new Promise((resolve, reject) => {
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext("2d");
       if (!canvas || !ctx) {
-        reject(new Error("キャンバスが見つかりません"));
+        reject(new Error("Canvas not found"));
         return;
       }
 
@@ -177,13 +179,13 @@ export const useDrawingHistory = ({ canvasRef, historyId }: UseDrawingHistoryPro
         resolve();
       };
       img.onerror = () => {
-        reject(new Error("画像の読み込みに失敗しました"));
+        reject(new Error("Failed to load image"));
       };
       img.src = URL.createObjectURL(blob);
     });
   };
 
-  // 履歴IDが変更されたときに、履歴の状態を更新
+  // Update history state when historyId changes
   useEffect(() => {
     if (!historyId) {
       setCanUndo(false);
@@ -200,7 +202,7 @@ export const useDrawingHistory = ({ canvasRef, historyId }: UseDrawingHistoryPro
         setCanUndo(history.currentIndex > -1);
         setCanRedo(history.currentIndex < history.imageList.length - 1);
 
-        // 現在の履歴があれば描画
+        // Draw current history state if available
         if (history.currentIndex >= 0 && history.imageList.length > 0) {
           const currentImage = history.imageList[history.currentIndex];
           await drawImageToCanvas(currentImage);
@@ -208,8 +210,8 @@ export const useDrawingHistory = ({ canvasRef, historyId }: UseDrawingHistoryPro
           clearCanvas();
         }
       } catch (err) {
-        console.error("履歴の読み込みに失敗しました", err);
-        setError(err instanceof Error ? err : new Error("履歴の読み込みに失敗しました"));
+        console.error("Failed to load history", err);
+        setError(err instanceof Error ? err : new Error("Failed to load history"));
       } finally {
         setIsLoading(false);
       }
