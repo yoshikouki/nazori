@@ -73,11 +73,7 @@ export const ToolBar = ({
           color={drawingStyle.lineColor}
           onWidthChange={onDrawingStyleChange}
         />
-        <LineColorPicker
-          color={drawingStyle.lineColor}
-          onColorChange={onDrawingStyleChange}
-          disabled={drawingStyle.isEraser}
-        />
+        <LineColorPicker color={drawingStyle.lineColor} onColorChange={onDrawingStyleChange} />
       </div>
 
       <div className="flex items-center justify-center gap-2 *:pointer-events-auto">
