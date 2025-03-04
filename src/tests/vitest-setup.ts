@@ -2,9 +2,6 @@ import React from "react";
 import { vi } from "vitest";
 import "@testing-library/jest-dom";
 
-// happy-domはvitestによって自動的に設定されるため、
-// GlobalRegistratorを明示的に使用する必要はありません
-
 // Mock Next.js Image component
 vi.mock("next/image", () => ({
   default: (props: Record<string, unknown>) => {
