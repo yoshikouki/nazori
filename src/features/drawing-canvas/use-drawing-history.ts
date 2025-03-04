@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  canvasToBlob,
+  clearCanvas,
+  drawBlobToCanvas,
+} from "@/features/drawing-canvas/drawing-core";
 import { drawingHistoryRepository } from "@/lib/client-db/repositories";
 import type { RefObject } from "react";
 import { useEffect, useRef, useState } from "react";
@@ -41,16 +46,15 @@ export const useDrawingHistory = ({ canvasRef, historyId }: UseDrawingHistoryPro
     setIsLoading(true);
 
     try {
-      const canvas = canvasRef.current;
-      const blob = await new Promise<Blob | null>((resolve) => {
-        canvas.toBlob((blob) => resolve(blob));
-      });
-
+      // Get current canvas state as blob
+      const blob = await canvasToBlob(canvasRef.current);
       if (!blob) {
-        throw new Error("Failed to get canvas image");
+        throw new Error("Failed to get canvas blob");
       }
 
+      // Push to history
       await drawingHistoryRepository.addImage(historyId, blob);
+
       // Enable undo after adding history
       setCanUndo(true);
       // Disable redo since we've created a new history branch
@@ -84,10 +88,10 @@ export const useDrawingHistory = ({ canvasRef, historyId }: UseDrawingHistoryPro
       // Draw current history state to canvas
       if (updatedHistory.currentIndex >= 0) {
         const currentImage = updatedHistory.imageList[updatedHistory.currentIndex];
-        await drawImageToCanvas(currentImage);
+        await drawBlobToCanvas(canvasRef.current, currentImage);
       } else {
         // Clear canvas if we've undone all history
-        clearCanvas();
+        clearCanvas(canvasRef.current);
       }
     } catch (err) {
       console.error("Failed to undo", err);
@@ -111,14 +115,17 @@ export const useDrawingHistory = ({ canvasRef, historyId }: UseDrawingHistoryPro
         throw new Error("Failed to redo");
       }
 
-      // Update undo/redo availability based on current position
+      // Update undo/redo availability
       setCanUndo(updatedHistory.currentIndex > -1);
       setCanRedo(updatedHistory.currentIndex < updatedHistory.imageList.length - 1);
 
       // Draw current history state to canvas
       if (updatedHistory.currentIndex >= 0) {
         const currentImage = updatedHistory.imageList[updatedHistory.currentIndex];
-        await drawImageToCanvas(currentImage);
+        await drawBlobToCanvas(canvasRef.current, currentImage);
+      } else {
+        // Clear canvas if we've redone to initial state
+        clearCanvas(canvasRef.current);
       }
     } catch (err) {
       console.error("Failed to redo", err);
@@ -132,57 +139,24 @@ export const useDrawingHistory = ({ canvasRef, historyId }: UseDrawingHistoryPro
    * Clears all history and resets canvas
    */
   const clearHistory = async () => {
-    if (!historyId) return;
+    if (!historyId || !canvasRef.current) return;
 
     setIsLoading(true);
     try {
       await drawingHistoryRepository.clear(historyId);
+
+      // Reset undo/redo availability
       setCanUndo(false);
       setCanRedo(false);
-      clearCanvas();
+
+      // Clear canvas
+      clearCanvas(canvasRef.current);
     } catch (err) {
       console.error("Failed to clear history", err);
       setError(err instanceof Error ? err : new Error("Failed to clear history"));
     } finally {
       setIsLoading(false);
     }
-  };
-
-  /**
-   * Clears the canvas content
-   */
-  const clearCanvas = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (!canvas || !ctx) return;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  };
-
-  /**
-   * Draws a blob image to the canvas
-   * Used for restoring history states
-   */
-  const drawImageToCanvas = async (blob: Blob): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      const canvas = canvasRef.current;
-      const ctx = canvas?.getContext("2d");
-      if (!canvas || !ctx) {
-        reject(new Error("Canvas not found"));
-        return;
-      }
-
-      const img = new Image();
-      img.onload = () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0);
-        resolve();
-      };
-      img.onerror = () => {
-        reject(new Error("Failed to load image"));
-      };
-      img.src = URL.createObjectURL(blob);
-    });
   };
 
   // Update history state when historyId changes
@@ -194,20 +168,26 @@ export const useDrawingHistory = ({ canvasRef, historyId }: UseDrawingHistoryPro
     }
 
     const loadHistory = async () => {
+      if (!historyId || !canvasRef.current) return;
+
       setIsLoading(true);
       try {
         const history = await drawingHistoryRepository.getById(historyId);
-        if (!history) return;
+        if (!history) {
+          throw new Error("History not found");
+        }
 
+        // Update undo/redo availability
         setCanUndo(history.currentIndex > -1);
         setCanRedo(history.currentIndex < history.imageList.length - 1);
 
-        // Draw current history state if available
-        if (history.currentIndex >= 0 && history.imageList.length > 0) {
+        // Draw current history state to canvas
+        if (history.currentIndex >= 0) {
           const currentImage = history.imageList[history.currentIndex];
-          await drawImageToCanvas(currentImage);
+          await drawBlobToCanvas(canvasRef.current, currentImage);
         } else {
-          clearCanvas();
+          // Clear canvas if history is at initial state
+          clearCanvas(canvasRef.current);
         }
       } catch (err) {
         console.error("Failed to load history", err);
@@ -218,9 +198,7 @@ export const useDrawingHistory = ({ canvasRef, historyId }: UseDrawingHistoryPro
     };
 
     loadHistory();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    // biome-ignore lint/correctness/useExhaustiveDependencies: React Compilerのため
-  }, [historyId, clearCanvas, drawImageToCanvas]);
+  }, [historyId, canvasRef]);
 
   return {
     pushHistory,

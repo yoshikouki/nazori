@@ -13,6 +13,15 @@ export interface Point {
   y: number;
 }
 
+type CanvasOrContext = HTMLCanvasElement | CanvasRenderingContext2D | null;
+
+const getCanvasContext = (canvas: CanvasOrContext): CanvasRenderingContext2D | null => {
+  if (!canvas) return null;
+  if (canvas instanceof CanvasRenderingContext2D) return canvas;
+  if (canvas instanceof HTMLCanvasElement) return canvas.getContext("2d");
+  return null;
+};
+
 /**
  * Applies drawing style settings to the canvas context
  * @param ctx Canvas context
@@ -20,9 +29,11 @@ export interface Point {
  * @returns Context with applied settings
  */
 export const applyDrawingStyle = (
-  ctx: CanvasRenderingContext2D,
+  sourceCtx: CanvasOrContext,
   drawingStyle: DrawingStyle,
-): CanvasRenderingContext2D => {
+): CanvasRenderingContext2D | null => {
+  const ctx = getCanvasContext(sourceCtx);
+  if (!ctx) return null;
   ctx.lineWidth = drawingStyle.lineWidth;
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
@@ -61,12 +72,13 @@ export const calculateMidPoint = (point1: Point, point2: Point): Point => {
  * @returns Updated last position and midpoint
  */
 export const drawSmoothLine = (
-  ctx: CanvasRenderingContext2D,
+  sourceCtx: CanvasOrContext,
   points: Point[],
   lastPos: Point,
   midPoint: Point,
 ): { lastPos: Point; midPoint: Point } => {
-  if (points.length === 0) return { lastPos, midPoint };
+  const ctx = getCanvasContext(sourceCtx);
+  if (!ctx || points.length === 0) return { lastPos, midPoint };
 
   let currentLastPos = { ...lastPos };
   let currentMidPoint = { ...midPoint };
@@ -88,37 +100,34 @@ export const drawSmoothLine = (
 
 /**
  * Clears the entire canvas
- * @param ctx Canvas context
- * @param width Canvas width
- * @param height Canvas height
+ * @param canvas Canvas element or context
  */
-export const clearCanvas = (
-  ctx: CanvasRenderingContext2D,
-  width: number,
-  height: number,
-): void => {
-  ctx.clearRect(0, 0, width, height);
+export const clearCanvas = (sourceCanvas: CanvasOrContext): void => {
+  const ctx = getCanvasContext(sourceCanvas);
+  if (!ctx) return;
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 };
 
 /**
  * Resizes canvas to match parent element dimensions
  * Preserves drawing content during resize
- * @param canvas Canvas element
+ * @param canvas Canvas element or context
  * @param drawingStyle Drawing style to reapply after resize
  * @returns Whether resize was performed
  */
 export const resizeCanvasToParent = (
-  canvas: HTMLCanvasElement,
+  sourceCanvas: CanvasOrContext,
   drawingStyle: DrawingStyle,
 ): boolean => {
+  const ctx = getCanvasContext(sourceCanvas);
+  if (!ctx) return false;
+
+  const canvas = ctx.canvas;
   const parent = canvas.parentElement;
   if (!parent) return false;
 
   const { width, height } = parent.getBoundingClientRect();
   if (canvas.width === width && canvas.height === height) return false;
-
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return false;
 
   // 現在の描画内容を保存
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -131,7 +140,8 @@ export const resizeCanvasToParent = (
   ctx.putImageData(imageData, 0, 0);
 
   // 描画スタイルを再設定
-  applyDrawingStyle(ctx, drawingStyle);
+  const updatedCtx = applyDrawingStyle(ctx, drawingStyle);
+  if (!updatedCtx) return false;
 
   return true;
 };
@@ -145,4 +155,51 @@ export const resizeCanvasToParent = (
 export const isAllowedPointerType = (type: string, penOnly: boolean): boolean => {
   const allowedTypes = penOnly ? ["pen"] : ["pen", "mouse", "touch"];
   return allowedTypes.includes(type);
+};
+
+/**
+ * Converts canvas to a Blob
+ * @param canvas Canvas element
+ * @returns Promise resolving to Blob or null
+ */
+export const canvasToBlob = (sourceCanvas: CanvasOrContext): Promise<Blob | null> => {
+  const canvas = getCanvasContext(sourceCanvas)?.canvas;
+  if (!canvas) return Promise.resolve(null);
+
+  return new Promise((resolve) => {
+    canvas.toBlob((blob) => {
+      resolve(blob);
+    });
+  });
+};
+
+/**
+ * Converts Blob to an Image element
+ * @param blob Image blob
+ * @returns Promise resolving to HTMLImageElement
+ */
+const blobToImage = (blob: Blob): Promise<HTMLImageElement> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = (e) => reject(e);
+    img.src = URL.createObjectURL(blob);
+  });
+};
+
+/**
+ * Draws a blob image to canvas
+ * @param canvas Canvas element or context
+ * @param blob Image blob
+ */
+export const drawBlobToCanvas = async (
+  sourceCanvas: CanvasOrContext,
+  blob: Blob | null,
+): Promise<void> => {
+  const ctx = getCanvasContext(sourceCanvas);
+  if (!ctx || !blob) return;
+  const img = await blobToImage(blob);
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.drawImage(img, 0, 0);
+  URL.revokeObjectURL(img.src); // Prevent memory leaks
 };

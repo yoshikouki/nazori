@@ -1,9 +1,9 @@
-import { type MutableRefObject, useRef } from "react";
+import { type MutableRefObject, useEffect, useRef } from "react";
 import {
   type Point,
   applyDrawingStyle,
   isAllowedPointerType as checkPointerType,
-  clearCanvas as clearCanvasCore,
+  clearCanvas,
   drawSmoothLine,
   resizeCanvasToParent,
 } from "./drawing-core";
@@ -27,8 +27,7 @@ export const useCanvas = ({ canvasRef, drawingStyle, onDrawEnd }: UseCanvasProps
   };
 
   const drawPoints = () => {
-    const ctx = canvasRef.current?.getContext("2d");
-    if (!ctx || pendingPointsRef.current.length === 0) {
+    if (!canvasRef.current || pendingPointsRef.current.length === 0) {
       if (animationFrameRef.current !== null && !isDrawingRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;
@@ -40,14 +39,14 @@ export const useCanvas = ({ canvasRef, drawingStyle, onDrawEnd }: UseCanvasProps
     }
 
     // Apply drawing style settings
-    applyDrawingStyle(ctx, drawingStyle);
+    applyDrawingStyle(canvasRef.current, drawingStyle);
 
     const points = [...pendingPointsRef.current];
     pendingPointsRef.current = [];
 
     // Draw smooth curve through collected points
     const { lastPos, midPoint } = drawSmoothLine(
-      ctx,
+      canvasRef.current,
       points,
       lastPosRef.current,
       midPointRef.current,
@@ -106,25 +105,31 @@ export const useCanvas = ({ canvasRef, drawingStyle, onDrawEnd }: UseCanvasProps
     onDrawEnd?.();
   };
 
-  const clearCanvas = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (!canvas || !ctx) return;
-    clearCanvasCore(ctx, canvas.width, canvas.height);
+  const clear = () => {
+    clearCanvas(canvasRef.current);
   };
 
-  const resizeCanvas = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    resizeCanvasToParent(canvas, drawingStyle);
-  };
+  // キャンバスのリサイズ
+  useEffect(() => {
+    const resizeCanvas = () => {
+      resizeCanvasToParent(canvasRef.current, drawingStyle);
+    };
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+    return () => {
+      window.removeEventListener("resize", resizeCanvas);
+    };
+  }, [canvasRef, drawingStyle]);
+
+  useEffect(() => {
+    applyDrawingStyle(canvasRef.current, drawingStyle);
+  }, [drawingStyle, canvasRef]);
 
   return {
     onPointerStart,
     onPointerMove,
     onPointerEnd,
-    clearCanvas,
-    resizeCanvas,
+    clearCanvas: clear,
     isDrawing: isDrawingRef,
   };
 };

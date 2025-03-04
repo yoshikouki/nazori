@@ -1,6 +1,6 @@
 "use client";
 
-import { drawBlobToCanvas } from "@/lib/canvas";
+import { drawBlobToCanvas } from "@/features/drawing-canvas/drawing-core";
 import type { Drawing } from "@/lib/client-db";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
@@ -52,12 +52,9 @@ export const DrawingCanvas = () => {
 
   // Handler for switching to a different drawing
   const onChangeDrawing = async (drawing: Drawing) => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (!canvas || !ctx) return;
-
+    if (!canvasRef.current) return;
     try {
-      await drawBlobToCanvas(ctx, drawing.image);
+      await drawBlobToCanvas(canvasRef.current, drawing.image);
       selectDrawing(drawing.id);
       clearHistory(); // Clear history for the new drawing
       pushHistory(); // Add initial state to history

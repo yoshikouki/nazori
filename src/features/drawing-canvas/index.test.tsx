@@ -81,8 +81,18 @@ const mockGetContext = vi.fn(() => ({
 }));
 
 // Mock drawBlobToCanvas
-vi.mock("@/lib/canvas", () => ({
+vi.mock("@/features/drawing-canvas/drawing-core", () => ({
   drawBlobToCanvas: vi.fn().mockResolvedValue(true),
+  resizeCanvasToParent: vi.fn().mockReturnValue(true),
+  isAllowedPointerType: vi.fn().mockReturnValue(true),
+  applyDrawingStyle: vi.fn().mockReturnValue({}),
+  calculateMidPoint: vi.fn().mockReturnValue({ x: 0, y: 0 }),
+  drawSmoothLine: vi
+    .fn()
+    .mockReturnValue({ lastPos: { x: 0, y: 0 }, midPoint: { x: 0, y: 0 } }),
+  clearCanvas: vi.fn(),
+  canvasToBlob: vi.fn().mockResolvedValue(new Blob()),
+  blobToImage: vi.fn().mockResolvedValue(new Image()),
 }));
 
 describe("DrawingCanvas", () => {
