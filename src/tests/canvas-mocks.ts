@@ -60,19 +60,33 @@ export const createMockContext = () => {
 
 /**
  * HTMLCanvasElementのモックを生成するファクトリー
+ * @param options モックの挙動をカスタマイズするオプション
  */
-export const createMockCanvas = () => {
+export const createMockCanvas = (options?: {
+  width?: number;
+  height?: number;
+  parentWidth?: number;
+  parentHeight?: number;
+  imageData?: {
+    width?: number;
+    height?: number;
+    data?: Uint8ClampedArray;
+    colorSpace?: PredefinedColorSpace;
+  };
+}) => {
   const mockContext = createMockContext();
 
   // HTMLElementのモック作成
+  const parentWidth = options?.parentWidth ?? 0;
+  const parentHeight = options?.parentHeight ?? 0;
   const mockParentElement = {
-    getBoundingClientRect: vi.fn(() => createMockDOMRect(0, 0)),
+    getBoundingClientRect: vi.fn(() => createMockDOMRect(parentWidth, parentHeight)),
     // 他のHTMLElementのプロパティは必要に応じて追加
   } as unknown as HTMLElement;
 
   const canvas = {
-    width: 0,
-    height: 0,
+    width: options?.width ?? 0,
+    height: options?.height ?? 0,
     parentElement: mockParentElement,
     getContext: vi.fn(() => mockContext),
     toBlob: vi.fn((callback: BlobCallback) => {
@@ -85,6 +99,16 @@ export const createMockCanvas = () => {
   Object.defineProperty(mockContext, "canvas", {
     get: () => canvas,
   });
+
+  // getImageDataのカスタマイズ
+  if (options?.imageData) {
+    mockContext.getImageData = vi.fn(() => ({
+      width: options.imageData?.width ?? 0,
+      height: options.imageData?.height ?? 0,
+      data: options.imageData?.data ?? new Uint8ClampedArray(),
+      colorSpace: options.imageData?.colorSpace ?? ("srgb" as PredefinedColorSpace),
+    }));
+  }
 
   return {
     canvas,

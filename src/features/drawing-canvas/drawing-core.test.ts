@@ -147,9 +147,10 @@ describe("drawing-core", () => {
 
   describe("clearCanvas", () => {
     it("clears the canvas", () => {
-      const { context: ctx } = createMockCanvas();
-      ctx.canvas.width = 100;
-      ctx.canvas.height = 200;
+      const { context: ctx } = createMockCanvas({
+        width: 100,
+        height: 200,
+      });
 
       clearCanvas(ctx);
 
@@ -157,9 +158,10 @@ describe("drawing-core", () => {
     });
 
     it("handles zero dimensions", () => {
-      const { context: ctx } = createMockCanvas();
-      ctx.canvas.width = 0;
-      ctx.canvas.height = 0;
+      const { context: ctx } = createMockCanvas({
+        width: 0,
+        height: 0,
+      });
 
       clearCanvas(ctx);
 
@@ -167,9 +169,10 @@ describe("drawing-core", () => {
     });
 
     it("handles negative dimensions", () => {
-      const { context: ctx } = createMockCanvas();
-      ctx.canvas.width = -10;
-      ctx.canvas.height = -20;
+      const { context: ctx } = createMockCanvas({
+        width: -10,
+        height: -20,
+      });
 
       clearCanvas(ctx);
 
@@ -227,22 +230,18 @@ describe("drawing-core", () => {
 
   describe("resizeCanvasToParent", () => {
     it("resizes canvas to match parent dimensions", () => {
-      const { canvas, context: ctx } = createMockCanvas();
-      canvas.width = 50;
-      canvas.height = 50;
-
-      // 親要素のサイズを設定
-      (canvas.parentElement as HTMLElement).getBoundingClientRect = vi.fn(() =>
-        createMockDOMRect(100, 200),
-      );
-
-      // getImageDataのモックを設定
-      ctx.getImageData = vi.fn(() => ({
+      const { canvas, context: ctx } = createMockCanvas({
         width: 50,
         height: 50,
-        data: new Uint8ClampedArray(),
-        colorSpace: "srgb" as PredefinedColorSpace,
-      }));
+        parentWidth: 100,
+        parentHeight: 200,
+        imageData: {
+          width: 50,
+          height: 50,
+          data: new Uint8ClampedArray(),
+          colorSpace: "srgb",
+        },
+      });
 
       const result = resizeCanvasToParent(canvas, DefaultDrawingStyle);
 
@@ -265,14 +264,12 @@ describe("drawing-core", () => {
     });
 
     it("returns false when canvas dimensions already match parent", () => {
-      const { canvas } = createMockCanvas();
-      canvas.width = 100;
-      canvas.height = 200;
-
-      // 親要素のサイズを設定
-      (canvas.parentElement as HTMLElement).getBoundingClientRect = vi.fn(() =>
-        createMockDOMRect(100, 200),
-      );
+      const { canvas } = createMockCanvas({
+        width: 100,
+        height: 200,
+        parentWidth: 100,
+        parentHeight: 200,
+      });
 
       const result = resizeCanvasToParent(canvas, DefaultDrawingStyle);
 
@@ -280,14 +277,12 @@ describe("drawing-core", () => {
     });
 
     it("returns false when getContext returns null", () => {
-      const { canvas } = createMockCanvas();
-      canvas.width = 50;
-      canvas.height = 50;
-
-      // 親要素のサイズを設定
-      (canvas.parentElement as HTMLElement).getBoundingClientRect = vi.fn(() =>
-        createMockDOMRect(100, 200),
-      );
+      const { canvas } = createMockCanvas({
+        width: 50,
+        height: 50,
+        parentWidth: 100,
+        parentHeight: 200,
+      });
 
       // getContextがnullを返すように設定
       Object.defineProperty(canvas, "getContext", {
@@ -301,22 +296,18 @@ describe("drawing-core", () => {
     });
 
     it("handles zero parent dimensions", () => {
-      const { canvas, context: ctx } = createMockCanvas();
-      canvas.width = 50;
-      canvas.height = 50;
-
-      // 親要素のサイズを0に設定
-      (canvas.parentElement as HTMLElement).getBoundingClientRect = vi.fn(() =>
-        createMockDOMRect(0, 0),
-      );
-
-      // getImageDataのモックを設定
-      ctx.getImageData = vi.fn(() => ({
+      const { canvas, context: ctx } = createMockCanvas({
         width: 50,
         height: 50,
-        data: new Uint8ClampedArray(),
-        colorSpace: "srgb" as PredefinedColorSpace,
-      }));
+        parentWidth: 0,
+        parentHeight: 0,
+        imageData: {
+          width: 50,
+          height: 50,
+          data: new Uint8ClampedArray(),
+          colorSpace: "srgb",
+        },
+      });
 
       const result = resizeCanvasToParent(canvas, DefaultDrawingStyle);
 
