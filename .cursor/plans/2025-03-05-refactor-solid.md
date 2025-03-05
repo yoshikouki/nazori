@@ -503,7 +503,7 @@ export const renderWithDrawingContext = (
 1. ドメインモデルの移行から着手する ✅
 2. ドメインインターフェイスの定義を行う ✅
 3. リポジトリアダプターを実装する
-4. 状態管理フックを分割する
+4. 状態管理フックを分割する ✅
 5. コンポーネントのリファクタリングを行う
 6. テストを改善する
 
@@ -531,15 +531,19 @@ export const renderWithDrawingContext = (
   - ✅ ProfileRepository インターフェイスを定義
   - ✅ DrawingHistoryRepository インターフェイスを定義
 
-#### 1.2 状態管理フックの分割 (未着手)
+#### 1.2 状態管理フックの分割 (完了)
 
-- ❌ src/features/drawing-canvas/stores/use-drawing-style-store.ts の作成
-- ❌ src/features/drawing-canvas/stores/use-drawing-data-store.ts の作成
-- ❌ src/features/drawing-canvas/stores/use-profile-store.ts の作成
+2024-03-13に完了
 
-#### 1.3 コンテキストプロバイダーの作成 (未着手)
+- ✅ src/features/drawing-canvas/stores/use-drawing-style-store.ts の作成
+- ✅ src/features/drawing-canvas/stores/use-drawing-data-store.ts の作成
+- ✅ src/features/drawing-canvas/stores/use-profile-store.ts の作成
 
-- ❌ src/features/drawing-canvas/contexts/drawing-context.tsx の作成
+#### 1.3 コンテキストプロバイダーの作成 (完了)
+
+2024-03-13に完了
+
+- ✅ src/features/drawing-canvas/contexts/drawing-context.tsx の作成
 
 ### フェーズ2: リポジトリ実装のアダプター作成 (未着手)
 
