@@ -8,8 +8,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import type { OnDrawingStyleChange } from ".";
-import { LineWidthOptionsArray, getCurrentLineWidth } from "./drawing-style";
+import {
+  LineWidthOptionsArray,
+  type OnDrawingStyleChange,
+  getCurrentLineWidth,
+} from "./drawing-style";
+
 type LineWidthPickerProps = {
   width: number;
   color: string;

@@ -63,3 +63,6 @@ export const DefaultLineStyle: LineStyle = {
   lineColor: DefaultDrawingStyle.lineColor,
   isEraser: DefaultDrawingStyle.isEraser,
 };
+
+// Type for drawing style change handler
+export type OnDrawingStyleChange = (newDrawingStyle: Partial<DrawingStyle>) => void;

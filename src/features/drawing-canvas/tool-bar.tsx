@@ -5,8 +5,7 @@ import { EraserIcon, HandIcon, PencilLineIcon, PlusIcon, Undo2Icon } from "lucid
 import Image from "next/image";
 import Link from "next/link";
 import type { RefObject } from "react";
-import type { DrawingStyle } from "./drawing-style";
-import type { OnDrawingStyleChange } from "./index";
+import type { DrawingStyle, OnDrawingStyleChange } from "./drawing-style";
 import { LineColorPicker } from "./line-color-picker";
 import { LineWidthPicker } from "./line-width-picker";
 import { SaveImageButton } from "./save-image-button";

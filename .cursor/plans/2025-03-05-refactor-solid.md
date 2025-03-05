@@ -410,93 +410,20 @@ export const createRepositories = (options?: {
 };
 ```
 
-### フェーズ3: コンポーネントのリファクタリング
+### フェーズ3: コンポーネントのリファクタリング (完了)
 
-#### 3.1 DrawingCanvasコンポーネントの分割
+2024-03-14に完了
 
-```typescript
-// src/features/drawing-canvas/index.tsx
-import { createRepositories } from "./adapters/repository-factory";
-import { DrawingProvider } from "./contexts/drawing-context";
-import { DrawingCanvasContent } from "./components/drawing-canvas-content";
+- ✅ DrawingCanvasコンポーネントの分割
+  - ✅ src/features/drawing-canvas/components/drawing-provider.tsx の作成
+  - ✅ src/features/drawing-canvas/components/drawing-canvas-content.tsx の作成
+  - ✅ src/features/drawing-canvas/index.tsx の更新
+- ✅ OnDrawingStyleChange型をdrawing-style.tsに追加し依存関係を整理
 
-export const DrawingCanvas = () => {
-  const repositories = createRepositories();
-  
-  return (
-    <DrawingProvider repositories={repositories}>
-      <DrawingCanvasContent />
-    </DrawingProvider>
-  );
-};
+### フェーズ4: テストの改善 (未着手)
 
-// src/features/drawing-canvas/components/drawing-canvas-content.tsx
-import { useDrawingContext } from "../contexts/drawing-context";
-
-export const DrawingCanvasContent = () => {
-  // DrawingContextから状態を取得
-  const {
-    drawingStyle,
-    updateDrawingStyle,
-    isLoading,
-    drawings,
-    createDrawing,
-    selectDrawing,
-    currentDrawingId,
-  } = useDrawingContext();
-  
-  // 実装...
-};
-```
-
-### フェーズ4: テストの改善
-
-#### 4.1 テスト用モックの作成
-
-```typescript
-// src/features/drawing-canvas/test/mocks/mock-drawing-style-repository.ts
-import type { DrawingStyleRepository } from "../../interfaces/repositories";
-import type { DrawingStyle } from "../../drawing-style";
-import type { DrawingStyleRecord } from "../../models/drawing-style-record";
-
-export class MockDrawingStyleRepository implements DrawingStyleRepository {
-  // モック実装...
-}
-
-// 他のリポジトリも同様にモック実装
-```
-
-#### 4.2 テストヘルパーの作成
-
-```typescript
-// src/features/drawing-canvas/test/utils.tsx
-import { render } from "@testing-library/react";
-import type {
-  DrawingStyleRepository,
-  DrawingRepository,
-  ProfileRepository,
-  DrawingHistoryRepository
-} from "../interfaces/repositories";
-import { DrawingProvider } from "../contexts/drawing-context";
-
-export const renderWithDrawingContext = (
-  ui: React.ReactElement,
-  options?: {
-    repositories?: {
-      drawingStyleRepository?: DrawingStyleRepository;
-      drawingRepository?: DrawingRepository;
-      profileRepository?: ProfileRepository;
-      drawingHistoryRepository?: DrawingHistoryRepository;
-    };
-  }
-) => {
-  return render(
-    <DrawingProvider repositories={options?.repositories}>
-      {ui}
-    </DrawingProvider>
-  );
-};
-```
+- ❌ テスト用モックの作成
+- ❌ テストヘルパーの作成
 
 ## 次のステップ
 
@@ -504,7 +431,7 @@ export const renderWithDrawingContext = (
 2. ドメインインターフェイスの定義を行う ✅
 3. リポジトリアダプターを実装する ✅
 4. 状態管理フックを分割する ✅
-5. コンポーネントのリファクタリングを行う
+5. コンポーネントのリファクタリングを行う ✅
 6. テストを改善する
 
 ## 進捗状況
@@ -558,9 +485,15 @@ export const renderWithDrawingContext = (
 - ✅ 依存性注入のためのファクトリ作成
   - ✅ src/features/drawing-canvas/adapters/repository-factory.ts の作成
 
-### フェーズ3: コンポーネントのリファクタリング (未着手)
+### フェーズ3: コンポーネントのリファクタリング (完了)
 
-- ❌ DrawingCanvasコンポーネントの分割
+2024-03-14に完了
+
+- ✅ DrawingCanvasコンポーネントの分割
+  - ✅ src/features/drawing-canvas/components/drawing-provider.tsx の作成
+  - ✅ src/features/drawing-canvas/components/drawing-canvas-content.tsx の作成
+  - ✅ src/features/drawing-canvas/index.tsx の更新
+- ✅ OnDrawingStyleChange型をdrawing-style.tsに追加し依存関係を整理
 
 ### フェーズ4: テストの改善 (未着手)
 

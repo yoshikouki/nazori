@@ -8,8 +8,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import type { OnDrawingStyleChange } from ".";
-import { LineColorOptionsArray, getCurrentLineColor } from "./drawing-style";
+import {
+  LineColorOptionsArray,
+  type OnDrawingStyleChange,
+  getCurrentLineColor,
+} from "./drawing-style";
 
 type LineColorPickerProps = {
   color: string;
