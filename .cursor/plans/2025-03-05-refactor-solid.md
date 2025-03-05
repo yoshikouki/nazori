@@ -502,7 +502,7 @@ export const renderWithDrawingContext = (
 
 1. ドメインモデルの移行から着手する ✅
 2. ドメインインターフェイスの定義を行う ✅
-3. リポジトリアダプターを実装する
+3. リポジトリアダプターを実装する ✅
 4. 状態管理フックを分割する ✅
 5. コンポーネントのリファクタリングを行う
 6. テストを改善する
@@ -519,7 +519,7 @@ export const renderWithDrawingContext = (
 - ✅ src/features/drawing-canvas/models/drawing-style-record.ts を作成
 - ✅ src/lib/client-db/index.ts を更新してモデルをインポートするように変更
 
-### フェーズ1: 依存性逆転とコロケーションパターンの適用 (進行中)
+### フェーズ1: 依存性逆転とコロケーションパターンの適用 (完了)
 
 #### 1.1 ドメインインターフェイスの定義 (完了)
 
@@ -545,11 +545,18 @@ export const renderWithDrawingContext = (
 
 - ✅ src/features/drawing-canvas/contexts/drawing-context.tsx の作成
 
-### フェーズ2: リポジトリ実装のアダプター作成 (未着手)
+### フェーズ2: リポジトリ実装のアダプター作成 (完了)
 
-- ❌ src/features/drawing-canvas/adapters/ ディレクトリ構造の作成
-- ❌ リポジトリアダプターの実装
-- ❌ 依存性注入のためのファクトリ作成
+2024-03-13に完了
+
+- ✅ src/features/drawing-canvas/adapters/ ディレクトリ構造の作成
+- ✅ リポジトリアダプターの実装
+  - ✅ src/features/drawing-canvas/adapters/profile-repository-adapter.ts の作成
+  - ✅ src/features/drawing-canvas/adapters/drawing-style-repository-adapter.ts の作成
+  - ✅ src/features/drawing-canvas/adapters/drawing-repository-adapter.ts の作成
+  - ✅ src/features/drawing-canvas/adapters/drawing-history-repository-adapter.ts の作成
+- ✅ 依存性注入のためのファクトリ作成
+  - ✅ src/features/drawing-canvas/adapters/repository-factory.ts の作成
 
 ### フェーズ3: コンポーネントのリファクタリング (未着手)
 
