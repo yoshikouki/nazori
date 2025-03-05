@@ -500,9 +500,58 @@ export const renderWithDrawingContext = (
 
 ## 次のステップ
 
-1. ドメインモデルの移行から着手する
-2. ドメインインターフェイスの定義を行う
+1. ドメインモデルの移行から着手する ✅
+2. ドメインインターフェイスの定義を行う ✅
 3. リポジトリアダプターを実装する
 4. 状態管理フックを分割する
 5. コンポーネントのリファクタリングを行う
 6. テストを改善する
+
+## 進捗状況
+
+### フェーズ0: ドメインモデルの移行 (完了)
+
+2024-03-13に完了
+
+- ✅ src/features/drawing-canvas/models/profile.ts を作成
+- ✅ src/features/drawing-canvas/models/drawing.ts を作成
+- ✅ src/features/drawing-canvas/models/drawing-history.ts を作成
+- ✅ src/features/drawing-canvas/models/drawing-style-record.ts を作成
+- ✅ src/lib/client-db/index.ts を更新してモデルをインポートするように変更
+
+### フェーズ1: 依存性逆転とコロケーションパターンの適用 (進行中)
+
+#### 1.1 ドメインインターフェイスの定義 (完了)
+
+2024-03-13に完了
+
+- ✅ src/features/drawing-canvas/interfaces/repositories.ts を作成
+  - ✅ DrawingStyleRepository インターフェイスを定義
+  - ✅ DrawingRepository インターフェイスを定義
+  - ✅ ProfileRepository インターフェイスを定義
+  - ✅ DrawingHistoryRepository インターフェイスを定義
+
+#### 1.2 状態管理フックの分割 (未着手)
+
+- ❌ src/features/drawing-canvas/stores/use-drawing-style-store.ts の作成
+- ❌ src/features/drawing-canvas/stores/use-drawing-data-store.ts の作成
+- ❌ src/features/drawing-canvas/stores/use-profile-store.ts の作成
+
+#### 1.3 コンテキストプロバイダーの作成 (未着手)
+
+- ❌ src/features/drawing-canvas/contexts/drawing-context.tsx の作成
+
+### フェーズ2: リポジトリ実装のアダプター作成 (未着手)
+
+- ❌ src/features/drawing-canvas/adapters/ ディレクトリ構造の作成
+- ❌ リポジトリアダプターの実装
+- ❌ 依存性注入のためのファクトリ作成
+
+### フェーズ3: コンポーネントのリファクタリング (未着手)
+
+- ❌ DrawingCanvasコンポーネントの分割
+
+### フェーズ4: テストの改善 (未着手)
+
+- ❌ テスト用モックの作成
+- ❌ テストヘルパーの作成

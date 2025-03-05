@@ -1,37 +1,9 @@
-import type { DrawingStyle } from "@/features/drawing-canvas/drawing-style";
+import type { Drawing } from "@/features/drawing-canvas/models/drawing";
+import type { DrawingHistory } from "@/features/drawing-canvas/models/drawing-history";
+import type { DrawingStyleRecord } from "@/features/drawing-canvas/models/drawing-style-record";
+import type { Profile } from "@/features/drawing-canvas/models/profile";
 import { type DBSchema, openDB } from "idb";
 import { ulid } from "ulid";
-
-export interface Profile {
-  id: string;
-  name?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface Drawing {
-  id: string;
-  profileId: string;
-  image: Blob;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface DrawingHistory {
-  id: string;
-  profileId: string;
-  imageList: Blob[]; // Blob
-  currentIndex: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface DrawingStyleRecord extends DrawingStyle {
-  id: string;
-  profileId: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
 
 interface NazoriDB extends DBSchema {
   profiles: {
