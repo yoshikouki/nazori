@@ -11,7 +11,10 @@
     "format": "biome check --write .",
     "format:unsafe": "biome check --write --unsafe .",
     "test": "vitest run",
-    "test:browser": "vitest --workspace=vitest.workspace.ts",
+    "test:chrome": "vitest run --workspace=vitest.workspace.ts --browser=chromium --browser.headless",
+    "test:safari": "vitest run --workspace=vitest.workspace.ts --browser=webkit --browser.headless",
+    "test:chrome:watch": "vitest --workspace=vitest.workspace.ts --browser=chromium",
+    "test:safari:watch": "vitest --workspace=vitest.workspace.ts --browser=webkit",
     "update:all": "bun update --latest"
   },
   "dependencies": {

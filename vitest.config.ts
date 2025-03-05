@@ -5,18 +5,20 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   plugins: [react()],
   test: {
-    environment: "happy-dom",
-    globals: true,
-    setupFiles: ["./src/tests/vitest-setup.ts"],
-    environmentOptions: {
-      happyDOM: {
-        settings: {
-          navigator: {
-            userAgent: "vitest",
-          },
-        },
-      },
+    browser: {
+      provider: "playwright", // or 'webdriverio'
+      enabled: true,
+      headless: true, // デフォルトでheadlessモードを有効化
+      // インスタンス設定はvitest.workspace.tsで行う
     },
+    environment: "happy-dom",
+    environmentOptions: {
+      // jsdomのオプションを削除
+    },
+    globals: true,
+    setupFiles: ["./vitest.setup.ts"],
+    include: ["src/**/*.{test,spec}.{ts,tsx}"],
+    exclude: ["**/node_modules/**", "**/dist/**", "**/.next/**"],
   },
   resolve: {
     alias: {
