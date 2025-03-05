@@ -15,10 +15,23 @@ export interface Point {
 
 type CanvasOrContext = HTMLCanvasElement | CanvasRenderingContext2D | null;
 
+const isCanvasRenderingContext2D = (obj: unknown): obj is CanvasRenderingContext2D => {
+  return obj !== null && typeof obj === "object" && "strokeStyle" in obj && "beginPath" in obj;
+};
+
+const isHTMLCanvasElement = (obj: unknown): obj is HTMLCanvasElement => {
+  return (
+    obj !== null &&
+    typeof obj === "object" &&
+    "getContext" in obj &&
+    typeof (obj as Record<string, unknown>).getContext === "function"
+  );
+};
+
 const getCanvasContext = (canvas: CanvasOrContext): CanvasRenderingContext2D | null => {
   if (!canvas) return null;
-  if (canvas instanceof CanvasRenderingContext2D) return canvas;
-  if (canvas instanceof HTMLCanvasElement) return canvas.getContext("2d");
+  if (isCanvasRenderingContext2D(canvas)) return canvas;
+  if (isHTMLCanvasElement(canvas)) return canvas.getContext("2d");
   return null;
 };
 

@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { createMockCanvas, createMockContext } from "../../tests/canvas-mocks";
 import {
   applyDrawingStyle,
   calculateMidPoint,
@@ -8,6 +9,24 @@ import {
   resizeCanvasToParent,
 } from "./drawing-core";
 import { DefaultDrawingStyle } from "./drawing-style";
+
+// PredefinedColorSpaceの型定義（テスト専用）
+type PredefinedColorSpace = "srgb" | "display-p3";
+
+// DOMRect用のモック
+const createMockDOMRect = (width: number, height: number): DOMRect => {
+  return {
+    x: 0,
+    y: 0,
+    width,
+    height,
+    top: 0,
+    right: width,
+    bottom: height,
+    left: 0,
+    toJSON: () => ({}),
+  };
+};
 
 describe("drawing-core", () => {
   describe("calculateMidPoint", () => {
@@ -74,14 +93,7 @@ describe("drawing-core", () => {
 
   describe("applyDrawingStyle", () => {
     it("applies normal drawing style", () => {
-      const ctx = {
-        lineWidth: 0,
-        lineCap: "",
-        lineJoin: "",
-        strokeStyle: "",
-        globalCompositeOperation: "",
-      } as unknown as CanvasRenderingContext2D;
-
+      const ctx = createMockContext();
       const style = {
         ...DefaultDrawingStyle,
         isEraser: false,
@@ -97,14 +109,7 @@ describe("drawing-core", () => {
     });
 
     it("applies eraser drawing style", () => {
-      const ctx = {
-        lineWidth: 0,
-        lineCap: "",
-        lineJoin: "",
-        strokeStyle: "",
-        globalCompositeOperation: "",
-      } as unknown as CanvasRenderingContext2D;
-
+      const ctx = createMockContext();
       const style = {
         ...DefaultDrawingStyle,
         isEraser: true,
@@ -116,14 +121,7 @@ describe("drawing-core", () => {
     });
 
     it("applies custom line width", () => {
-      const ctx = {
-        lineWidth: 0,
-        lineCap: "",
-        lineJoin: "",
-        strokeStyle: "",
-        globalCompositeOperation: "",
-      } as unknown as CanvasRenderingContext2D;
-
+      const ctx = createMockContext();
       const style = {
         ...DefaultDrawingStyle,
         lineWidth: 20,
@@ -135,14 +133,7 @@ describe("drawing-core", () => {
     });
 
     it("applies custom line color", () => {
-      const ctx = {
-        lineWidth: 0,
-        lineCap: "",
-        lineJoin: "",
-        strokeStyle: "",
-        globalCompositeOperation: "",
-      } as unknown as CanvasRenderingContext2D;
-
+      const ctx = createMockContext();
       const style = {
         ...DefaultDrawingStyle,
         lineColor: "#FF0000",
@@ -156,31 +147,31 @@ describe("drawing-core", () => {
 
   describe("clearCanvas", () => {
     it("clears the canvas", () => {
-      const ctx = {
-        clearRect: vi.fn(),
-      } as unknown as CanvasRenderingContext2D;
+      const { context: ctx } = createMockCanvas();
+      ctx.canvas.width = 100;
+      ctx.canvas.height = 200;
 
-      clearCanvas(ctx, 100, 200);
+      clearCanvas(ctx);
 
       expect(ctx.clearRect).toHaveBeenCalledWith(0, 0, 100, 200);
     });
 
     it("handles zero dimensions", () => {
-      const ctx = {
-        clearRect: vi.fn(),
-      } as unknown as CanvasRenderingContext2D;
+      const { context: ctx } = createMockCanvas();
+      ctx.canvas.width = 0;
+      ctx.canvas.height = 0;
 
-      clearCanvas(ctx, 0, 0);
+      clearCanvas(ctx);
 
       expect(ctx.clearRect).toHaveBeenCalledWith(0, 0, 0, 0);
     });
 
     it("handles negative dimensions", () => {
-      const ctx = {
-        clearRect: vi.fn(),
-      } as unknown as CanvasRenderingContext2D;
+      const { context: ctx } = createMockCanvas();
+      ctx.canvas.width = -10;
+      ctx.canvas.height = -20;
 
-      clearCanvas(ctx, -10, -20);
+      clearCanvas(ctx);
 
       expect(ctx.clearRect).toHaveBeenCalledWith(0, 0, -10, -20);
     });
@@ -188,13 +179,7 @@ describe("drawing-core", () => {
 
   describe("drawSmoothLine", () => {
     it("draws a smooth line through points", () => {
-      const ctx = {
-        beginPath: vi.fn(),
-        moveTo: vi.fn(),
-        quadraticCurveTo: vi.fn(),
-        stroke: vi.fn(),
-      } as unknown as CanvasRenderingContext2D;
-
+      const ctx = createMockContext();
       const points = [
         { x: 10, y: 10 },
         { x: 20, y: 20 },
@@ -213,7 +198,7 @@ describe("drawing-core", () => {
     });
 
     it("returns original points when no points are provided", () => {
-      const ctx = {} as CanvasRenderingContext2D;
+      const ctx = createMockContext();
       const points: Array<{ x: number; y: number }> = [];
       const lastPos = { x: 5, y: 5 };
       const midPoint = { x: 7.5, y: 7.5 };
@@ -225,13 +210,7 @@ describe("drawing-core", () => {
     });
 
     it("handles a single point", () => {
-      const ctx = {
-        beginPath: vi.fn(),
-        moveTo: vi.fn(),
-        quadraticCurveTo: vi.fn(),
-        stroke: vi.fn(),
-      } as unknown as CanvasRenderingContext2D;
-
+      const ctx = createMockContext();
       const points = [{ x: 10, y: 10 }];
       const lastPos = { x: 5, y: 5 };
       const midPoint = { x: 7.5, y: 7.5 };
@@ -248,20 +227,22 @@ describe("drawing-core", () => {
 
   describe("resizeCanvasToParent", () => {
     it("resizes canvas to match parent dimensions", () => {
-      const imageData = { width: 50, height: 50 };
-      const ctx = {
-        getImageData: vi.fn(() => imageData),
-        putImageData: vi.fn(),
-      } as unknown as CanvasRenderingContext2D;
+      const { canvas, context: ctx } = createMockCanvas();
+      canvas.width = 50;
+      canvas.height = 50;
 
-      const canvas = {
+      // 親要素のサイズを設定
+      (canvas.parentElement as HTMLElement).getBoundingClientRect = vi.fn(() =>
+        createMockDOMRect(100, 200),
+      );
+
+      // getImageDataのモックを設定
+      ctx.getImageData = vi.fn(() => ({
         width: 50,
         height: 50,
-        parentElement: {
-          getBoundingClientRect: () => ({ width: 100, height: 200 }),
-        },
-        getContext: vi.fn(() => ctx),
-      } as unknown as HTMLCanvasElement;
+        data: new Uint8ClampedArray(),
+        colorSpace: "srgb" as PredefinedColorSpace,
+      }));
 
       const result = resizeCanvasToParent(canvas, DefaultDrawingStyle);
 
@@ -272,9 +253,11 @@ describe("drawing-core", () => {
     });
 
     it("returns false when no parent element exists", () => {
-      const canvas = {
-        parentElement: null,
-      } as unknown as HTMLCanvasElement;
+      const { canvas } = createMockCanvas();
+      Object.defineProperty(canvas, "parentElement", {
+        value: null,
+        configurable: true,
+      });
 
       const result = resizeCanvasToParent(canvas, DefaultDrawingStyle);
 
@@ -282,13 +265,14 @@ describe("drawing-core", () => {
     });
 
     it("returns false when canvas dimensions already match parent", () => {
-      const canvas = {
-        width: 100,
-        height: 200,
-        parentElement: {
-          getBoundingClientRect: () => ({ width: 100, height: 200 }),
-        },
-      } as unknown as HTMLCanvasElement;
+      const { canvas } = createMockCanvas();
+      canvas.width = 100;
+      canvas.height = 200;
+
+      // 親要素のサイズを設定
+      (canvas.parentElement as HTMLElement).getBoundingClientRect = vi.fn(() =>
+        createMockDOMRect(100, 200),
+      );
 
       const result = resizeCanvasToParent(canvas, DefaultDrawingStyle);
 
@@ -296,14 +280,20 @@ describe("drawing-core", () => {
     });
 
     it("returns false when getContext returns null", () => {
-      const canvas = {
-        width: 50,
-        height: 50,
-        parentElement: {
-          getBoundingClientRect: () => ({ width: 100, height: 200 }),
-        },
-        getContext: vi.fn(() => null),
-      } as unknown as HTMLCanvasElement;
+      const { canvas } = createMockCanvas();
+      canvas.width = 50;
+      canvas.height = 50;
+
+      // 親要素のサイズを設定
+      (canvas.parentElement as HTMLElement).getBoundingClientRect = vi.fn(() =>
+        createMockDOMRect(100, 200),
+      );
+
+      // getContextがnullを返すように設定
+      Object.defineProperty(canvas, "getContext", {
+        value: vi.fn(() => null),
+        configurable: true,
+      });
 
       const result = resizeCanvasToParent(canvas, DefaultDrawingStyle);
 
@@ -311,20 +301,22 @@ describe("drawing-core", () => {
     });
 
     it("handles zero parent dimensions", () => {
-      const imageData = { width: 50, height: 50 };
-      const ctx = {
-        getImageData: vi.fn(() => imageData),
-        putImageData: vi.fn(),
-      } as unknown as CanvasRenderingContext2D;
+      const { canvas, context: ctx } = createMockCanvas();
+      canvas.width = 50;
+      canvas.height = 50;
 
-      const canvas = {
+      // 親要素のサイズを0に設定
+      (canvas.parentElement as HTMLElement).getBoundingClientRect = vi.fn(() =>
+        createMockDOMRect(0, 0),
+      );
+
+      // getImageDataのモックを設定
+      ctx.getImageData = vi.fn(() => ({
         width: 50,
         height: 50,
-        parentElement: {
-          getBoundingClientRect: () => ({ width: 0, height: 0 }),
-        },
-        getContext: vi.fn(() => ctx),
-      } as unknown as HTMLCanvasElement;
+        data: new Uint8ClampedArray(),
+        colorSpace: "srgb" as PredefinedColorSpace,
+      }));
 
       const result = resizeCanvasToParent(canvas, DefaultDrawingStyle);
 
