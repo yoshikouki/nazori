@@ -9,6 +9,7 @@ export default defineConfig({
       provider: "playwright", // or 'webdriverio'
       enabled: true,
       headless: true, // デフォルトでheadlessモードを有効化
+      screenshotFailures: false,
       // インスタンス設定はvitest.workspace.tsで行う
     },
     environment: "happy-dom",
