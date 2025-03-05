@@ -5,7 +5,7 @@ import {
   clearCanvas,
   drawBlobToCanvas,
 } from "@/features/drawing-canvas/drawing-core";
-import { drawingHistoryRepository } from "@/lib/client-db/repositories";
+import { drawingHistoryRepository } from "@/features/drawing-canvas/repositories";
 import type { RefObject } from "react";
 import { useEffect, useRef, useState } from "react";
 

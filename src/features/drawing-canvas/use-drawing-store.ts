@@ -1,12 +1,12 @@
 "use client";
 
-import type { Drawing, DrawingHistory, DrawingStyleRecord, Profile } from "@/lib/client-db";
 import {
   drawingHistoryRepository,
   drawingRepository,
   drawingStyleRepository,
   profileRepository,
-} from "@/lib/client-db/repositories";
+} from "@/features/drawing-canvas/repositories";
+import type { Drawing, DrawingHistory, DrawingStyleRecord, Profile } from "@/lib/client-db";
 import { useEffect, useState } from "react";
 import { DefaultDrawingStyle, type DrawingStyle } from "./drawing-style";
 

@@ -1,5 +1,5 @@
 import type { DrawingStyle } from "@/features/drawing-canvas/drawing-style";
-import { type DrawingStyleRecord, clientDB, generateId } from "../index";
+import { type DrawingStyleRecord, clientDB, generateId } from "../../../lib/client-db/index";
 
 /**
  * 描画スタイルのリポジトリクラス

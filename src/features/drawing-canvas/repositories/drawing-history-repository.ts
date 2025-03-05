@@ -1,4 +1,4 @@
-import { type DrawingHistory, clientDB, generateId } from "../index";
+import { type DrawingHistory, clientDB, generateId } from "../../../lib/client-db/index";
 
 /**
  * 描画履歴のリポジトリクラス
