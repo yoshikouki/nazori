@@ -32,13 +32,7 @@ export default defineWorkspace([
         ],
       },
       include: ["src/**/*.browser.{test,spec}.ts", "src/**/*.browser.{test,spec}.tsx"],
-      exclude: [
-        "**/node_modules/**",
-        "**/dist/**",
-        "**/.next/**",
-        "src/**/*.{test,spec}.ts",
-        "src/**/*.{test,spec}.tsx",
-      ],
+      exclude: ["**/node_modules/**", "**/dist/**", "**/.next/**"],
     },
   },
 ]);
