@@ -67,6 +67,8 @@ export const createMockCanvas = (options?: {
   height?: number;
   parentWidth?: number;
   parentHeight?: number;
+  noParentElement?: boolean;
+  nullContext?: boolean;
   imageData?: {
     width?: number;
     height?: number;
@@ -87,8 +89,8 @@ export const createMockCanvas = (options?: {
   const canvas = {
     width: options?.width ?? 0,
     height: options?.height ?? 0,
-    parentElement: mockParentElement,
-    getContext: vi.fn(() => mockContext),
+    parentElement: options?.noParentElement ? null : mockParentElement,
+    getContext: options?.nullContext ? vi.fn(() => null) : vi.fn(() => mockContext),
     toBlob: vi.fn((callback: BlobCallback) => {
       const blob = new Blob([""], { type: "image/png" });
       callback(blob);

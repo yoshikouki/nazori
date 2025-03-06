@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { createMockCanvas, createMockContext } from "../../tests/canvas-mocks";
 import {
   applyDrawingStyle,
@@ -9,24 +9,6 @@ import {
   resizeCanvasToParent,
 } from "./drawing-core";
 import { DefaultDrawingStyle } from "./drawing-style";
-
-// PredefinedColorSpaceの型定義（テスト専用）
-type PredefinedColorSpace = "srgb" | "display-p3";
-
-// DOMRect用のモック
-const createMockDOMRect = (width: number, height: number): DOMRect => {
-  return {
-    x: 0,
-    y: 0,
-    width,
-    height,
-    top: 0,
-    right: width,
-    bottom: height,
-    left: 0,
-    toJSON: () => ({}),
-  };
-};
 
 describe("drawing-core", () => {
   describe("calculateMidPoint", () => {
@@ -252,10 +234,8 @@ describe("drawing-core", () => {
     });
 
     it("returns false when no parent element exists", () => {
-      const { canvas } = createMockCanvas();
-      Object.defineProperty(canvas, "parentElement", {
-        value: null,
-        configurable: true,
+      const { canvas } = createMockCanvas({
+        noParentElement: true,
       });
 
       const result = resizeCanvasToParent(canvas, DefaultDrawingStyle);
@@ -282,12 +262,7 @@ describe("drawing-core", () => {
         height: 50,
         parentWidth: 100,
         parentHeight: 200,
-      });
-
-      // getContextがnullを返すように設定
-      Object.defineProperty(canvas, "getContext", {
-        value: vi.fn(() => null),
-        configurable: true,
+        nullContext: true,
       });
 
       const result = resizeCanvasToParent(canvas, DefaultDrawingStyle);
