@@ -44,7 +44,14 @@ export const ToolBar = ({
           asChild
         >
           <Link href="/">
-            <Image src="/logo-no-padding.webp" alt="logo" width={20} height={20} />
+            <Image
+              src="/logo-no-padding.webp"
+              alt="logo"
+              width={20}
+              height={30.27}
+              className="h-auto w-auto"
+              priority
+            />
           </Link>
         </Button>
         <Button
