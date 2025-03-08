@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PlusIcon } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Drawing } from "./models/drawing";
 
 interface DrawingDialogProps {
@@ -20,6 +20,18 @@ export const DrawingSelector = ({
   isLoading,
 }: DrawingDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const imageUrls = Object.fromEntries(
+    drawings.map((drawing) => [drawing.id, URL.createObjectURL(drawing.image)]),
+  );
+
+  // Clean up URLs when component unmounts to free memory
+  useEffect(() => {
+    return () => {
+      for (const url of Object.values(imageUrls)) {
+        URL.revokeObjectURL(url);
+      }
+    };
+  }, [imageUrls]);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -54,13 +66,10 @@ export const DrawingSelector = ({
               >
                 <div className="relative aspect-square w-full">
                   <Image
-                    src={URL.createObjectURL(drawing.image)}
+                    src={imageUrls[drawing.id]}
                     alt={`Drawing from ${drawing.createdAt.toLocaleDateString()}`}
                     fill
                     style={{ objectFit: "contain" }}
-                    onLoad={(e) => {
-                      URL.revokeObjectURL((e.target as HTMLImageElement).src);
-                    }}
                   />
                 </div>
                 <div className="p-2 text-gray-500 text-xs">
