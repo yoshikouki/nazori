@@ -1,4 +1,5 @@
 import { clientDB, generateId } from "../../../lib/client-db/index";
+import { EMPTY_CANVAS_BASE64 } from "../../../lib/empty-canvas";
 import type { Drawing } from "../models/drawing";
 
 /**
@@ -36,14 +37,15 @@ class DrawingRepository {
   /**
    * 新しい描画を作成する
    */
-  async create(profileId: string, image = new Blob()): Promise<Drawing> {
+  async create(profileId: string): Promise<Drawing> {
     try {
       const db = await clientDB();
       const now = new Date();
+      const emptyBlob = await fetch(EMPTY_CANVAS_BASE64).then((res) => res.blob());
       const drawing: Drawing = {
         id: generateId(),
         profileId,
-        image,
+        image: emptyBlob,
         createdAt: now,
         updatedAt: now,
       };
