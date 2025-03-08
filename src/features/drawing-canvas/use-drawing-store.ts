@@ -19,7 +19,6 @@ import { DefaultDrawingStyle, type DrawingStyle } from "./drawing-style";
  */
 export const useDrawingStore = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
   const [currentProfile, setCurrentProfile] = useState<Profile | null>(null);
   const [drawingStyleRecord, setDrawingStyleRecord] = useState<DrawingStyleRecord | null>(null);
   const [isEraser, setIsEraser] = useState(false);
@@ -78,7 +77,6 @@ export const useDrawingStore = () => {
       }
     } catch (err) {
       console.error("Failed to update style", err);
-      setError(err instanceof Error ? err : new Error("Failed to update style"));
     }
   };
 
@@ -95,7 +93,6 @@ export const useDrawingStore = () => {
       return drawing;
     } catch (err) {
       console.error("Failed to create drawing", err);
-      setError(err instanceof Error ? err : new Error("Failed to create drawing"));
     }
   };
 
@@ -104,7 +101,6 @@ export const useDrawingStore = () => {
    */
   const updateCurrentDrawing = async (image: Blob): Promise<Drawing | undefined> => {
     if (!currentProfile || !currentDrawingId) {
-      setError(new Error("Failed to update drawing: No profile or drawing selected"));
       return;
     }
 
@@ -120,7 +116,6 @@ export const useDrawingStore = () => {
       return updatedDrawing;
     } catch (err) {
       console.error("Failed to update drawing", err);
-      setError(err instanceof Error ? err : new Error("Failed to update drawing"));
       return;
     }
   };
@@ -169,7 +164,6 @@ export const useDrawingStore = () => {
         setDrawings(drawings);
       } catch (err) {
         console.error("Failed to load data", err);
-        setError(err instanceof Error ? err : new Error("Failed to load data"));
       } finally {
         setIsLoading(false);
       }
@@ -182,7 +176,6 @@ export const useDrawingStore = () => {
     drawingStyle,
     drawingHistory,
     isLoading,
-    error,
     updateDrawingStyle,
     drawings,
     createDrawing,
