@@ -1,7 +1,13 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { PlusIcon } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MoreVertical, PlusIcon, Trash2Icon } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { Drawing } from "./models/drawing";
@@ -10,6 +16,7 @@ interface DrawingDialogProps {
   drawings: Drawing[];
   onDrawingSelect: (drawing: Drawing) => void;
   onCreateNewDrawing: () => void;
+  onDeleteDrawing: (drawingId: string) => Promise<void>;
   isLoading: boolean;
 }
 
@@ -17,6 +24,7 @@ export const DrawingSelector = ({
   drawings,
   onDrawingSelect,
   onCreateNewDrawing,
+  onDeleteDrawing,
   isLoading,
 }: DrawingDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -47,7 +55,7 @@ export const DrawingSelector = ({
         <DialogHeader>
           <DialogTitle>なぞりを選ぶ</DialogTitle>
         </DialogHeader>
-        <div className="max-h-[60vh] overflow-y-auto pr-1">
+        <div className="max-h-[60vh] overflow-y-auto px-1">
           <div className="grid grid-cols-2 gap-4 py-4">
             {isLoading ? (
               <div className="flex aspect-square w-full items-center justify-center">
@@ -55,28 +63,58 @@ export const DrawingSelector = ({
               </div>
             ) : (
               drawings.map((drawing) => (
-                <button
-                  type="button"
+                <div
                   key={drawing.id}
-                  className="cursor-pointer overflow-hidden rounded-lg border text-left hover:bg-gray-50"
-                  onClick={() => {
-                    onDrawingSelect(drawing);
-                    setIsOpen(false);
-                  }}
-                  aria-label={`Drawing from ${drawing.createdAt.toLocaleDateString()}`}
+                  className="group relative overflow-hidden rounded-lg border text-left"
                 >
-                  <div className="relative aspect-square w-full">
-                    <Image
-                      src={imageUrls[drawing.id]}
-                      alt={`Drawing from ${drawing.createdAt.toLocaleDateString()}`}
-                      fill
-                      style={{ objectFit: "contain" }}
-                    />
+                  <button
+                    type="button"
+                    className="w-full cursor-pointer hover:bg-gray-50"
+                    onClick={() => {
+                      onDrawingSelect(drawing);
+                      setIsOpen(false);
+                    }}
+                    aria-label={`Drawing from ${drawing.createdAt.toLocaleDateString()}`}
+                  >
+                    <div className="relative aspect-square w-full">
+                      <Image
+                        src={imageUrls[drawing.id]}
+                        alt={`Drawing from ${drawing.createdAt.toLocaleDateString()}`}
+                        fill
+                        style={{ objectFit: "contain" }}
+                      />
+                    </div>
+                    <div className="p-2 text-gray-500 text-xs">
+                      {drawing.createdAt.toLocaleDateString()}
+                    </div>
+                  </button>
+                  <div className="absolute top-1 right-1 opacity-0 transition-opacity group-hover:opacity-100">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 rounded-full bg-white/80"
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                          <span className="sr-only">メニュー</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteDrawing(drawing.id);
+                          }}
+                          className="cursor-pointer text-red-600"
+                        >
+                          <Trash2Icon className="mr-2 h-4 w-4" />
+                          <span>削除</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
-                  <div className="p-2 text-gray-500 text-xs">
-                    {drawing.createdAt.toLocaleDateString()}
-                  </div>
-                </button>
+                </div>
               ))
             )}
             <button

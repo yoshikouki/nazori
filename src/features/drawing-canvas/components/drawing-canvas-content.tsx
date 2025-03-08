@@ -20,6 +20,7 @@ export const DrawingCanvasContent = () => {
     onDrawEnd,
     undo,
     drawings,
+    onDeleteDrawing,
   } = useDrawing();
 
   return (
@@ -45,6 +46,7 @@ export const DrawingCanvasContent = () => {
           drawings={drawings}
           onDrawingSelect={onChangeDrawing}
           onCreateNewDrawing={createNewDrawing}
+          onDeleteDrawing={onDeleteDrawing}
           isLoading={isLoading}
         />
       </div>

@@ -20,6 +20,7 @@ interface ToolBarProps {
   drawings: Drawing[];
   onDrawingSelect: (drawing: Drawing) => void;
   onCreateNewDrawing: () => void;
+  onDeleteDrawing?: (drawingId: string) => Promise<void>;
   isLoading: boolean;
 }
 
@@ -31,6 +32,7 @@ export const ToolBar = ({
   drawings,
   onDrawingSelect,
   onCreateNewDrawing,
+  onDeleteDrawing,
   isLoading,
 }: ToolBarProps) => {
   const togglePenOnly = () => {
@@ -95,6 +97,7 @@ export const ToolBar = ({
           drawings={drawings}
           onDrawingSelect={onDrawingSelect}
           onCreateNewDrawing={onCreateNewDrawing}
+          onDeleteDrawing={onDeleteDrawing || (async () => {})}
           isLoading={isLoading}
         />
       </div>

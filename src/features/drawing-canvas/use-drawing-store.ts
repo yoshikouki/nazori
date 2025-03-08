@@ -175,6 +175,23 @@ export const useDrawingStore = () => {
     loadData();
   }, [currentProfile, currentDrawingId]);
 
+  /**
+   * Deletes a drawing by ID
+   */
+  const deleteDrawing = async (id: string): Promise<boolean> => {
+    try {
+      const success = await drawingRepository.delete(id);
+      if (success) {
+        setDrawings(drawings.filter((d) => d.id !== id));
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error("Failed to delete drawing", err);
+      return false;
+    }
+  };
+
   return {
     drawingStyle,
     drawingHistory,
@@ -186,5 +203,6 @@ export const useDrawingStore = () => {
     currentDrawingId,
     selectDrawing,
     currentProfile,
+    deleteDrawing,
   };
 };
