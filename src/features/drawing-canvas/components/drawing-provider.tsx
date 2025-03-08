@@ -61,8 +61,9 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
     try {
       selectDrawing(drawing.id);
       await drawBlobToCanvas(canvasRef.current, drawing.image);
-      clearHistory();
-      pushHistory(); // Add initial state to history
+      await pushHistory(); // Save initial state before clearing history
+      await clearHistory(); // Start fresh history
+      await pushHistory(); // Set initial state in new history
     } catch (error) {
       console.error("Failed to load drawing:", error);
     }
