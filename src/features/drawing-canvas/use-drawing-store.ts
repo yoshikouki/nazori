@@ -99,8 +99,8 @@ export const useDrawingStore = () => {
   /**
    * Updates the current drawing with new image data
    */
-  const updateCurrentDrawing = async (image: Blob): Promise<Drawing | undefined> => {
-    if (!currentProfile || !currentDrawingId) {
+  const updateCurrentDrawing = async (image: Blob | null): Promise<Drawing | undefined> => {
+    if (!currentProfile || !currentDrawingId || !image) {
       return;
     }
 

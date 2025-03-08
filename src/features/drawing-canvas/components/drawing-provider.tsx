@@ -1,6 +1,6 @@
 import type { Drawing } from "@/features/drawing-canvas/models/drawing";
 import { type ReactNode, createContext, useContext, useEffect, useRef } from "react";
-import { drawBlobToCanvas } from "../drawing-core";
+import { canvasToBlob, drawBlobToCanvas } from "../drawing-core";
 import type { DrawingStyle } from "../drawing-style";
 import { useDrawingHistory } from "../use-drawing-history";
 import { useDrawingStore } from "../use-drawing-store";
@@ -44,6 +44,7 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
     isLoading,
     drawings,
     createDrawing,
+    updateCurrentDrawing,
     selectDrawing,
     currentDrawingId,
     currentProfile,
@@ -78,8 +79,10 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
   };
 
   // Save drawing state after each drawing operation
-  const onDrawEnd = () => {
+  const onDrawEnd = async () => {
     pushHistory();
+    const blob = await canvasToBlob(canvasRef.current);
+    updateCurrentDrawing(blob);
   };
 
   // Cleanup animation frames on unmount
