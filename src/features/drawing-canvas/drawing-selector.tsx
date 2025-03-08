@@ -1,13 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MoreVertical, PlusIcon, Trash2Icon } from "lucide-react";
+import { PlusIcon, Trash2Icon } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { Drawing } from "./models/drawing";
@@ -28,6 +22,7 @@ export const DrawingSelector = ({
   isLoading,
 }: DrawingDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const imageUrls = Object.fromEntries(
     drawings.map((drawing) => [drawing.id, URL.createObjectURL(drawing.image)]),
   );
@@ -40,6 +35,13 @@ export const DrawingSelector = ({
       }
     };
   }, [imageUrls]);
+
+  // Reset confirmation when dialog closes
+  useEffect(() => {
+    if (!isOpen) {
+      setConfirmDeleteId(null);
+    }
+  }, [isOpen]);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -67,16 +69,14 @@ export const DrawingSelector = ({
                   key={drawing.id}
                   className="group relative overflow-hidden rounded-lg border text-left"
                 >
-                  <button
-                    type="button"
-                    className="w-full cursor-pointer hover:bg-gray-50"
-                    onClick={() => {
-                      onDrawingSelect(drawing);
-                      setIsOpen(false);
-                    }}
-                    aria-label={`Drawing from ${drawing.createdAt.toLocaleDateString()}`}
-                  >
-                    <div className="relative aspect-square w-full">
+                  <div className="cursor-pointer hover:bg-gray-50">
+                    <div 
+                      className="relative aspect-square w-full"
+                      onClick={() => {
+                        onDrawingSelect(drawing);
+                        setIsOpen(false);
+                      }}
+                    >
                       <Image
                         src={imageUrls[drawing.id]}
                         alt={`Drawing from ${drawing.createdAt.toLocaleDateString()}`}
@@ -84,35 +84,37 @@ export const DrawingSelector = ({
                         style={{ objectFit: "contain" }}
                       />
                     </div>
-                    <div className="p-2 text-gray-500 text-xs">
-                      {drawing.createdAt.toLocaleDateString()}
-                    </div>
-                  </button>
-                  <div className="absolute top-1 right-1 opacity-0 transition-opacity group-hover:opacity-100">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 rounded-full bg-white/80"
-                        >
-                          <MoreVertical className="h-4 w-4" />
-                          <span className="sr-only">メニュー</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
+                    <div className="flex items-center justify-between p-2">
+                      <span className="text-gray-500 text-xs">
+                        {drawing.createdAt.toLocaleDateString()}
+                      </span>
+                      {confirmDeleteId === drawing.id ? (
+                        <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             onDeleteDrawing(drawing.id);
+                            setConfirmDeleteId(null);
                           }}
-                          className="cursor-pointer text-red-600"
+                          className="ml-2 rounded bg-red-500 px-2 py-1 text-xs text-white hover:bg-red-600"
+                          aria-label="さくじょする"
                         >
-                          <Trash2Icon className="mr-2 h-4 w-4" />
-                          <span>削除</span>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                          さくじょする？
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setConfirmDeleteId(drawing.id);
+                          }}
+                          className="ml-2 text-gray-400 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100"
+                          aria-label="削除"
+                        >
+                          <Trash2Icon className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))
