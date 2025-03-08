@@ -12,7 +12,6 @@ const createEmptyCanvasBase64 = (): string => {
   // Blobに変換
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   const buffer = imageData.data.buffer;
-  const blob = new Blob([buffer], { type: "image/png" });
 
   // Base64に変換
   return `data:image/png;base64,${Buffer.from(buffer).toString("base64")}`;
@@ -25,5 +24,6 @@ export const EMPTY_CANVAS_BASE64 =
 
 // スクリプトとして実行された場合
 if (import.meta.main) {
-  console.log(EMPTY_CANVAS_BASE64);
+  const base64 = createEmptyCanvasBase64();
+  console.log(base64);
 }
