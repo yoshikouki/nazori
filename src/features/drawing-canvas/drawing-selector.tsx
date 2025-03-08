@@ -36,19 +36,6 @@ export const DrawingSelector = ({
           <DialogTitle>なぞりを選ぶ</DialogTitle>
         </DialogHeader>
         <div className="grid grid-cols-2 gap-4 py-4">
-          <button
-            type="button"
-            className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-lg border border-gray-300 border-dashed p-2 hover:bg-gray-50"
-            onClick={() => {
-              onCreateNewDrawing();
-              setIsOpen(false);
-            }}
-            aria-label="あたらしくつくる"
-          >
-            <PlusIcon className="h-8 w-8 text-gray-400" />
-            <span className="mt-2 text-gray-500 text-sm">あたらしくつくる</span>
-          </button>
-
           {isLoading ? (
             <div className="flex aspect-square w-full items-center justify-center">
               よみこみちゅう...
@@ -82,6 +69,18 @@ export const DrawingSelector = ({
               </button>
             ))
           )}
+          <button
+            type="button"
+            className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-lg border border-gray-300 border-dashed p-2 hover:bg-gray-50"
+            onClick={() => {
+              onCreateNewDrawing();
+              setIsOpen(false);
+            }}
+            aria-label="あたらしくつくる"
+          >
+            <PlusIcon className="h-8 w-8 text-gray-400" />
+            <span className="mt-2 text-gray-500 text-sm">あたらしくつくる</span>
+          </button>
         </div>
       </DialogContent>
     </Dialog>

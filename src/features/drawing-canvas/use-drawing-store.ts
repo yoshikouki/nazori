@@ -161,7 +161,16 @@ export const useDrawingStore = () => {
 
         // Get drawings list
         const drawings = await drawingRepository.getByProfileId(profile.id);
-        setDrawings(drawings);
+        if (drawings.length === 0) {
+          const initialDrawing = await drawingRepository.create(profile.id);
+          setDrawings([initialDrawing]);
+        } else {
+          setDrawings(drawings);
+        }
+        // Set current drawing id to the first drawing
+        if (currentDrawingId === null) {
+          setCurrentDrawingId(drawings[0].id);
+        }
       } catch (err) {
         console.error("Failed to load data", err);
       } finally {
@@ -170,7 +179,7 @@ export const useDrawingStore = () => {
     };
 
     loadData();
-  }, [currentProfile]);
+  }, [currentProfile, currentDrawingId]);
 
   return {
     drawingStyle,
