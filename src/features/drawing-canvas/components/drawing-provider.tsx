@@ -70,9 +70,9 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
 
   // Handler for creating a new drawing
   const createNewDrawing = async () => {
+    await createDrawing();
     clearCanvas(canvasRef.current);
     clearHistory(); // Clear history for the new drawing
-    await createDrawing();
   };
 
   // Save drawing state after each drawing operation

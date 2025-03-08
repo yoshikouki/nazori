@@ -85,7 +85,6 @@ export const useDrawingStore = () => {
    */
   const createDrawing = async () => {
     if (!currentProfile) return;
-
     try {
       const drawing = await drawingRepository.create(currentProfile.id);
       setDrawings([drawing, ...drawings]);
@@ -162,14 +161,9 @@ export const useDrawingStore = () => {
         // Get drawings list
         const drawings = await drawingRepository.getByProfileId(profile.id);
         if (drawings.length === 0) {
-          const initialDrawing = await drawingRepository.create(profile.id);
-          setDrawings([initialDrawing]);
+          await createDrawing();
         } else {
           setDrawings(drawings);
-        }
-        // Set current drawing id to the first drawing
-        if (currentDrawingId === null) {
-          setCurrentDrawingId(drawings[0].id);
         }
       } catch (err) {
         console.error("Failed to load data", err);
@@ -180,6 +174,12 @@ export const useDrawingStore = () => {
 
     loadData();
   }, [currentProfile, currentDrawingId]);
+
+  useEffect(() => {
+    if (currentDrawingId) return;
+    createDrawing();
+    // biome-ignore lint/correctness/useExhaustiveDependencies: React Compiler
+  }, [currentDrawingId, createDrawing]);
 
   return {
     drawingStyle,
