@@ -87,7 +87,7 @@ export const useDrawingStore = () => {
     if (!currentProfile) return;
     try {
       const drawing = await drawingRepository.create(currentProfile.id);
-      setDrawings([drawing, ...drawings]);
+      setDrawings((prev) => [drawing, ...prev]);
       setCurrentDrawingId(drawing.id);
       return drawing;
     } catch (err) {
@@ -158,13 +158,13 @@ export const useDrawingStore = () => {
           (await drawingHistoryRepository.create(profile.id));
         setDrawingHistory(history);
 
+        if (!currentDrawingId) {
+          const drawing = await drawingRepository.create(currentProfile.id);
+          setCurrentDrawingId(drawing.id);
+        }
         // Get drawings list
         const drawings = await drawingRepository.getByProfileId(profile.id);
-        if (drawings.length === 0) {
-          await createDrawing();
-        } else {
-          setDrawings(drawings);
-        }
+        setDrawings(drawings);
       } catch (err) {
         console.error("Failed to load data", err);
       } finally {
@@ -173,14 +173,7 @@ export const useDrawingStore = () => {
     };
 
     loadData();
-    // biome-ignore lint/correctness/useExhaustiveDependencies: React Compiler
-  }, [currentProfile, createDrawing]);
-
-  useEffect(() => {
-    if (currentDrawingId) return;
-    createDrawing();
-    // biome-ignore lint/correctness/useExhaustiveDependencies: React Compiler
-  }, [currentDrawingId, createDrawing]);
+  }, [currentProfile, currentDrawingId]);
 
   return {
     drawingStyle,
