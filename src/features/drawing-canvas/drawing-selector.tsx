@@ -27,6 +27,13 @@ export const DrawingSelector = ({
     drawings.map((drawing) => [drawing.id, URL.createObjectURL(drawing.image)]),
   );
 
+  const onOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (!open) {
+      setConfirmDeleteId(null);
+    }
+  };
+
   // Clean up URLs when component unmounts to free memory
   useEffect(() => {
     return () => {
@@ -36,20 +43,13 @@ export const DrawingSelector = ({
     };
   }, [imageUrls]);
 
-  // Reset confirmation when dialog closes
-  useEffect(() => {
-    if (!isOpen) {
-      setConfirmDeleteId(null);
-    }
-  }, [isOpen]);
-
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <Button
         type="button"
         variant="outline"
         className="aspect-square select-none p-0"
-        onClick={() => setIsOpen(true)}
+        onClick={() => onOpenChange(true)}
       >
         <PlusIcon />
       </Button>
@@ -69,13 +69,19 @@ export const DrawingSelector = ({
                   key={drawing.id}
                   className="group relative overflow-hidden rounded-lg border text-left"
                 >
-                  <div className="cursor-pointer hover:bg-gray-50">
-                    <div 
+                  <div className="cursor-pointer hover:bg-background">
+                    <div
                       className="relative aspect-square w-full"
                       onClick={() => {
                         onDrawingSelect(drawing);
-                        setIsOpen(false);
+                        onOpenChange(false);
                       }}
+                      onKeyDown={(e) => {
+                        if (e.key !== "Enter" && e.key !== " ") return;
+                        onDrawingSelect(drawing);
+                        onOpenChange(false);
+                      }}
+                      aria-label={`${drawing.createdAt.toLocaleDateString()}のなぞりを選択`}
                     >
                       <Image
                         src={imageUrls[drawing.id]}
@@ -84,7 +90,7 @@ export const DrawingSelector = ({
                         style={{ objectFit: "contain" }}
                       />
                     </div>
-                    <div className="flex items-center justify-between p-2">
+                    <div className="relative flex items-center justify-between p-2">
                       <span className="text-gray-500 text-xs">
                         {drawing.createdAt.toLocaleDateString()}
                       </span>
@@ -96,10 +102,10 @@ export const DrawingSelector = ({
                             onDeleteDrawing(drawing.id);
                             setConfirmDeleteId(null);
                           }}
-                          className="ml-2 rounded bg-red-500 px-2 py-1 text-xs text-white hover:bg-red-600"
-                          aria-label="さくじょする"
+                          className="absolute inset-0 rounded bg-destructive px-2 py-1 font-bold text-destructive-foreground text-xs hover:bg-destructive/90"
+                          aria-label="けしていい？"
                         >
-                          さくじょする？
+                          けしていい？
                         </button>
                       ) : (
                         <button
@@ -108,10 +114,10 @@ export const DrawingSelector = ({
                             e.stopPropagation();
                             setConfirmDeleteId(drawing.id);
                           }}
-                          className="ml-2 text-gray-400 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100"
+                          className="ml-2 text-foreground/30 transition-opacity group-hover:text-foreground/100 "
                           aria-label="削除"
                         >
-                          <Trash2Icon className="h-4 w-4" />
+                          <Trash2Icon className="size-4" />
                         </button>
                       )}
                     </div>
@@ -124,7 +130,7 @@ export const DrawingSelector = ({
               className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-lg border border-gray-300 border-dashed p-2 hover:bg-gray-50"
               onClick={() => {
                 onCreateNewDrawing();
-                setIsOpen(false);
+                onOpenChange(false);
               }}
               aria-label="あたらしくつくる"
             >

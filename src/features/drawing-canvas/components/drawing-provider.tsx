@@ -1,5 +1,6 @@
 import type { Drawing } from "@/features/drawing-canvas/models/drawing";
 import { type ReactNode, createContext, useContext, useEffect, useRef } from "react";
+import { toast } from "sonner";
 import { canvasToBlob, clearCanvas, drawBlobToCanvas } from "../drawing-core";
 import type { DrawingStyle } from "../drawing-style";
 import { useDrawingHistory } from "../use-drawing-history";
@@ -85,8 +86,10 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
         // If we deleted the current drawing, create a new one
         await createNewDrawing();
       }
+      toast.success("けしたよ");
     } catch (error) {
       console.error("Failed to delete drawing:", error);
+      toast.error("けせず・・・むねん");
     }
   };
 
