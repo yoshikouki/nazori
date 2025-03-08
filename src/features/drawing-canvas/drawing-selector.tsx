@@ -1,30 +1,36 @@
 "use client";
+import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import type { Drawing } from "@/lib/client-db";
 import { PlusIcon } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+import type { Drawing } from "./models/drawing";
 
 interface DrawingDialogProps {
   drawings: Drawing[];
   onDrawingSelect: (drawing: Drawing) => void;
   onCreateNewDrawing: () => void;
   isLoading: boolean;
-  trigger: React.ReactNode;
 }
 
-export const DrawingDialog = ({
+export const DrawingSelector = ({
   drawings,
   onDrawingSelect,
   onCreateNewDrawing,
   isLoading,
-  trigger,
 }: DrawingDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      {trigger}
+      <Button
+        type="button"
+        variant="outline"
+        className="aspect-square select-none p-0"
+        onClick={() => setIsOpen(true)}
+      >
+        <PlusIcon />
+      </Button>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>なぞりを選ぶ</DialogTitle>

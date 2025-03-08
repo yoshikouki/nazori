@@ -5,7 +5,7 @@ import { EraserIcon, HandIcon, PencilLineIcon, PlusIcon, Undo2Icon } from "lucid
 import Image from "next/image";
 import Link from "next/link";
 import type { RefObject } from "react";
-import { DrawingDialog } from "./drawing-dialog";
+import { DrawingSelector } from "./drawing-selector";
 import type { DrawingStyle, OnDrawingStyleChange } from "./drawing-style";
 import { LineColorPicker } from "./line-color-picker";
 import { LineWidthPicker } from "./line-width-picker";
@@ -91,16 +91,11 @@ export const ToolBar = ({
       </div>
 
       <div className="flex items-center justify-center gap-2 *:pointer-events-auto">
-        <DrawingDialog
+        <DrawingSelector
           drawings={drawings}
           onDrawingSelect={onDrawingSelect}
           onCreateNewDrawing={onCreateNewDrawing}
           isLoading={isLoading}
-          trigger={
-            <Button type="button" variant="outline" className="aspect-square select-none p-0">
-              <PlusIcon />
-            </Button>
-          }
         />
       </div>
 
