@@ -1,6 +1,6 @@
 import type { Drawing } from "@/features/drawing-canvas/models/drawing";
 import { type ReactNode, createContext, useContext, useEffect, useRef } from "react";
-import { canvasToBlob, drawBlobToCanvas } from "../drawing-core";
+import { canvasToBlob, clearCanvas, drawBlobToCanvas } from "../drawing-core";
 import type { DrawingStyle } from "../drawing-style";
 import { useDrawingHistory } from "../use-drawing-history";
 import { useDrawingStore } from "../use-drawing-store";
@@ -59,9 +59,9 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
   const onChangeDrawing = async (drawing: Drawing) => {
     if (!canvasRef.current) return;
     try {
-      await drawBlobToCanvas(canvasRef.current, drawing.image);
       selectDrawing(drawing.id);
-      clearHistory(); // Clear history for the new drawing
+      await drawBlobToCanvas(canvasRef.current, drawing.image);
+      clearHistory();
       pushHistory(); // Add initial state to history
     } catch (error) {
       console.error("Failed to load drawing:", error);
@@ -70,10 +70,7 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
 
   // Handler for creating a new drawing
   const createNewDrawing = async () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (!canvas || !ctx) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    clearCanvas(canvasRef.current);
     clearHistory(); // Clear history for the new drawing
     await createDrawing();
   };

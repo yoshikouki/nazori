@@ -106,9 +106,6 @@ export const useDrawingHistory = ({ canvasRef, profileId }: UseDrawingHistoryPro
       if (!updatedHistory) {
         throw new Error("Failed to clear history");
       }
-
-      // Clear canvas
-      clearCanvas(canvasRef.current);
     } catch (err) {
       console.error("Failed to clear history", err);
     }
