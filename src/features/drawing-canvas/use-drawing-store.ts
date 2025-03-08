@@ -173,7 +173,8 @@ export const useDrawingStore = () => {
     };
 
     loadData();
-  }, [currentProfile, currentDrawingId]);
+    // biome-ignore lint/correctness/useExhaustiveDependencies: React Compiler
+  }, [currentProfile, createDrawing]);
 
   useEffect(() => {
     if (currentDrawingId) return;
