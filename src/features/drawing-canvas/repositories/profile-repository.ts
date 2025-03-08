@@ -1,4 +1,5 @@
-import { type Profile, clientDB, generateId } from "../../../lib/client-db/index";
+import { clientDB, generateId } from "../../../lib/client-db/index";
+import type { Profile } from "../models/profile";
 
 /**
  * プロファイルのリポジトリクラス

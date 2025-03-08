@@ -1,4 +1,5 @@
-import { type Drawing, clientDB, generateId } from "../../../lib/client-db/index";
+import { clientDB, generateId } from "../../../lib/client-db/index";
+import type { Drawing } from "../models/drawing";
 
 /**
  * 描画データのリポジトリクラス
