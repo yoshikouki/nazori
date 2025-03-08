@@ -90,7 +90,7 @@ export const useCanvas = ({ canvasRef, drawingStyle, onDrawEnd }: UseCanvasProps
 
   const onPointerEnd = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
-    if (!canvas || !isAllowedPointerType(e.pointerType)) return;
+    if (!isDrawingRef.current || !isAllowedPointerType(e.pointerType) || !canvas) return;
     e.preventDefault();
     isDrawingRef.current = false;
     // Release pointer capture when drawing ends
