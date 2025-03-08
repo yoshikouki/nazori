@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { type RefObject } from "react";
+import type { RefObject } from "react";
 import type { DrawingStyle } from "./drawing-style";
 import { useCanvas } from "./use-canvas";
 
