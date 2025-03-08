@@ -5,7 +5,7 @@ import { type DrawingStyleRecord, clientDB, generateId } from "../../../lib/clie
  * 描画スタイルのリポジトリクラス
  * データアクセスロジックをカプセル化します
  */
-export class DrawingStyleRepository {
+class DrawingStyleRepository {
   /**
    * IDでスタイルを取得する
    */

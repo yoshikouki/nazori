@@ -3,26 +3,28 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import type { Drawing } from "@/lib/client-db";
 import { PlusIcon } from "lucide-react";
 import Image from "next/image";
+import { useState } from "react";
 
 interface DrawingDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
   drawings: Drawing[];
   onDrawingSelect: (drawing: Drawing) => void;
   onCreateNewDrawing: () => void;
   isLoading: boolean;
+  trigger: React.ReactNode;
 }
 
 export const DrawingDialog = ({
-  isOpen,
-  onClose,
   drawings,
   onDrawingSelect,
   onCreateNewDrawing,
   isLoading,
+  trigger,
 }: DrawingDialogProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      {trigger}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>なぞりを選ぶ</DialogTitle>
@@ -31,7 +33,10 @@ export const DrawingDialog = ({
           <button
             type="button"
             className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-lg border border-gray-300 border-dashed p-2 hover:bg-gray-50"
-            onClick={onCreateNewDrawing}
+            onClick={() => {
+              onCreateNewDrawing();
+              setIsOpen(false);
+            }}
             aria-label="あたらしくつくる"
           >
             <PlusIcon className="h-8 w-8 text-gray-400" />
@@ -48,7 +53,10 @@ export const DrawingDialog = ({
                 type="button"
                 key={drawing.id}
                 className="cursor-pointer overflow-hidden rounded-lg border text-left hover:bg-gray-50"
-                onClick={() => onDrawingSelect(drawing)}
+                onClick={() => {
+                  onDrawingSelect(drawing);
+                  setIsOpen(false);
+                }}
                 aria-label={`Drawing from ${drawing.createdAt.toLocaleDateString()}`}
               >
                 <div className="relative aspect-square w-full">

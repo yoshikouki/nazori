@@ -4,7 +4,7 @@ import { type Profile, clientDB, generateId } from "../../../lib/client-db/index
  * プロファイルのリポジトリクラス
  * データアクセスロジックをカプセル化します
  */
-export class ProfileRepository {
+class ProfileRepository {
   /**
    * IDでプロファイルを取得する
    */

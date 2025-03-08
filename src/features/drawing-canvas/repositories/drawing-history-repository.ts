@@ -5,7 +5,7 @@ import type { DrawingHistory } from "../models/drawing-history";
  * 描画履歴のリポジトリクラス
  * データアクセスロジックをカプセル化します
  */
-export class DrawingHistoryRepository {
+class DrawingHistoryRepository {
   /**
    * IDで履歴を取得する
    */

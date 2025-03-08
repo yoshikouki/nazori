@@ -1,6 +1,6 @@
 // Color options derived from shadcn-ui color palette
 // ref: https://github.com/shadcn-ui/ui/blob/d44971b6c23d60ccef11e303fddaf94b90c01eda/apps/www/registry/registry-colors.ts#L1477
-export const LineColorOptions = {
+const LineColorOptions = {
   black: { key: "black", name: "くろ", value: "#000000", lightness: "dark" },
   red: { key: "red", name: "あか", value: "#ef4444", lightness: "dark" },
   orange: { key: "orange", name: "オレンジ", value: "#f97316", lightness: "dark" },
@@ -23,7 +23,7 @@ export const LineColorOptions = {
 export const LineColorOptionsArray = Object.values(LineColorOptions);
 
 // Line width options with child-friendly names
-export const LineWidthOptions = {
+const LineWidthOptions = {
   thin: { key: "thin", name: "ほそい", value: 4 },
   medium: { key: "medium", name: "ふつう", value: 8 },
   thick: { key: "thick", name: "ふとい", value: 20 },
@@ -53,15 +53,6 @@ export const getCurrentLineColor = (color: string) => {
 };
 export const getCurrentLineWidth = (width: number) => {
   return LineWidthOptionsArray.find((option) => option.value === width);
-};
-
-// Legacy type for backward compatibility
-// Kept for supporting older code that doesn't use penOnly
-export type LineStyle = Omit<DrawingStyle, "penOnly">;
-export const DefaultLineStyle: LineStyle = {
-  lineWidth: DefaultDrawingStyle.lineWidth,
-  lineColor: DefaultDrawingStyle.lineColor,
-  isEraser: DefaultDrawingStyle.isEraser,
 };
 
 // Type for drawing style change handler

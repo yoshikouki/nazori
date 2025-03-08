@@ -1,7 +1,6 @@
 "use client";
 import { cn } from "@/lib/utils";
 import { CanvasArea } from "../canvas-area";
-import { DrawingDialog } from "../drawing-dialog";
 import { ToolBar } from "../tool-bar";
 import { useDrawing } from "./drawing-provider";
 
@@ -16,9 +15,6 @@ export const DrawingCanvasContent = () => {
     drawingStyle,
     updateDrawingStyle,
     isLoading,
-    isDrawingListOpen,
-    openDrawingList,
-    closeDrawingList,
     onChangeDrawing,
     createNewDrawing,
     onDrawEnd,
@@ -45,19 +41,13 @@ export const DrawingCanvasContent = () => {
           drawingStyle={drawingStyle}
           onDrawingStyleChange={updateDrawingStyle}
           onUndo={undo}
-          onOpenDrawingList={openDrawingList}
           canvasRef={canvasRef}
+          drawings={drawings}
+          onDrawingSelect={onChangeDrawing}
+          onCreateNewDrawing={createNewDrawing}
+          isLoading={isLoading}
         />
       </div>
-
-      <DrawingDialog
-        isOpen={isDrawingListOpen}
-        onClose={closeDrawingList}
-        drawings={drawings}
-        onDrawingSelect={onChangeDrawing}
-        onCreateNewDrawing={createNewDrawing}
-        isLoading={isLoading}
-      />
     </div>
   );
 };

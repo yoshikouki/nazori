@@ -1,5 +1,5 @@
 import type { Drawing } from "@/features/drawing-canvas/models/drawing";
-import { type ReactNode, createContext, useContext, useEffect, useRef, useState } from "react";
+import { type ReactNode, createContext, useContext, useEffect, useRef } from "react";
 import { drawBlobToCanvas } from "../drawing-core";
 import type { DrawingStyle } from "../drawing-style";
 import { useDrawingHistory } from "../use-drawing-history";
@@ -13,9 +13,6 @@ interface DrawingContextType {
   isLoading: boolean;
   drawings: Drawing[];
   currentDrawingId: string | null;
-  isDrawingListOpen: boolean;
-  openDrawingList: () => void;
-  closeDrawingList: () => void;
   onChangeDrawing: (drawing: Drawing) => Promise<void>;
   createNewDrawing: () => Promise<void>;
   onDrawEnd: () => void;
@@ -40,7 +37,6 @@ interface DrawingProviderProps {
 
 export const DrawingProvider = ({ children }: DrawingProviderProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isDrawingListOpen, setIsDrawingListOpen] = useState(false);
 
   const {
     drawingStyle,
@@ -57,15 +53,6 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
     historyId: currentDrawingId,
   });
 
-  // Drawing list dialog handlers
-  const openDrawingList = () => {
-    setIsDrawingListOpen(true);
-  };
-
-  const closeDrawingList = () => {
-    setIsDrawingListOpen(false);
-  };
-
   // Handler for switching to a different drawing
   const onChangeDrawing = async (drawing: Drawing) => {
     if (!canvasRef.current) return;
@@ -74,7 +61,6 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
       selectDrawing(drawing.id);
       clearHistory(); // Clear history for the new drawing
       pushHistory(); // Add initial state to history
-      setIsDrawingListOpen(false);
     } catch (error) {
       console.error("Failed to load drawing:", error);
     }
@@ -86,7 +72,6 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    setIsDrawingListOpen(false);
     clearHistory(); // Clear history for the new drawing
     await createDrawing();
   };
@@ -110,9 +95,6 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
     isLoading,
     drawings,
     currentDrawingId,
-    isDrawingListOpen,
-    openDrawingList,
-    closeDrawingList,
     onChangeDrawing,
     createNewDrawing,
     onDrawEnd,

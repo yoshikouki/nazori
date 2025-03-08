@@ -5,25 +5,33 @@ import { EraserIcon, HandIcon, PencilLineIcon, PlusIcon, Undo2Icon } from "lucid
 import Image from "next/image";
 import Link from "next/link";
 import type { RefObject } from "react";
+import { DrawingDialog } from "./drawing-dialog";
 import type { DrawingStyle, OnDrawingStyleChange } from "./drawing-style";
 import { LineColorPicker } from "./line-color-picker";
 import { LineWidthPicker } from "./line-width-picker";
+import type { Drawing } from "./models/drawing";
 import { SaveImageButton } from "./save-image-button";
 
 interface ToolBarProps {
   drawingStyle: DrawingStyle;
   onDrawingStyleChange: OnDrawingStyleChange;
   onUndo: () => void;
-  onOpenDrawingList: () => void;
   canvasRef: RefObject<HTMLCanvasElement | null>;
+  drawings: Drawing[];
+  onDrawingSelect: (drawing: Drawing) => void;
+  onCreateNewDrawing: () => void;
+  isLoading: boolean;
 }
 
 export const ToolBar = ({
   drawingStyle,
   onDrawingStyleChange,
   onUndo,
-  onOpenDrawingList,
   canvasRef,
+  drawings,
+  onDrawingSelect,
+  onCreateNewDrawing,
+  isLoading,
 }: ToolBarProps) => {
   const togglePenOnly = () => {
     onDrawingStyleChange({ penOnly: !drawingStyle.penOnly });
@@ -83,14 +91,17 @@ export const ToolBar = ({
       </div>
 
       <div className="flex items-center justify-center gap-2 *:pointer-events-auto">
-        <Button
-          type="button"
-          variant="outline"
-          className="aspect-square select-none p-0"
-          onClick={onOpenDrawingList}
-        >
-          <PlusIcon />
-        </Button>
+        <DrawingDialog
+          drawings={drawings}
+          onDrawingSelect={onDrawingSelect}
+          onCreateNewDrawing={onCreateNewDrawing}
+          isLoading={isLoading}
+          trigger={
+            <Button type="button" variant="outline" className="aspect-square select-none p-0">
+              <PlusIcon />
+            </Button>
+          }
+        />
       </div>
 
       <div className="flex flex-col items-end gap-2 *:pointer-events-auto">

@@ -42,7 +42,7 @@ interface NazoriDB extends DBSchema {
 const DB_VERSION = 1;
 const DB_NAME = "nazori-db";
 
-export const initDB = async () => {
+const initDB = async () => {
   return openDB<NazoriDB>(DB_NAME, DB_VERSION, {
     upgrade(db) {
       if (!db.objectStoreNames.contains("profiles")) {

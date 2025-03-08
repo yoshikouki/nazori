@@ -4,7 +4,7 @@ import { type Drawing, clientDB, generateId } from "../../../lib/client-db/index
  * 描画データのリポジトリクラス
  * データアクセスロジックをカプセル化します
  */
-export class DrawingRepository {
+class DrawingRepository {
   /**
    * IDで描画を取得する
    */
