@@ -52,18 +52,11 @@ export const useDrawingHistory = ({ canvasRef, profileId }: UseDrawingHistoryPro
 
     try {
       const updatedHistory = await drawingHistoryRepository.undo(profileId);
-      if (!updatedHistory) {
-        throw new Error("Failed to undo");
-      }
+      if (!updatedHistory || updatedHistory.currentIndex < 0) return;
 
       // Draw current history state to canvas
-      if (updatedHistory.currentIndex >= 0) {
-        const currentImage = updatedHistory.imageList[updatedHistory.currentIndex];
-        await drawBlobToCanvas(canvasRef.current, currentImage);
-      } else {
-        // Clear canvas if we've undone to initial state
-        clearCanvas(canvasRef.current);
-      }
+      const currentImage = updatedHistory.imageList[updatedHistory.currentIndex];
+      await drawBlobToCanvas(canvasRef.current, currentImage);
     } catch (err) {
       console.error("Failed to undo", err);
     }

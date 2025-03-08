@@ -98,7 +98,7 @@ class DrawingHistoryRepository {
   async undo(profileId: string): Promise<DrawingHistory | undefined> {
     try {
       const history = await this.getByProfileId(profileId);
-      if (!history || history.currentIndex < 0) return history;
+      if (!history || history.currentIndex <= 0) return history;
 
       const db = await clientDB();
       const updatedHistory: DrawingHistory = {
