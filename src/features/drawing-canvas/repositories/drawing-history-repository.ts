@@ -61,12 +61,12 @@ class DrawingHistoryRepository {
   /**
    * 履歴に画像を追加する
    */
-  async addImage(id: string, image: Blob): Promise<DrawingHistory | undefined> {
+  async addImage(profileId: string, image: Blob): Promise<DrawingHistory | undefined> {
     try {
-      const db = await clientDB();
-      const history = await db.get("drawing_histories", id);
+      const history = await this.getByProfileId(profileId);
       if (!history) return undefined;
 
+      const db = await clientDB();
       // 現在のインデックス以降のデータを削除し、新しいデータを追加
       const newList = history.imageList.slice(0, history.currentIndex + 1);
       newList.push(image);
@@ -95,12 +95,12 @@ class DrawingHistoryRepository {
   /**
    * 履歴を一つ戻す
    */
-  async undo(id: string): Promise<DrawingHistory | undefined> {
+  async undo(profileId: string): Promise<DrawingHistory | undefined> {
     try {
-      const db = await clientDB();
-      const history = await db.get("drawing_histories", id);
+      const history = await this.getByProfileId(profileId);
       if (!history || history.currentIndex < 0) return history;
 
+      const db = await clientDB();
       const updatedHistory: DrawingHistory = {
         ...history,
         currentIndex: history.currentIndex - 1,
@@ -117,12 +117,12 @@ class DrawingHistoryRepository {
   /**
    * 履歴を一つ進める
    */
-  async redo(id: string): Promise<DrawingHistory | undefined> {
+  async redo(profileId: string): Promise<DrawingHistory | undefined> {
     try {
-      const db = await clientDB();
-      const history = await db.get("drawing_histories", id);
+      const history = await this.getByProfileId(profileId);
       if (!history || history.currentIndex >= history.imageList.length - 1) return history;
 
+      const db = await clientDB();
       const updatedHistory: DrawingHistory = {
         ...history,
         currentIndex: history.currentIndex + 1,
@@ -139,12 +139,12 @@ class DrawingHistoryRepository {
   /**
    * 履歴をクリアする
    */
-  async clear(id: string): Promise<DrawingHistory | undefined> {
+  async clear(profileId: string): Promise<DrawingHistory | undefined> {
     try {
-      const db = await clientDB();
-      const history = await db.get("drawing_histories", id);
+      const history = await this.getByProfileId(profileId);
       if (!history) return undefined;
 
+      const db = await clientDB();
       const updatedHistory: DrawingHistory = {
         ...history,
         imageList: [],

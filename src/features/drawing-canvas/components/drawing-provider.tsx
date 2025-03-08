@@ -46,11 +46,12 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
     createDrawing,
     selectDrawing,
     currentDrawingId,
+    currentProfile,
   } = useDrawingStore();
 
   const { pushHistory, undo, clearHistory } = useDrawingHistory({
     canvasRef,
-    historyId: currentDrawingId,
+    profileId: currentProfile?.id ?? null,
   });
 
   // Handler for switching to a different drawing

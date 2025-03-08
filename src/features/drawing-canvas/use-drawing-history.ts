@@ -7,42 +7,29 @@ import {
 } from "@/features/drawing-canvas/drawing-core";
 import { drawingHistoryRepository } from "@/features/drawing-canvas/repositories";
 import type { RefObject } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 interface UseDrawingHistoryProps {
   canvasRef: RefObject<HTMLCanvasElement | null>;
-  historyId: string | null;
+  profileId: string | null;
 }
 
 /**
  * Custom hook for managing drawing history
  * Integrates in-memory history with IndexedDB persistence
  */
-export const useDrawingHistory = ({ canvasRef, historyId }: UseDrawingHistoryProps) => {
+export const useDrawingHistory = ({ canvasRef, profileId }: UseDrawingHistoryProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
 
-  // Timestamp of last operation for throttling
-  const lastOperationTimeRef = useRef<number>(0);
-  // Auto-save interval in milliseconds
-  const autoSaveInterval = 2000;
-
   /**
    * Adds current canvas state to history
    * Throttles saves to prevent excessive database operations
    */
-  const pushHistory = async (force = false) => {
-    if (!historyId || !canvasRef.current) return;
-
-    const now = Date.now();
-    // Skip if not forced and within throttle interval
-    if (!force && now - lastOperationTimeRef.current < autoSaveInterval) {
-      return;
-    }
-
-    lastOperationTimeRef.current = now;
+  const pushHistory = async () => {
+    if (!profileId || !canvasRef.current) return;
     setIsLoading(true);
 
     try {
@@ -53,7 +40,10 @@ export const useDrawingHistory = ({ canvasRef, historyId }: UseDrawingHistoryPro
       }
 
       // Push to history
-      await drawingHistoryRepository.addImage(historyId, blob);
+      const updatedHistory = await drawingHistoryRepository.addImage(profileId, blob);
+      if (!updatedHistory) {
+        throw new Error("Failed to save history");
+      }
 
       // Enable undo after adding history
       setCanUndo(true);
@@ -72,16 +62,16 @@ export const useDrawingHistory = ({ canvasRef, historyId }: UseDrawingHistoryPro
    * Updates canvas with previous state
    */
   const undo = async () => {
-    if (!historyId || !canvasRef.current) return;
+    if (!profileId || !canvasRef.current) return;
 
     setIsLoading(true);
     try {
-      const updatedHistory = await drawingHistoryRepository.undo(historyId);
+      const updatedHistory = await drawingHistoryRepository.undo(profileId);
       if (!updatedHistory) {
         throw new Error("Failed to undo");
       }
 
-      // Update undo/redo availability based on current position
+      // Update undo/redo availability
       setCanUndo(updatedHistory.currentIndex > -1);
       setCanRedo(updatedHistory.currentIndex < updatedHistory.imageList.length - 1);
 
@@ -90,7 +80,7 @@ export const useDrawingHistory = ({ canvasRef, historyId }: UseDrawingHistoryPro
         const currentImage = updatedHistory.imageList[updatedHistory.currentIndex];
         await drawBlobToCanvas(canvasRef.current, currentImage);
       } else {
-        // Clear canvas if we've undone all history
+        // Clear canvas if we've undone to initial state
         clearCanvas(canvasRef.current);
       }
     } catch (err) {
@@ -106,11 +96,11 @@ export const useDrawingHistory = ({ canvasRef, historyId }: UseDrawingHistoryPro
    * Updates canvas with next state
    */
   const redo = async () => {
-    if (!historyId || !canvasRef.current) return;
+    if (!profileId || !canvasRef.current) return;
 
     setIsLoading(true);
     try {
-      const updatedHistory = await drawingHistoryRepository.redo(historyId);
+      const updatedHistory = await drawingHistoryRepository.redo(profileId);
       if (!updatedHistory) {
         throw new Error("Failed to redo");
       }
@@ -139,11 +129,14 @@ export const useDrawingHistory = ({ canvasRef, historyId }: UseDrawingHistoryPro
    * Clears all history and resets canvas
    */
   const clearHistory = async () => {
-    if (!historyId || !canvasRef.current) return;
+    if (!profileId || !canvasRef.current) return;
 
     setIsLoading(true);
     try {
-      await drawingHistoryRepository.clear(historyId);
+      const updatedHistory = await drawingHistoryRepository.clear(profileId);
+      if (!updatedHistory) {
+        throw new Error("Failed to clear history");
+      }
 
       // Reset undo/redo availability
       setCanUndo(false);
@@ -159,20 +152,20 @@ export const useDrawingHistory = ({ canvasRef, historyId }: UseDrawingHistoryPro
     }
   };
 
-  // Update history state when historyId changes
+  // Update history state when profileId changes
   useEffect(() => {
-    if (!historyId) {
+    if (!profileId) {
       setCanUndo(false);
       setCanRedo(false);
       return;
     }
 
     const loadHistory = async () => {
-      if (!historyId || !canvasRef.current) return;
+      if (!profileId || !canvasRef.current) return;
 
       setIsLoading(true);
       try {
-        const history = await drawingHistoryRepository.getById(historyId);
+        const history = await drawingHistoryRepository.getByProfileId(profileId);
         if (!history) {
           throw new Error("History not found");
         }
@@ -198,7 +191,7 @@ export const useDrawingHistory = ({ canvasRef, historyId }: UseDrawingHistoryPro
     };
 
     loadHistory();
-  }, [historyId, canvasRef]);
+  }, [profileId, canvasRef]);
 
   return {
     pushHistory,

@@ -189,5 +189,6 @@ export const useDrawingStore = () => {
     updateCurrentDrawing,
     currentDrawingId,
     selectDrawing,
+    currentProfile,
   };
 };
