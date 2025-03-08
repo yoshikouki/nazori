@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { EraserIcon, HandIcon, PencilLineIcon, PlusIcon, Undo2Icon } from "lucide-react";
+import { EraserIcon, HandIcon, PencilLineIcon, Undo2Icon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import type { RefObject } from "react";

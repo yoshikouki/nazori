@@ -271,7 +271,7 @@ describe("drawing-core", () => {
     });
 
     it("handles zero parent dimensions", () => {
-      const { canvas, context: ctx } = createMockCanvas({
+      const { canvas } = createMockCanvas({
         width: 50,
         height: 50,
         parentWidth: 0,

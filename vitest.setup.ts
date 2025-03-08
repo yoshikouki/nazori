@@ -1,18 +1,15 @@
 import "@vitest/browser/providers/playwright";
+import React from "react";
 import { vi } from "vitest";
 
 // Next.jsのモジュールをモック
 vi.mock("next/image", () => ({
-  default: function MockImage({ src, alt, width, height, ...props }: Record<string, unknown>) {
-    return `<img src="${src}" alt="${alt}" width="${width}" height="${height}" />`;
-  },
+  default: (props: Record<string, unknown>) => React.createElement("img", props),
   __esModule: true,
 }));
 
 vi.mock("next/link", () => ({
-  default: function MockLink({ href, children, ...props }: Record<string, unknown>) {
-    return `<a href="${href}">${children}</a>`;
-  },
+  default: (props: Record<string, unknown>) => React.createElement("a", props),
   __esModule: true,
 }));
 
