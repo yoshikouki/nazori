@@ -11,6 +11,7 @@ import { LineColorPicker } from "./line-color-picker";
 import { LineWidthPicker } from "./line-width-picker";
 import type { Drawing } from "./models/drawing";
 import { SaveImageButton } from "./save-image-button";
+import { TemplateSelector } from "./template-selector";
 
 interface ToolBarProps {
   drawingStyle: DrawingStyle;
@@ -104,6 +105,7 @@ export const ToolBar = ({
 
       <div className="flex flex-col items-end gap-2 *:pointer-events-auto">
         <SaveImageButton canvasRef={canvasRef} />
+        <TemplateSelector />
         <Button
           type="button"
           variant={drawingStyle.penOnly ? "default" : "outline"}

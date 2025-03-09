@@ -1,10 +1,12 @@
 import type { Drawing } from "@/features/drawing-canvas/models/drawing";
-import { type ReactNode, createContext, useContext, useRef } from "react";
+import type { Template } from "@/features/drawing-canvas/models/template";
+import { type ReactNode, createContext, useContext, useRef, useState } from "react";
 import { toast } from "sonner";
 import { canvasToBlob, clearCanvas, drawBlobToCanvas } from "../drawing-core";
 import type { DrawingStyle } from "../drawing-style";
 import { useDrawingHistory } from "../use-drawing-history";
 import { useDrawingStore } from "../use-drawing-store";
+import type { TemplateDirection } from "./template-overlay";
 
 interface DrawingContextType {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
@@ -18,6 +20,10 @@ interface DrawingContextType {
   onDrawEnd: () => void;
   undo: () => void;
   onDrawingDelete: (drawingId: string) => Promise<void>;
+  currentTemplate: Template | null;
+  setCurrentTemplate: (template: Template | null) => void;
+  templateDirection: TemplateDirection;
+  setTemplateDirection: (direction: TemplateDirection) => void;
 }
 
 const DrawingContext = createContext<DrawingContextType | null>(null);
@@ -41,6 +47,8 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
     canvasRef,
     profileId: store.currentProfile?.id,
   });
+  const [currentTemplate, setCurrentTemplate] = useState<Template | null>(null);
+  const [templateDirection, setTemplateDirection] = useState<TemplateDirection>("horizontal");
 
   const onDrawingChange = async (drawing: Drawing) => {
     if (!canvasRef.current) return;
@@ -88,6 +96,10 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
     onDrawEnd,
     undo: history.undo,
     onDrawingDelete,
+    currentTemplate,
+    setCurrentTemplate,
+    templateDirection,
+    setTemplateDirection,
   };
 
   return <DrawingContext.Provider value={value}>{children}</DrawingContext.Provider>;
