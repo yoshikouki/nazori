@@ -81,7 +81,7 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
   // Handler for deleting a drawing
   const onDeleteDrawing = async (drawingId: string) => {
     try {
-      const success = await deleteDrawing(drawingId);
+      await deleteDrawing(drawingId);
       toast.success("けしたよ");
     } catch (error) {
       console.error("Failed to delete drawing:", error);
