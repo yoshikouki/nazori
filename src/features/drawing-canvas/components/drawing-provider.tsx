@@ -1,12 +1,11 @@
 import type { Drawing } from "@/features/drawing-canvas/models/drawing";
-import { type ReactNode, createContext, useContext, useEffect, useRef } from "react";
+import { type ReactNode, createContext, useContext, useRef } from "react";
 import { toast } from "sonner";
 import { canvasToBlob, clearCanvas, drawBlobToCanvas } from "../drawing-core";
 import type { DrawingStyle } from "../drawing-style";
 import { useDrawingHistory } from "../use-drawing-history";
 import { useDrawingStore } from "../use-drawing-store";
 
-// コンテキストの型定義
 interface DrawingContextType {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
   drawingStyle: DrawingStyle;
@@ -14,17 +13,15 @@ interface DrawingContextType {
   isLoading: boolean;
   drawings: Drawing[];
   currentDrawingId: string | null;
-  onChangeDrawing: (drawing: Drawing) => Promise<void>;
-  createNewDrawing: () => Promise<void>;
+  onDrawingChange: (drawing: Drawing) => Promise<void>;
+  onDrawingCreate: () => Promise<void>;
   onDrawEnd: () => void;
   undo: () => void;
-  onDeleteDrawing: (drawingId: string) => Promise<void>;
+  onDrawingDelete: (drawingId: string) => Promise<void>;
 }
 
-// コンテキストの作成
 const DrawingContext = createContext<DrawingContextType | null>(null);
 
-// コンテキストを使用するためのカスタムフック
 export const useDrawing = () => {
   const context = useContext(DrawingContext);
   if (!context) {
@@ -58,8 +55,7 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
     profileId: currentProfile?.id ?? null,
   });
 
-  // Handler for switching to a different drawing
-  const onChangeDrawing = async (drawing: Drawing) => {
+  const onDrawingChange = async (drawing: Drawing) => {
     if (!canvasRef.current) return;
     selectDrawing(drawing.id);
     await drawBlobToCanvas(canvasRef.current, drawing.image);
@@ -67,15 +63,13 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
     await pushHistory(); // Set initial state in new history
   };
 
-  // Handler for creating a new drawing
-  const createNewDrawing = async () => {
+  const onDrawingCreate = async () => {
     await createDrawing();
     clearCanvas(canvasRef.current);
     clearHistory(); // Clear history for the new drawing
   };
 
-  // Handler for deleting a drawing
-  const onDeleteDrawing = async (drawingId: string) => {
+  const onDrawingDelete = async (drawingId: string) => {
     const success = await deleteDrawing(drawingId);
     if (success) {
       toast.success("けしたよ");
@@ -84,7 +78,6 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
     }
   };
 
-  // Save drawing state after each drawing operation
   const onDrawEnd = async () => {
     pushHistory();
     const blob = await canvasToBlob(canvasRef.current);
@@ -101,13 +94,6 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
     updateCurrentDrawing(blob);
   };
 
-  // Cleanup animation frames on unmount
-  useEffect(() => {
-    return () => {
-      // Cleanup handled in individual components
-    };
-  }, []);
-
   const value: DrawingContextType = {
     canvasRef,
     drawingStyle,
@@ -115,11 +101,11 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
     isLoading,
     drawings,
     currentDrawingId,
-    onChangeDrawing,
-    createNewDrawing,
+    onDrawingChange,
+    onDrawingCreate,
     onDrawEnd,
     undo,
-    onDeleteDrawing,
+    onDrawingDelete,
   };
 
   return <DrawingContext.Provider value={value}>{children}</DrawingContext.Provider>;

@@ -15,12 +15,12 @@ export const DrawingCanvasContent = () => {
     drawingStyle,
     updateDrawingStyle,
     isLoading,
-    onChangeDrawing,
-    createNewDrawing,
+    onDrawingChange,
+    onDrawingCreate,
     onDrawEnd,
     undo,
     drawings,
-    onDeleteDrawing,
+    onDrawingDelete,
   } = useDrawing();
 
   return (
@@ -44,9 +44,9 @@ export const DrawingCanvasContent = () => {
           onUndo={undo}
           canvasRef={canvasRef}
           drawings={drawings}
-          onDrawingSelect={onChangeDrawing}
-          onCreateNewDrawing={createNewDrawing}
-          onDeleteDrawing={onDeleteDrawing}
+          onDrawingSelect={onDrawingChange}
+          ononDrawingCreate={onDrawingCreate}
+          onDrawingDelete={onDrawingDelete}
           isLoading={isLoading}
         />
       </div>

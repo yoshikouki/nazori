@@ -9,16 +9,16 @@ import type { Drawing } from "./models/drawing";
 interface DrawingDialogProps {
   drawings: Drawing[];
   onDrawingSelect: (drawing: Drawing) => void;
-  onCreateNewDrawing: () => void;
-  onDeleteDrawing: (drawingId: string) => Promise<void>;
+  ononDrawingCreate: () => void;
+  onDrawingDelete: (drawingId: string) => Promise<void>;
   isLoading: boolean;
 }
 
 export const DrawingSelector = ({
   drawings,
   onDrawingSelect,
-  onCreateNewDrawing,
-  onDeleteDrawing,
+  ononDrawingCreate,
+  onDrawingDelete,
   isLoading,
 }: DrawingDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -59,7 +59,7 @@ export const DrawingSelector = ({
           <Button
             variant="ghost"
             onClick={() => {
-              onCreateNewDrawing();
+              ononDrawingCreate();
               onOpenChange(false);
             }}
             aria-label="あたらしくつくる"
@@ -110,7 +110,7 @@ export const DrawingSelector = ({
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            onDeleteDrawing(drawing.id);
+                            onDrawingDelete(drawing.id);
                             setConfirmDeleteId(null);
                           }}
                           className="absolute inset-0 rounded bg-destructive px-2 py-1 font-bold text-destructive-foreground text-xs hover:bg-destructive/90"

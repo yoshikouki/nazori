@@ -19,8 +19,8 @@ interface ToolBarProps {
   canvasRef: RefObject<HTMLCanvasElement | null>;
   drawings: Drawing[];
   onDrawingSelect: (drawing: Drawing) => void;
-  onCreateNewDrawing: () => void;
-  onDeleteDrawing?: (drawingId: string) => Promise<void>;
+  ononDrawingCreate: () => void;
+  onDrawingDelete?: (drawingId: string) => Promise<void>;
   isLoading: boolean;
 }
 
@@ -31,8 +31,8 @@ export const ToolBar = ({
   canvasRef,
   drawings,
   onDrawingSelect,
-  onCreateNewDrawing,
-  onDeleteDrawing,
+  ononDrawingCreate,
+  onDrawingDelete,
   isLoading,
 }: ToolBarProps) => {
   const togglePenOnly = () => {
@@ -96,8 +96,8 @@ export const ToolBar = ({
         <DrawingSelector
           drawings={drawings}
           onDrawingSelect={onDrawingSelect}
-          onCreateNewDrawing={onCreateNewDrawing}
-          onDeleteDrawing={onDeleteDrawing || (async () => {})}
+          ononDrawingCreate={ononDrawingCreate}
+          onDrawingDelete={onDrawingDelete || (async () => {})}
           isLoading={isLoading}
         />
       </div>
