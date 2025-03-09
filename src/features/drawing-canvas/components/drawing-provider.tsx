@@ -1,5 +1,6 @@
 import type { Drawing } from "@/features/drawing-canvas/models/drawing";
 import { type ReactNode, createContext, useContext, useEffect, useRef } from "react";
+import { toast } from "sonner";
 import { canvasToBlob, clearCanvas, drawBlobToCanvas } from "../drawing-core";
 import type { DrawingStyle } from "../drawing-style";
 import { useDrawingHistory } from "../use-drawing-history";
@@ -17,6 +18,7 @@ interface DrawingContextType {
   createNewDrawing: () => Promise<void>;
   onDrawEnd: () => void;
   undo: () => void;
+  onDeleteDrawing: (drawingId: string) => Promise<void>;
 }
 
 // コンテキストの作成
@@ -48,6 +50,7 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
     selectDrawing,
     currentDrawingId,
     currentProfile,
+    deleteDrawing,
   } = useDrawingStore();
 
   const { pushHistory, undo, clearHistory } = useDrawingHistory({
@@ -75,6 +78,21 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
     clearHistory(); // Clear history for the new drawing
   };
 
+  // Handler for deleting a drawing
+  const onDeleteDrawing = async (drawingId: string) => {
+    try {
+      const success = await deleteDrawing(drawingId);
+      if (success && drawingId === currentDrawingId) {
+        // If we deleted the current drawing, create a new one
+        await createNewDrawing();
+      }
+      toast.success("けしたよ");
+    } catch (error) {
+      console.error("Failed to delete drawing:", error);
+      toast.error("けせず・・・むねん");
+    }
+  };
+
   // Save drawing state after each drawing operation
   const onDrawEnd = async () => {
     pushHistory();
@@ -100,6 +118,7 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
     createNewDrawing,
     onDrawEnd,
     undo,
+    onDeleteDrawing,
   };
 
   return <DrawingContext.Provider value={value}>{children}</DrawingContext.Provider>;
