@@ -158,10 +158,6 @@ export const useDrawingStore = () => {
           (await drawingHistoryRepository.create(profile.id));
         setDrawingHistory(history);
 
-        if (!currentDrawingId) {
-          const drawing = await drawingRepository.create(currentProfile.id);
-          setCurrentDrawingId(drawing.id);
-        }
         // Get drawings list
         const drawings = await drawingRepository.getByProfileId(profile.id);
         setDrawings(drawings);
@@ -173,7 +169,7 @@ export const useDrawingStore = () => {
     };
 
     loadData();
-  }, [currentProfile, currentDrawingId]);
+  }, [currentProfile]);
 
   /**
    * Deletes a drawing by ID
@@ -183,6 +179,9 @@ export const useDrawingStore = () => {
       const success = await drawingRepository.delete(id);
       if (success) {
         setDrawings(drawings.filter((d) => d.id !== id));
+        if (currentDrawingId === id) {
+          setCurrentDrawingId(null);
+        }
         return true;
       }
       return false;

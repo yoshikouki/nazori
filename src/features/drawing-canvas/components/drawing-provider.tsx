@@ -82,10 +82,6 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
   const onDeleteDrawing = async (drawingId: string) => {
     try {
       const success = await deleteDrawing(drawingId);
-      if (success && drawingId === currentDrawingId) {
-        // If we deleted the current drawing, create a new one
-        await createNewDrawing();
-      }
       toast.success("けしたよ");
     } catch (error) {
       console.error("Failed to delete drawing:", error);
@@ -97,6 +93,16 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
   const onDrawEnd = async () => {
     pushHistory();
     const blob = await canvasToBlob(canvasRef.current);
+
+    // Create new drawing if this is first draw operation and no current drawing exists
+    if (!currentDrawingId) {
+      const newDrawing = await createDrawing();
+      if (newDrawing) {
+        await clearHistory(); // Start fresh history for the new drawing
+        await pushHistory(); // Set initial state in the history
+      }
+    }
+
     updateCurrentDrawing(blob);
   };
 
