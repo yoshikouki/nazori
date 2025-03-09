@@ -109,7 +109,7 @@ export const useCanvas = ({ canvasRef, drawingStyle, onDrawEnd }: UseCanvasProps
     clearCanvas(canvasRef.current);
   };
 
-  // キャンバスのリサイズ
+  // Watch for window resize
   useEffect(() => {
     const resizeCanvas = () => {
       resizeCanvasToParent(canvasRef.current, drawingStyle);
@@ -121,6 +121,7 @@ export const useCanvas = ({ canvasRef, drawingStyle, onDrawEnd }: UseCanvasProps
     };
   }, [canvasRef, drawingStyle]);
 
+  // Apply drawing style changes to canvas
   useEffect(() => {
     applyDrawingStyle(canvasRef.current, drawingStyle);
   }, [drawingStyle, canvasRef]);

@@ -11,7 +11,7 @@ import { useEffect } from "react";
 
 interface UseDrawingHistoryProps {
   canvasRef: RefObject<HTMLCanvasElement | null>;
-  profileId: string | null;
+  profileId: string | null | undefined;
 }
 
 /**

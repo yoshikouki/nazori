@@ -36,41 +36,29 @@ interface DrawingProviderProps {
 
 export const DrawingProvider = ({ children }: DrawingProviderProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  const {
-    drawingStyle,
-    updateDrawingStyle,
-    isLoading,
-    drawings,
-    createDrawing,
-    updateCurrentDrawing,
-    selectDrawing,
-    currentDrawingId,
-    currentProfile,
-    deleteDrawing,
-  } = useDrawingStore();
-
-  const { pushHistory, undo, clearHistory } = useDrawingHistory({
+  const store = useDrawingStore();
+  const history = useDrawingHistory({
     canvasRef,
-    profileId: currentProfile?.id ?? null,
+    profileId: store.currentProfile?.id,
   });
 
   const onDrawingChange = async (drawing: Drawing) => {
     if (!canvasRef.current) return;
-    selectDrawing(drawing.id);
+    store.selectDrawing(drawing.id);
     await drawBlobToCanvas(canvasRef.current, drawing.image);
-    await clearHistory(); // Start fresh history
-    await pushHistory(); // Set initial state in new history
+    await history.clearHistory(); // Start fresh history
+    await history.pushHistory(); // Set initial state in new history
   };
 
   const onDrawingCreate = async () => {
-    await createDrawing();
+    await store.createDrawing();
     clearCanvas(canvasRef.current);
-    clearHistory(); // Clear history for the new drawing
+    await history.clearHistory(); // Clear history for the new drawing
+    await history.pushHistory(); // Set initial state in the history
   };
 
   const onDrawingDelete = async (drawingId: string) => {
-    const success = await deleteDrawing(drawingId);
+    const success = await store.deleteDrawing(drawingId);
     if (success) {
       toast.success("けしたよ");
     } else {
@@ -79,32 +67,26 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
   };
 
   const onDrawEnd = async () => {
-    pushHistory();
-    const blob = await canvasToBlob(canvasRef.current);
-
     // Create new drawing if this is first draw operation and no current drawing exists
-    if (!currentDrawingId) {
-      const newDrawing = await createDrawing();
-      if (newDrawing) {
-        await clearHistory(); // Start fresh history for the new drawing
-        await pushHistory(); // Set initial state in the history
-      }
+    if (!store.currentDrawingId) {
+      await store.createDrawing();
     }
-
-    updateCurrentDrawing(blob);
+    const blob = await canvasToBlob(canvasRef.current);
+    await store.updateCurrentDrawing(blob);
+    await history.pushHistory();
   };
 
   const value: DrawingContextType = {
     canvasRef,
-    drawingStyle,
-    updateDrawingStyle,
-    isLoading,
-    drawings,
-    currentDrawingId,
+    drawingStyle: store.drawingStyle,
+    updateDrawingStyle: store.updateDrawingStyle,
+    isLoading: store.isLoading,
+    drawings: store.drawings,
+    currentDrawingId: store.currentDrawingId,
     onDrawingChange,
     onDrawingCreate,
     onDrawEnd,
-    undo,
+    undo: history.undo,
     onDrawingDelete,
   };
 

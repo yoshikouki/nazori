@@ -169,16 +169,18 @@ export const useDrawingStore = () => {
   };
 
   return {
-    drawingStyle,
-    drawingHistory,
     isLoading,
-    updateDrawingStyle,
-    drawings,
-    createDrawing,
-    updateCurrentDrawing,
-    currentDrawingId,
-    selectDrawing,
     currentProfile,
+    // Drawing style
+    drawingStyle,
+    updateDrawingStyle,
+    // Drawings
+    drawings,
+    selectDrawing,
+    createDrawing,
     deleteDrawing,
+    // Selected drawing
+    currentDrawingId,
+    updateCurrentDrawing,
   };
 };
