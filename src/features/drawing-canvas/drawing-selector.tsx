@@ -54,8 +54,19 @@ export const DrawingSelector = ({
         <PlusIcon />
       </Button>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>なぞりを選ぶ</DialogTitle>
+        <DialogHeader className="flex flex-row items-center justify-between">
+          <DialogTitle className="sr-only">なぞりを選ぶ</DialogTitle>
+          <Button
+            variant="ghost"
+            onClick={() => {
+              onCreateNewDrawing();
+              onOpenChange(false);
+            }}
+            aria-label="あたらしくつくる"
+          >
+            <PlusIcon className="h-5 w-5 text-foreground/60" />
+            <span className="text-foreground/60 text-xs">あたらしくつくる</span>
+          </Button>
         </DialogHeader>
         <div className="max-h-[60vh] overflow-y-auto px-1">
           <div className="grid grid-cols-2 gap-4 py-4">
@@ -125,18 +136,6 @@ export const DrawingSelector = ({
                 </div>
               ))
             )}
-            <button
-              type="button"
-              className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-lg border border-gray-300 border-dashed p-2 hover:bg-gray-50"
-              onClick={() => {
-                onCreateNewDrawing();
-                onOpenChange(false);
-              }}
-              aria-label="あたらしくつくる"
-            >
-              <PlusIcon className="h-8 w-8 text-gray-400" />
-              <span className="mt-2 text-gray-500 text-sm">あたらしくつくる</span>
-            </button>
           </div>
         </div>
       </DialogContent>
