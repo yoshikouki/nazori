@@ -61,14 +61,10 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
   // Handler for switching to a different drawing
   const onChangeDrawing = async (drawing: Drawing) => {
     if (!canvasRef.current) return;
-    try {
-      selectDrawing(drawing.id);
-      await drawBlobToCanvas(canvasRef.current, drawing.image);
-      await clearHistory(); // Start fresh history
-      await pushHistory(); // Set initial state in new history
-    } catch (error) {
-      console.error("Failed to load drawing:", error);
-    }
+    selectDrawing(drawing.id);
+    await drawBlobToCanvas(canvasRef.current, drawing.image);
+    await clearHistory(); // Start fresh history
+    await pushHistory(); // Set initial state in new history
   };
 
   // Handler for creating a new drawing
@@ -80,11 +76,10 @@ export const DrawingProvider = ({ children }: DrawingProviderProps) => {
 
   // Handler for deleting a drawing
   const onDeleteDrawing = async (drawingId: string) => {
-    try {
-      await deleteDrawing(drawingId);
+    const success = await deleteDrawing(drawingId);
+    if (success) {
       toast.success("けしたよ");
-    } catch (error) {
-      console.error("Failed to delete drawing:", error);
+    } else {
       toast.error("けせず・・・むねん");
     }
   };

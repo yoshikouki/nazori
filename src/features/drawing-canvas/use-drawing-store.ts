@@ -43,40 +43,36 @@ export const useDrawingStore = () => {
   const updateDrawingStyle = async (newStyle: Partial<DrawingStyle>) => {
     if (!drawingStyleRecord) return;
 
-    try {
-      // Special handling for eraser mode - not stored in DB
-      if ("isEraser" in newStyle) {
-        const { isEraser, ...styleWithoutEraser } = newStyle;
-        setIsEraser(!!isEraser);
+    // Special handling for eraser mode - not stored in DB
+    if ("isEraser" in newStyle) {
+      const { isEraser, ...styleWithoutEraser } = newStyle;
+      setIsEraser(!!isEraser);
 
-        // Exit if only eraser mode was changed
-        if (Object.keys(styleWithoutEraser).length === 0) return;
+      // Exit if only eraser mode was changed
+      if (Object.keys(styleWithoutEraser).length === 0) return;
 
-        // Update DB with non-eraser style changes
-        const updatedStyle = await drawingStyleRepository.update(drawingStyleRecord.id, {
-          ...drawingStyle,
-          ...styleWithoutEraser,
-          isEraser: drawingStyleRecord.isEraser,
-        });
-
-        if (updatedStyle) {
-          setDrawingStyleRecord(updatedStyle);
-        }
-        return;
-      }
-
-      // Normal style update
+      // Update DB with non-eraser style changes
       const updatedStyle = await drawingStyleRepository.update(drawingStyleRecord.id, {
         ...drawingStyle,
-        ...newStyle,
+        ...styleWithoutEraser,
         isEraser: drawingStyleRecord.isEraser,
       });
 
       if (updatedStyle) {
         setDrawingStyleRecord(updatedStyle);
       }
-    } catch (err) {
-      console.error("Failed to update style", err);
+      return;
+    }
+
+    // Normal style update
+    const updatedStyle = await drawingStyleRepository.update(drawingStyleRecord.id, {
+      ...drawingStyle,
+      ...newStyle,
+      isEraser: drawingStyleRecord.isEraser,
+    });
+
+    if (updatedStyle) {
+      setDrawingStyleRecord(updatedStyle);
     }
   };
 
@@ -85,14 +81,10 @@ export const useDrawingStore = () => {
    */
   const createDrawing = async () => {
     if (!currentProfile) return;
-    try {
-      const drawing = await drawingRepository.create(currentProfile.id);
-      setDrawings((prev) => [drawing, ...prev]);
-      setCurrentDrawingId(drawing.id);
-      return drawing;
-    } catch (err) {
-      console.error("Failed to create drawing", err);
-    }
+    const drawing = await drawingRepository.create(currentProfile.id);
+    setDrawings((prev) => [drawing, ...prev]);
+    setCurrentDrawingId(drawing.id);
+    return drawing;
   };
 
   /**
@@ -103,20 +95,15 @@ export const useDrawingStore = () => {
       return;
     }
 
-    try {
-      // Save drawing to storage
-      const updatedDrawing = await drawingRepository.updateImage(currentDrawingId, image);
-      if (!updatedDrawing) {
-        throw new Error("Failed to update drawing");
-      }
-
-      // Update drawing list with new version
-      setDrawings(drawings.map((d) => (d.id === currentDrawingId ? updatedDrawing : d)));
-      return updatedDrawing;
-    } catch (err) {
-      console.error("Failed to update drawing", err);
+    // Save drawing to storage
+    const updatedDrawing = await drawingRepository.updateImage(currentDrawingId, image);
+    if (!updatedDrawing) {
       return;
     }
+
+    // Update drawing list with new version
+    setDrawings(drawings.map((d) => (d.id === currentDrawingId ? updatedDrawing : d)));
+    return updatedDrawing;
   };
 
   /**
@@ -131,41 +118,36 @@ export const useDrawingStore = () => {
    */
   useEffect(() => {
     const loadData = async () => {
-      try {
-        setIsLoading(true);
+      setIsLoading(true);
 
-        // Get or create profile
-        const profile =
-          currentProfile ??
-          (await profileRepository.getFirst()) ??
-          (await profileRepository.create());
+      // Get or create profile
+      const profile =
+        currentProfile ??
+        (await profileRepository.getFirst()) ??
+        (await profileRepository.create());
 
-        if (profile.id !== currentProfile?.id) {
-          setCurrentProfile(profile);
-          // Skip further loading if profile changed
-          return;
-        }
-
-        // Get or create drawing style
-        const styleRecord =
-          (await drawingStyleRepository.getByProfileId(profile.id)) ||
-          (await drawingStyleRepository.create(profile.id, DefaultDrawingStyle));
-        setDrawingStyleRecord(styleRecord);
-
-        // Get or create drawing history
-        const history =
-          (await drawingHistoryRepository.getByProfileId(profile.id)) ||
-          (await drawingHistoryRepository.create(profile.id));
-        setDrawingHistory(history);
-
-        // Get drawings list
-        const drawings = await drawingRepository.getByProfileId(profile.id);
-        setDrawings(drawings);
-      } catch (err) {
-        console.error("Failed to load data", err);
-      } finally {
-        setIsLoading(false);
+      if (profile.id !== currentProfile?.id) {
+        setCurrentProfile(profile);
+        // Skip further loading if profile changed
+        return;
       }
+
+      // Get or create drawing style
+      const styleRecord =
+        (await drawingStyleRepository.getByProfileId(profile.id)) ||
+        (await drawingStyleRepository.create(profile.id, DefaultDrawingStyle));
+      setDrawingStyleRecord(styleRecord);
+
+      // Get or create drawing history
+      const history =
+        (await drawingHistoryRepository.getByProfileId(profile.id)) ||
+        (await drawingHistoryRepository.create(profile.id));
+      setDrawingHistory(history);
+
+      // Get drawings list
+      const drawings = await drawingRepository.getByProfileId(profile.id);
+      setDrawings(drawings);
+      setIsLoading(false);
     };
 
     loadData();
@@ -175,20 +157,15 @@ export const useDrawingStore = () => {
    * Deletes a drawing by ID
    */
   const deleteDrawing = async (id: string): Promise<boolean> => {
-    try {
-      const success = await drawingRepository.delete(id);
-      if (success) {
-        setDrawings(drawings.filter((d) => d.id !== id));
-        if (currentDrawingId === id) {
-          setCurrentDrawingId(null);
-        }
-        return true;
+    const success = await drawingRepository.delete(id);
+    if (success) {
+      setDrawings(drawings.filter((d) => d.id !== id));
+      if (currentDrawingId === id) {
+        setCurrentDrawingId(null);
       }
-      return false;
-    } catch (err) {
-      console.error("Failed to delete drawing", err);
-      return false;
+      return true;
     }
+    return false;
   };
 
   return {

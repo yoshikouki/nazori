@@ -26,21 +26,14 @@ export const useDrawingHistory = ({ canvasRef, profileId }: UseDrawingHistoryPro
   const pushHistory = async () => {
     if (!profileId || !canvasRef.current) return;
 
-    try {
-      // Get current canvas state as blob
-      const blob = await canvasToBlob(canvasRef.current);
-      if (!blob) {
-        throw new Error("Failed to get canvas blob");
-      }
-
-      // Push to history
-      const updatedHistory = await drawingHistoryRepository.addImage(profileId, blob);
-      if (!updatedHistory) {
-        throw new Error("Failed to save history");
-      }
-    } catch (err) {
-      console.error("Failed to save history", err);
+    // Get current canvas state as blob
+    const blob = await canvasToBlob(canvasRef.current);
+    if (!blob) {
+      return;
     }
+
+    // Push to history
+    await drawingHistoryRepository.addImage(profileId, blob);
   };
 
   /**
@@ -50,16 +43,12 @@ export const useDrawingHistory = ({ canvasRef, profileId }: UseDrawingHistoryPro
   const undo = async () => {
     if (!profileId || !canvasRef.current) return;
 
-    try {
-      const updatedHistory = await drawingHistoryRepository.undo(profileId);
-      if (!updatedHistory || updatedHistory.currentIndex < 0) return;
+    const updatedHistory = await drawingHistoryRepository.undo(profileId);
+    if (!updatedHistory || updatedHistory.currentIndex < 0) return;
 
-      // Draw current history state to canvas
-      const currentImage = updatedHistory.imageList[updatedHistory.currentIndex];
-      await drawBlobToCanvas(canvasRef.current, currentImage);
-    } catch (err) {
-      console.error("Failed to undo", err);
-    }
+    // Draw current history state to canvas
+    const currentImage = updatedHistory.imageList[updatedHistory.currentIndex];
+    await drawBlobToCanvas(canvasRef.current, currentImage);
   };
 
   /**
@@ -69,22 +58,18 @@ export const useDrawingHistory = ({ canvasRef, profileId }: UseDrawingHistoryPro
   const redo = async () => {
     if (!profileId || !canvasRef.current) return;
 
-    try {
-      const updatedHistory = await drawingHistoryRepository.redo(profileId);
-      if (!updatedHistory) {
-        throw new Error("Failed to redo");
-      }
+    const updatedHistory = await drawingHistoryRepository.redo(profileId);
+    if (!updatedHistory) {
+      return;
+    }
 
-      // Draw current history state to canvas
-      if (updatedHistory.currentIndex >= 0) {
-        const currentImage = updatedHistory.imageList[updatedHistory.currentIndex];
-        await drawBlobToCanvas(canvasRef.current, currentImage);
-      } else {
-        // Clear canvas if we've redone to initial state
-        clearCanvas(canvasRef.current);
-      }
-    } catch (err) {
-      console.error("Failed to redo", err);
+    // Draw current history state to canvas
+    if (updatedHistory.currentIndex >= 0) {
+      const currentImage = updatedHistory.imageList[updatedHistory.currentIndex];
+      await drawBlobToCanvas(canvasRef.current, currentImage);
+    } else {
+      // Clear canvas if we've redone to initial state
+      clearCanvas(canvasRef.current);
     }
   };
 
@@ -94,14 +79,7 @@ export const useDrawingHistory = ({ canvasRef, profileId }: UseDrawingHistoryPro
   const clearHistory = async () => {
     if (!profileId || !canvasRef.current) return;
 
-    try {
-      const updatedHistory = await drawingHistoryRepository.clear(profileId);
-      if (!updatedHistory) {
-        throw new Error("Failed to clear history");
-      }
-    } catch (err) {
-      console.error("Failed to clear history", err);
-    }
+    await drawingHistoryRepository.clear(profileId);
   };
 
   // Update history state when profileId changes
@@ -111,22 +89,18 @@ export const useDrawingHistory = ({ canvasRef, profileId }: UseDrawingHistoryPro
     const loadHistory = async () => {
       if (!profileId || !canvasRef.current) return;
 
-      try {
-        const history = await drawingHistoryRepository.getByProfileId(profileId);
-        if (!history) {
-          throw new Error("History not found");
-        }
+      const history = await drawingHistoryRepository.getByProfileId(profileId);
+      if (!history) {
+        return;
+      }
 
-        // Draw current history state to canvas
-        if (history.currentIndex >= 0) {
-          const currentImage = history.imageList[history.currentIndex];
-          await drawBlobToCanvas(canvasRef.current, currentImage);
-        } else {
-          // Clear canvas if history is at initial state
-          clearCanvas(canvasRef.current);
-        }
-      } catch (err) {
-        console.error("Failed to load history", err);
+      // Draw current history state to canvas
+      if (history.currentIndex >= 0) {
+        const currentImage = history.imageList[history.currentIndex];
+        await drawBlobToCanvas(canvasRef.current, currentImage);
+      } else {
+        // Clear canvas if history is at initial state
+        clearCanvas(canvasRef.current);
       }
     };
 
