@@ -12,7 +12,7 @@ interface TemplateOverlayProps {
 
 export const TemplateOverlay = ({
   className,
-  direction = "horizontal",
+  direction = "vertical",
 }: TemplateOverlayProps) => {
   const { currentTemplate } = useDrawing();
 
