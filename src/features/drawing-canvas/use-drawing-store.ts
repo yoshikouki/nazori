@@ -1,11 +1,9 @@
 "use client";
 
 import type { Drawing } from "@/features/drawing-canvas/models/drawing";
-import type { DrawingHistory } from "@/features/drawing-canvas/models/drawing-history";
 import type { DrawingStyleRecord } from "@/features/drawing-canvas/models/drawing-style-record";
 import type { Profile } from "@/features/drawing-canvas/models/profile";
 import {
-  drawingHistoryRepository,
   drawingRepository,
   drawingStyleRepository,
   profileRepository,
@@ -22,7 +20,6 @@ export const useDrawingStore = () => {
   const [currentProfile, setCurrentProfile] = useState<Profile | null>(null);
   const [drawingStyleRecord, setDrawingStyleRecord] = useState<DrawingStyleRecord | null>(null);
   const [isEraser, setIsEraser] = useState(false);
-  const [drawingHistory, setDrawingHistory] = useState<DrawingHistory | null>(null);
   const [drawings, setDrawings] = useState<Drawing[]>([]);
   const [currentDrawingId, setCurrentDrawingId] = useState<string | null>(null);
 
@@ -137,12 +134,6 @@ export const useDrawingStore = () => {
         (await drawingStyleRepository.getByProfileId(profile.id)) ||
         (await drawingStyleRepository.create(profile.id, DefaultDrawingStyle));
       setDrawingStyleRecord(styleRecord);
-
-      // Get or create drawing history
-      const history =
-        (await drawingHistoryRepository.getByProfileId(profile.id)) ||
-        (await drawingHistoryRepository.create(profile.id));
-      setDrawingHistory(history);
 
       // Get drawings list
       const drawings = await drawingRepository.getByProfileId(profile.id);

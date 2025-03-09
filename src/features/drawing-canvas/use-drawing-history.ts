@@ -89,10 +89,9 @@ export const useDrawingHistory = ({ canvasRef, profileId }: UseDrawingHistoryPro
     const loadHistory = async () => {
       if (!profileId || !canvasRef.current) return;
 
-      const history = await drawingHistoryRepository.getByProfileId(profileId);
-      if (!history) {
-        return;
-      }
+      const history =
+        (await drawingHistoryRepository.getByProfileId(profileId)) ||
+        (await drawingHistoryRepository.create(profileId));
 
       // Draw current history state to canvas
       if (history.currentIndex >= 0) {
