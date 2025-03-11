@@ -1,0 +1,5 @@
+{
+  "tasks": {
+    "build": "bun install && bun build"
+  }
+}
